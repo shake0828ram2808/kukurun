@@ -147,6 +147,8 @@
       <span class="name-placeholder">ここに　でるよ</span>
     </div>
     <div class="kana-del-row">
+      <button class="kana-del-btn kana-del-hoka" onclick="Snd.tap();openHokaModal()">ほかのもじ</button>
+      <div class="kana-del-spacer"></div>
       <button class="kana-del-btn kana-del-all" onclick="Snd.tap();speak('ぜんぶけす');clearKana();handleZenbukesus()">ぜんぶ　けす</button>
       <button class="kana-del-btn kana-del-one" onclick="Snd.tap();speak('ひとつけす');delKana()">ひとつ　けす</button>
     </div>
@@ -622,6 +624,14 @@
   document.addEventListener('DOMContentLoaded', _patch);
 })();
 </script>
+
+<!-- ══ MODAL: ほかのもじ ══ -->
+<div class="hoka-overlay" id="hoka-overlay" onclick="closeHokaModal()" style="display:none;"></div>
+<div class="hoka-modal" id="hoka-modal" style="display:none;">
+  <div class="hoka-modal-title">ほかの　もじ</div>
+  <div class="hoka-modal-body" id="hoka-modal-body"></div>
+  <button class="hoka-close-btn" onclick="closeHokaModal()">とじる</button>
+</div>
 
 </body>
 </html>

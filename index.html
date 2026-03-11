@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>くくるん</title>
+<link rel="stylesheet" href="app.css?v=1772807941">
+
+</head>
+<body>
+
+<!-- ══ 花丸オーバーレイ ══ -->
+<div id="hanamaru-ov">
+  <svg width="300" height="300" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+    <circle class="hm-ring" cx="150" cy="150" r="120" stroke-width="22"/>
+    <circle class="hm-ring" cx="150" cy="150" r="140"
+      stroke-width="7" stroke="#FF6060" opacity=".55"
+      style="stroke-dasharray:879;stroke-dashoffset:879;animation-delay:.08s;"/>
+  </svg>
+</div>
+
+<div id="app">
+
+<!-- ══ INTRO MODAL ══ -->
+<div id="intro-modal" onclick="closeIntroModal(event)">
+  <div class="intro-content">
+    <!-- くくるんキャラ（左） -->
+    <svg 
+        id="intro-kukurun-svg"
+        width="120" 
+        height="120" 
+        viewBox="0 0 100 100"
+        class="kukurun-character"
+        style="width:120px;height:120px;flex-shrink:0;"
+      >
+        <defs>
+          <radialGradient id="introBodyGrad" cx="42%" cy="35%" r="58%">
+            <stop offset="0%" stop-color="#ffffff" />
+            <stop offset="60%" stop-color="#b8d9ff" />
+            <stop offset="100%" stop-color="#6aabee" />
+          </radialGradient>
+          <radialGradient id="introEyeGrad" cx="35%" cy="30%" r="65%">
+            <stop offset="0%" stop-color="#6699ff" />
+            <stop offset="100%" stop-color="#003399" />
+          </radialGradient>
+          <filter id="introSoftShadow" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#0055aa" flood-opacity="0.18"/>
+          </filter>
+        </defs>
+        <!-- 体（まんまる） -->
+        <circle cx="50" cy="54" r="38" fill="url(#introBodyGrad)" filter="url(#introSoftShadow)"/>
+        <!-- ほっぺ -->
+        <ellipse cx="28" cy="62" rx="7" ry="5" fill="#ffaacc" fill-opacity="0.45" />
+        <ellipse cx="72" cy="62" rx="7" ry="5" fill="#ffaacc" fill-opacity="0.45" />
+        <!-- 目 -->
+        <g id="intro-kukurun-eyes">
+          <g transform="translate(37, 48)">
+            <circle r="5.8" fill="url(#introEyeGrad)" />
+            <circle cx="1.4" cy="-1.8" r="1.8" fill="white" />
+          </g>
+          <g transform="translate(63, 48)">
+            <circle r="5.8" fill="url(#introEyeGrad)" />
+            <circle cx="-1.4" cy="-1.8" r="1.8" fill="white" />
+          </g>
+        </g>
+        <!-- 口 -->
+        <g id="intro-kukurun-mouth">
+          <path id="intro-kukurun-mouth-fill" d="M 45,60 C 46,62 48,62 50,60 C 52,62 54,62 55,60" fill="none" stroke="#334" stroke-width="2.2" stroke-linecap="round" />
+          <circle id="intro-kukurun-tongue" cx="50" cy="64" r="4" fill="#ff88aa" style="display:none;" />
+        </g>
+        <!-- 頭の飾り -->
+        <ellipse cx="50" cy="17" rx="8" ry="6" fill="#a0c8ff" fill-opacity="0.7" />
+        <circle cx="50" cy="12" r="4" fill="#6aabee" />
+      </svg>
+
+    <!-- 吹き出し（右） -->
+    <div class="intro-balloon">
+      <div class="intro-balloon-text">くくるんだよ<br>いっしょに　がんばろうね！</div>
+      <div class="balloon-tail"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCREEN: NAME ══ -->
+<div class="screen active" id="screen-name">
+  <div style="display:flex;flex-direction:column;align-items:center;gap:8px;width:100%;max-width:430px;">
+    <!-- くくるん -->
+    <div class="kukurun-wrap" id="name-kukurun-wrap" onclick="kukurunNameIntro()">
+      <!-- 吹き出し（上） -->
+      <div class="kukurun-balloon" id="name-kukurun-balloon">
+        <div class="balloon-text" id="name-balloon-text">なまえを　おしえてね</div>
+        <div class="balloon-tail"></div>
+      </div>
+      <svg 
+        id="name-kukurun-svg"
+        width="47" 
+        height="47" 
+        viewBox="0 0 100 100"
+        class="kukurun-character"
+        style="width:47px;height:47px;flex-shrink:0;"
+      >
+        <defs>
+          <radialGradient id="nameBodyGrad" cx="42%" cy="35%" r="58%">
+            <stop offset="0%" stop-color="#ffffff" />
+            <stop offset="60%" stop-color="#b8d9ff" />
+            <stop offset="100%" stop-color="#6aabee" />
+          </radialGradient>
+          <radialGradient id="nameEyeGrad" cx="35%" cy="30%" r="65%">
+            <stop offset="0%" stop-color="#6699ff" />
+            <stop offset="100%" stop-color="#003399" />
+          </radialGradient>
+          <filter id="nameSoftShadow" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#0055aa" flood-opacity="0.18"/>
+          </filter>
+        </defs>
+        <!-- 体（まんまる） -->
+        <circle cx="50" cy="54" r="38" fill="url(#nameBodyGrad)" filter="url(#nameSoftShadow)"/>
+        <!-- ほっぺ -->
+        <ellipse cx="28" cy="62" rx="7" ry="5" fill="#ffaacc" fill-opacity="0.45" />
+        <ellipse cx="72" cy="62" rx="7" ry="5" fill="#ffaacc" fill-opacity="0.45" />
+        <!-- 目 -->
+        <g id="name-kukurun-eyes">
+          <g transform="translate(37, 48)">
+            <circle r="5.8" fill="url(#nameEyeGrad)" />
+            <circle cx="1.4" cy="-1.8" r="1.8" fill="white" />
+          </g>
+          <g transform="translate(63, 48)">
+            <circle r="5.8" fill="url(#nameEyeGrad)" />
+            <circle cx="-1.4" cy="-1.8" r="1.8" fill="white" />
+          </g>
+        </g>
+        <!-- 口 -->
+        <g id="name-kukurun-mouth">
+          <path id="name-kukurun-mouth-fill" d="M 45,60 C 46,62 48,62 50,60 C 52,62 54,62 55,60" fill="none" stroke="#334" stroke-width="2.2" stroke-linecap="round" />
+          <circle id="name-kukurun-tongue" cx="50" cy="64" r="4" fill="#ff88aa" style="display:none;" />
+        </g>
+        <!-- 頭の飾り -->
+        <ellipse cx="50" cy="17" rx="8" ry="6" fill="#a0c8ff" fill-opacity="0.7" />
+        <circle cx="50" cy="12" r="4" fill="#6aabee" />
+      </svg>
+
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="name-display" id="name-display">
+      <span class="name-placeholder">ここに　でるよ</span>
+    </div>
+    <div class="kana-del-row">
+      <button class="kana-del-btn kana-del-all" onclick="Snd.tap();speak('ぜんぶけす');clearKana();handleZenbukesus()">ぜんぶ　けす</button>
+      <button class="kana-del-btn kana-del-one" onclick="Snd.tap();speak('ひとつけす');delKana()">ひとつ　けす</button>
+    </div>
+    <div class="kana-grid" id="kana-grid"></div>
+    <button class="btn btn-primary" id="name-ok-btn" onclick="goSuffix()" style="opacity:.4;" disabled>
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 13l4 4L19 7"/></svg>
+      きめた！
+    </button>
+  </div>
+</div>
+
+<!-- ══ SCREEN: SUFFIX ══ -->
+<div class="screen" id="screen-suffix">
+  <div style="display:flex;flex-direction:column;align-items:center;gap:8px;width:100%;max-width:430px;">
+    <!-- くくるん -->
+    <div class="kukurun-wrap" onclick="kukurunTalkSmall()">
+      <!-- 吹き出し（上） -->
+      <div class="kukurun-balloon" id="suffix-kukurun-balloon">
+        <div class="balloon-text" id="suffix-balloon-text">よびかたを　おしえてね</div>
+        <div class="balloon-tail"></div>
+      </div>
+      <svg 
+        id="suffix-kukurun-svg"
+        width="47" 
+        height="47" 
+        viewBox="0 0 100 100"
+        class="kukurun-character"
+        style="width:47px;height:47px;flex-shrink:0;"
+      >
+        <defs>
+          <radialGradient id="suffixBodyGrad" cx="42%" cy="35%" r="58%">
+            <stop offset="0%" stop-color="#ffffff" />
+            <stop offset="60%" stop-color="#b8d9ff" />
+            <stop offset="100%" stop-color="#6aabee" />
+          </radialGradient>
+          <radialGradient id="suffixEyeGrad" cx="35%" cy="30%" r="65%">
+            <stop offset="0%" stop-color="#6699ff" />
+            <stop offset="100%" stop-color="#003399" />
+          </radialGradient>
+          <filter id="suffixSoftShadow" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#0055aa" flood-opacity="0.18"/>
+          </filter>
+        </defs>
+        <!-- 体（まんまる） -->
+        <circle cx="50" cy="54" r="38" fill="url(#suffixBodyGrad)" filter="url(#suffixSoftShadow)"/>
+        <!-- ほっぺ -->
+        <ellipse cx="28" cy="62" rx="7" ry="5" fill="#ffaacc" fill-opacity="0.45" />
+        <ellipse cx="72" cy="62" rx="7" ry="5" fill="#ffaacc" fill-opacity="0.45" />
+        <!-- 目 -->
+        <g id="suffix-kukurun-eyes">
+          <g transform="translate(37, 48)">
+            <circle r="5.8" fill="url(#suffixEyeGrad)" />
+            <circle cx="1.4" cy="-1.8" r="1.8" fill="white" />
+          </g>
+          <g transform="translate(63, 48)">
+            <circle r="5.8" fill="url(#suffixEyeGrad)" />
+            <circle cx="-1.4" cy="-1.8" r="1.8" fill="white" />
+          </g>
+        </g>
+        <!-- 口 -->
+        <g id="suffix-kukurun-mouth">
+          <path id="suffix-kukurun-mouth-fill" d="M 45,60 C 46,62 48,62 50,60 C 52,62 54,62 55,60" fill="none" stroke="#334" stroke-width="2.2" stroke-linecap="round" />
+          <circle id="suffix-kukurun-tongue" cx="50" cy="64" r="4" fill="#ff88aa" style="display:none;" />
+        </g>
+        <!-- 頭の飾り -->
+        <ellipse cx="50" cy="17" rx="8" ry="6" fill="#a0c8ff" fill-opacity="0.7" />
+        <circle cx="50" cy="12" r="4" fill="#6aabee" />
+      </svg>
+
+    </div>
+  </div>
+
+  <div class="card" style="text-align:center;">
+    <div style="font-size:22px;margin-bottom:20px;" id="suffix-preview"></div>
+    <div class="suffix-grid" id="suffix-grid"></div>
+    <div style="height:14px;"></div>
+    <button class="btn btn-primary" onclick="goEggSelect()">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 13l4 4L19 7"/></svg>
+      きめた！
+    </button>
+  </div>
+</div>
+
+<!-- ══ SCREEN: EGG SELECT ══ -->
+<div class="screen" id="screen-egg-select">
+  <div style="display:flex;flex-direction:column;align-items:center;gap:8px;width:100%;max-width:430px;">
+    <!-- くくるん -->
+    <div class="kukurun-wrap" onclick="kukurunTalkSmall()">
+      <!-- 吹き出し（上） -->
+      <div class="kukurun-balloon" id="egg-kukurun-balloon">
+        <div class="balloon-text" id="egg-balloon-text">どれを　そだてる？</div>
+        <div class="balloon-tail"></div>
+      </div>
+      <svg 
+        id="egg-kukurun-svg"
+        width="47" 
+        height="47" 
+        viewBox="0 0 100 100"
+        class="kukurun-character"
+        style="width:47px;height:47px;flex-shrink:0;"
+      >
+        <defs>
+          <radialGradient id="eggBodyGrad" cx="42%" cy="35%" r="58%">
+            <stop offset="0%" stop-color="#ffffff" />
+            <stop offset="60%" stop-color="#b8d9ff" />
+            <stop offset="100%" stop-color="#6aabee" />
+          </radialGradient>
+          <radialGradient id="eggEyeGrad" cx="35%" cy="30%" r="65%">
+            <stop offset="0%" stop-color="#6699ff" />
+            <stop offset="100%" stop-color="#003399" />
+          </radialGradient>
+          <filter id="eggSoftShadow" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#0055aa" flood-opacity="0.18"/>
+          </filter>
+        </defs>
+        <!-- 体（まんまる） -->
+        <circle cx="50" cy="54" r="38" fill="url(#eggBodyGrad)" filter="url(#eggSoftShadow)"/>
+        <!-- ほっぺ -->
+        <ellipse cx="28" cy="62" rx="7" ry="5" fill="#ffaacc" fill-opacity="0.45" />
+        <ellipse cx="72" cy="62" rx="7" ry="5" fill="#ffaacc" fill-opacity="0.45" />
+        <!-- 目 -->
+        <g id="egg-kukurun-eyes">
+          <g transform="translate(37, 48)">
+            <circle r="5.8" fill="url(#eggEyeGrad)" />
+            <circle cx="1.4" cy="-1.8" r="1.8" fill="white" />
+          </g>
+          <g transform="translate(63, 48)">
+            <circle r="5.8" fill="url(#eggEyeGrad)" />
+            <circle cx="-1.4" cy="-1.8" r="1.8" fill="white" />
+          </g>
+        </g>
+        <!-- 口 -->
+        <g id="egg-kukurun-mouth">
+          <path id="egg-kukurun-mouth-fill" d="M 45,60 C 46,62 48,62 50,60 C 52,62 54,62 55,60" fill="none" stroke="#334" stroke-width="2.2" stroke-linecap="round" />
+          <circle id="egg-kukurun-tongue" cx="50" cy="64" r="4" fill="#ff88aa" style="display:none;" />
+        </g>
+        <!-- 頭の飾り -->
+        <ellipse cx="50" cy="17" rx="8" ry="6" fill="#a0c8ff" fill-opacity="0.7" />
+        <circle cx="50" cy="12" r="4" fill="#6aabee" />
+      </svg>
+
+    </div>
+  </div>
+
+  <div class="card" style="text-align:center;">
+    <div class="egg-select-grid" id="egg-select-grid"></div>
+    <div style="height:14px;"></div>
+    <button class="btn btn-primary" id="egg-ok-btn" onclick="goHomeFromEgg()" disabled style="opacity:.4;">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 13l4 4L19 7"/></svg>
+      きめた！
+    </button>
+  </div>
+</div>
+
+<!-- ══ SCREEN: HOME ══ -->
+<div class="screen" id="screen-home">
+  <div style="display:flex;flex-direction:column;align-items:center;gap:8px;width:100%;max-width:430px;">
+    <!-- くくるんキャラ -->
+    <div class="kukurun-wrap" onclick="homeKukurunTalk()">
+      <!-- 吹き出し（上） -->
+      <div class="kukurun-balloon" id="kukurun-balloon">
+        <div class="balloon-text" id="balloon-text">こんにちは！</div>
+        <div class="balloon-tail"></div>
+      </div>
+      <!-- SVGラッパー（影連動用） -->
+      <div class="kukurun-svg-wrap">
+      <svg 
+        id="home-kukurun-svg"
+        width="80" 
+        height="80" 
+        viewBox="0 0 100 100"
+        class="kukurun-character"
+        style="width:80px;height:80px;flex-shrink:0;"
+      >
+        <defs>
+          <radialGradient id="kukurunBodyGrad" cx="42%" cy="35%" r="58%">
+            <stop offset="0%" stop-color="#ffffff" />
+            <stop offset="60%" stop-color="#b8d9ff" />
+            <stop offset="100%" stop-color="#6aabee" />
+          </radialGradient>
+          <radialGradient id="kukurunEyeGrad" cx="35%" cy="30%" r="65%">
+            <stop offset="0%" stop-color="#6699ff" />
+            <stop offset="100%" stop-color="#003399" />
+          </radialGradient>
+          <filter id="kukurunSoftShadow" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#0055aa" flood-opacity="0.18"/>
+          </filter>
+        </defs>
+        <!-- 体（まんまる） -->
+        <circle cx="50" cy="54" r="38" fill="url(#kukurunBodyGrad)" filter="url(#kukurunSoftShadow)"/>
+        <!-- ほっぺ -->
+        <ellipse cx="28" cy="62" rx="7" ry="5" fill="#ffaacc" fill-opacity="0.45" />
+        <ellipse cx="72" cy="62" rx="7" ry="5" fill="#ffaacc" fill-opacity="0.45" />
+        <!-- 目 -->
+        <g id="kukurun-eyes">
+          <g transform="translate(37, 48)">
+            <circle r="5.8" fill="url(#kukurunEyeGrad)" />
+            <circle cx="1.4" cy="-1.8" r="1.8" fill="white" />
+          </g>
+          <g transform="translate(63, 48)">
+            <circle r="5.8" fill="url(#kukurunEyeGrad)" />
+            <circle cx="-1.4" cy="-1.8" r="1.8" fill="white" />
+          </g>
+        </g>
+        <!-- 口 -->
+        <g id="kukurun-mouth">
+          <path id="kukurun-mouth-fill" d="M 45,60 C 46,62 48,62 50,60 C 52,62 54,62 55,60" fill="none" stroke="#334" stroke-width="2.2" stroke-linecap="round" />
+          <circle id="kukurun-tongue" cx="50" cy="64" r="4" fill="#ff88aa" style="display:none;" />
+        </g>
+        <!-- 頭の飾り -->
+        <ellipse cx="50" cy="17" rx="8" ry="6" fill="#a0c8ff" fill-opacity="0.7" />
+        <circle cx="50" cy="12" r="4" fill="#6aabee" />
+      </svg>
+      <!-- 床の影（SVGラッパー内→くくるん底辺中央に連動） -->
+      <div class="floor-shadow" id="home-floor-shadow"></div>
+      </div><!-- /.kukurun-svg-wrap -->
+    </div>
+
+    <div class="greeting-bar" style="display:none;">
+      <span id="greeting-text">こんにちは！</span>
+    </div>
+
+    <div id="home-creature-wrap" style="display:flex;flex-direction:column;align-items:center;gap:6px;min-height:72px;visibility:hidden;">
+      <div class="egg-stage-wrap" id="home-egg-wrap">
+        <img id="home-egg-img" src="" style="height:50px;width:auto;display:block;" alt="">
+      </div>
+      <div id="home-stage-label" style="font-size:12px;color:var(--text2);"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="sec-lbl">どれを　やる？</div>
+    <div class="dan-grid" id="dan-grid"></div>
+    <div style="height:10px;"></div>
+    <button class="dan-btn d-rnd" style="width:100%;border-radius:var(--r);"
+            onclick="tapSnd();selDan('random')">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+           stroke="rgba(255,255,255,.8)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="2" width="20" height="20" rx="4"/>
+        <circle cx="8"  cy="8"  r="1.3" fill="rgba(255,255,255,.8)" stroke="none"/>
+        <circle cx="16" cy="8"  r="1.3" fill="rgba(255,255,255,.8)" stroke="none"/>
+        <circle cx="12" cy="12" r="1.3" fill="rgba(255,255,255,.8)" stroke="none"/>
+        <circle cx="8"  cy="16" r="1.3" fill="rgba(255,255,255,.8)" stroke="none"/>
+        <circle cx="16" cy="16" r="1.3" fill="rgba(255,255,255,.8)" stroke="none"/>
+      </svg>
+      <span class="dn">らんだむ</span>
+    </button>
+  </div>
+</div>
+
+<!-- ══ SCREEN: MODE ══ -->
+<div class="screen" id="screen-mode">
+  <button class="back-btn" onclick="tapSnd();speak('もどる');showScreen('screen-home')">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    もどる
+  </button>
+  <div class="card">
+    <div id="mode-dan-label" style="font-size:28px;margin-bottom:4px;"></div>
+    <div class="sec-lbl">どれを　やる？</div>
+    <div class="sel-row" onclick="tapSnd();speak('おぼえる');startOboeru()">
+      <div class="sel-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--theme)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+          <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+        </svg>
+      </div>
+      <div><div class="sel-main">おぼえる</div><div class="sel-sub">みて　きいて　おぼえよう</div></div>
+    </div>
+    <div style="height:8px;"></div>
+    <div class="sel-row" onclick="tapSnd();speak('れんしゅう');startRenshu()">
+      <div class="sel-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--theme)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 20h9"/>
+          <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+        </svg>
+      </div>
+      <div><div class="sel-main">れんしゅう</div><div class="sel-sub">もんだいに　こたえよう</div></div>
+    </div>
+    <div style="height:8px;"></div>
+    <div id="mode-test-row">
+      <div id="mode-test-locked" class="sel-row locked" style="display:flex;">
+        <div class="sel-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+        </div>
+        <div><div class="sel-main" style="color:var(--text2);">テストする</div><div class="sel-sub">れんしゅうの　あとに　できるよ</div></div>
+      </div>
+      <div id="mode-test-open" class="sel-row" style="display:none;" onclick="tapSnd();speak('てすと');startTest()">
+        <div class="sel-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--theme)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 11l3 3L22 4"/>
+            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+          </svg>
+        </div>
+        <div><div class="sel-main">テストする</div><div class="sel-sub">メダルを　もらおう！</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCREEN: OBOERU ══ -->
+<div class="screen" id="screen-oboeru">
+  <button class="back-btn" onclick="tapSnd();speak('もどる');showScreen('screen-mode')">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    もどる
+  </button>
+  <div class="card">
+    <div style="display:flex;align-items:center;gap:7px;margin-bottom:4px;">
+      <div style="width:8px;height:8px;border-radius:50%;background:var(--theme);"></div>
+      <span style="font-size:12px;color:var(--theme);">おぼえるモード</span>
+    </div>
+    <div id="oboeru-dan-label" style="font-size:19px;color:var(--text2);margin-bottom:10px;"></div>
+    <div id="oboeru-mode-switch" style="display:flex;background:var(--surface2);border-radius:var(--r-pill);padding:3px;gap:3px;margin-bottom:12px;">
+      <button id="oboeru-auto-btn" onclick="setOboeruMode('auto')"
+        style="flex:1;font-family:var(--font);font-size:13px;padding:7px 6px;border:none;border-radius:var(--r-pill);cursor:pointer;transition:all .2s;background:var(--theme);color:#fff;">
+        じどうで　ぜんぶ
+      </button>
+      <button id="oboeru-manual-btn" onclick="setOboeruMode('manual')"
+        style="flex:1;font-family:var(--font);font-size:13px;padding:7px 6px;border:none;border-radius:var(--r-pill);cursor:pointer;transition:all .2s;background:transparent;color:var(--text2);">
+        じぶんで　えらぶ
+      </button>
+    </div>
+    <div id="kuku-list"></div>
+    <button class="btn btn-fwd" onclick="tapSnd();speak('れんしゅうへ　すすむ');startRenshu()" style="margin-top:10px;">
+      れんしゅうへ　すすむ
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- ══ SCREEN: RENSHU ══ -->
+<div class="screen" id="screen-renshu">
+  <button class="back-btn" onclick="tapSnd();speak('もどる');showScreen('screen-mode')">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    もどる
+  </button>
+  <div class="card">
+    <div style="display:flex;align-items:center;gap:7px;margin-bottom:10px;">
+      <div style="width:8px;height:8px;border-radius:50%;background:var(--red);"></div>
+      <span style="font-size:12px;color:var(--red);">れんしゅうモード</span>
+    </div>
+    <div class="prog-track"><div class="prog-fill" id="renshu-progress" style="width:0%"></div></div>
+    <div style="font-size:12px;color:var(--text2);text-align:right;margin-bottom:4px;" id="renshu-counter"></div>
+    <div class="prob-card">
+      <div class="prob-reading-top" id="renshu-reading"></div>
+      <div class="prob-eq" id="renshu-problem"></div>
+    </div>
+    <div class="ans-grid" id="number-grid"></div>
+    <div style="font-size:12px;color:var(--text2);text-align:center;margin-bottom:8px;min-height:1.6em;display:flex;align-items:center;justify-content:center;" id="renshu-hint"></div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-outline btn-sm" style="flex:1;"
+              onclick="tapSnd();speak('こたえを　みる');showAns()">こたえを　みる</button>
+      <button class="btn btn-primary btn-sm" id="renshu-next-btn" style="flex:1;display:none;"
+              onclick="tapSnd();speak('つぎへ');nextRenshu()">
+        つぎへ
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCREEN: TEST ══ -->
+<div class="screen" id="screen-test">
+  <button class="back-btn" onclick="tapSnd();speak('もどる');showScreen('screen-mode')">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    もどる
+  </button>
+  <div class="card">
+    <div style="display:flex;align-items:center;gap:7px;margin-bottom:10px;">
+      <div style="width:8px;height:8px;border-radius:50%;background:#F4A800;"></div>
+      <span style="font-size:12px;color:#F4A800;">テストモード</span>
+    </div>
+    <div id="test-dan-label" style="font-size:19px;color:var(--text2);margin-bottom:4px;"></div>
+    <div class="prog-track"><div class="prog-fill" id="test-progress" style="width:0%"></div></div>
+    <div style="font-size:12px;color:var(--text2);text-align:right;margin-bottom:4px;" id="test-counter"></div>
+    <div class="prob-card">
+      <div class="prob-reading-top" id="test-reading"></div>
+      <div class="prob-eq" id="test-problem"></div>
+    </div>
+    <div class="ans-grid" id="test-grid"></div>
+    <div style="font-size:12px;color:var(--text2);text-align:center;margin-top:8px;" id="test-hint"></div>
+  </div>
+</div>
+
+<!-- ══ SCREEN: TEST RESULT ══ -->
+<div class="screen" id="screen-test-result" style="padding-top:24px;align-items:center;">
+  <div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding-top:4px;">
+    <div id="test-result-medal" style="font-size:72px;line-height:1;"></div>
+    <div id="test-result-label" style="background:var(--theme);color:#fff;border-radius:var(--r-pill);padding:4px 18px;font-size:13px;"></div>
+  </div>
+  <div class="card" style="text-align:center;margin-top:14px;">
+    <div id="test-result-title" style="font-size:22px;margin-bottom:8px;"></div>
+    <div id="test-result-score" style="font-size:16px;color:var(--text2);margin-bottom:16px;"></div>
+    <button class="btn btn-primary"
+            onclick="tapSnd();speak('ホームに　もどる');showScreen('screen-home')">ホームに　もどる</button>
+  </div>
+</div>
+
+<!-- ══ SCREEN: CLEAR ══ -->
+<div class="screen" id="screen-clear" style="padding-top:24px;align-items:center;">
+  <div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding-top:4px;">
+    <div class="egg-stage-wrap" id="clear-egg-wrap" style="animation:trophyBob 2.2s ease-in-out infinite alternate;">
+      <img id="clear-egg-img" src="" style="height:90px;width:auto;display:block;" alt="egg">
+      <svg id="clear-crack-svg" class="crack-overlay" viewBox="0 0 100 130" xmlns="http://www.w3.org/2000/svg" style="display:none;">
+        <g id="crack-g1" opacity="0">
+          <path d="M50 22 L45 42 L53 47 L43 68" stroke="#999" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+        </g>
+        <g id="crack-g2" opacity="0">
+          <path d="M63 32 L59 50 L66 55 L57 76" stroke="#999" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+          <path d="M38 52 L43 64 L36 73" stroke="#999" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+        </g>
+      </svg>
+    </div>
+    <div id="clear-stage-label" style="background:var(--theme);color:#fff;border-radius:var(--r-pill);
+         padding:4px 18px;font-size:13px;"></div>
+  </div>
+  <div class="card" style="text-align:center;margin-top:14px;">
+    <div id="clear-title" style="font-size:26px;margin-bottom:20px;">できたね！</div>
+    <button class="btn btn-primary"
+            onclick="tapSnd();speak('ホームに　もどる');showScreen('screen-home')">ホームに　もどる</button>
+  </div>
+</div>
+
+<div id="debug-panel" style="margin:8px auto;padding:10px;background:#FFF3CD;border:2px dashed #FFC107;border-radius:12px;width:100%;max-width:430px;box-sizing:border-box;">
+  <div style="font-family:var(--font);font-size:11px;color:#856404;margin-bottom:6px;text-align:center;">🔧 デバッグ：せいちょうチェック</div>
+  <div style="display:flex;align-items:center;justify-content:center;gap:8px;">
+    <button onclick="debugClears(-1)" style="font-family:var(--font);font-size:18px;padding:6px 14px;border:2px solid #FFC107;border-radius:8px;background:#fff;cursor:pointer;">－</button>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:2px;min-width:80px;">
+      <img id="debug-preview-img" src="" style="height:50px;width:auto;display:none;" alt="">
+      <span id="debug-clears-label" style="font-family:var(--font);font-size:14px;font-weight:bold;text-align:center;">0かい</span>
+      <span id="debug-stage-label" style="font-family:var(--font);font-size:10px;color:#856404;text-align:center;"></span>
+    </div>
+    <button onclick="debugClears(+1)" style="font-family:var(--font);font-size:18px;padding:6px 14px;border:2px solid #FFC107;border-radius:8px;background:#fff;cursor:pointer;">＋</button>
+    <button onclick="debugClears(null)" style="font-family:var(--font);font-size:13px;padding:6px 10px;border:2px solid #dc3545;border-radius:8px;background:#fff;color:#dc3545;cursor:pointer;">リセット</button>
+  </div>
+  <div style="display:flex;gap:8px;margin-top:8px;">
+    <button onclick="debugShowClear()" style="font-family:var(--font);font-size:13px;padding:6px 0;border:2px solid #FFC107;border-radius:8px;background:#fff;color:#856404;cursor:pointer;flex:1;">🏆 クリア画面</button>
+    <button onclick="debugGoHome()" style="font-family:var(--font);font-size:13px;padding:6px 0;border:2px solid #17a2b8;border-radius:8px;background:#fff;color:#17a2b8;cursor:pointer;flex:1;">🏠 ホーム画面</button>
+  </div>
+</div>
+</div><!-- /#app -->
+
+<script src="questions.js?v=1772807941"></script>
+<script src="kukurun.js?v=1772807941"></script>
+<script src="sprites.js?v=1772807941"></script>
+<script src="app.js?v=1772807941"></script>
+
+<script>
+/* ── home-creature-wrap: visibility制御パッチ ──
+   app.jsがdisplay:'flex'でshow/hideしているのを
+   visibility:'visible'/'hidden'に差し替える           */
+(function() {
+  const _orig = document.getElementById.bind(document);
+  // updateCreatureが呼ばれた後にhomeWrapの状態を監視して修正
+  const _patch = () => {
+    const wrap = document.getElementById('home-creature-wrap');
+    if (!wrap) return;
+    // MutationObserverでdisplay変更を検知してvisibilityに変換
+    const mo = new MutationObserver(() => {
+      if (wrap.style.display === 'none') {
+        wrap.style.display = 'flex';
+        wrap.style.visibility = 'hidden';
+      } else if (wrap.style.display === 'flex') {
+        wrap.style.visibility = 'visible';
+      }
+    });
+    mo.observe(wrap, { attributes: true, attributeFilter: ['style'] });
+    // 初期状態も設定
+    wrap.style.display = 'flex';
+    wrap.style.visibility = 'hidden';
+  };
+  document.addEventListener('DOMContentLoaded', _patch);
+})();
+</script>
+
+</body>
+</html>

@@ -1,5 +1,15 @@
 @import url('https://fonts.googleapis.com/css2?family=Kosugi+Maru&display=swap');
 
+#version-badge {
+  position: fixed;
+  top: 6px;
+  right: 8px;
+  font-size: 10px;
+  color: rgba(0,0,0,.35);
+  pointer-events: none;
+  z-index: 9999;
+}
+
 /*
   カラーシステム
   --theme   : #5C5FE8  紫 — ブランド、プライマリボタン、アクティブ枠

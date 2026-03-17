@@ -40,7 +40,7 @@ function updateCreature() {
   
   // 成長レベルはメダル合計から計算（1段スパム防止）
   const n = getGrowthClears();
-  const kind = displayKind;
+  const kind = S.selectedEgg || (S.adultCharacters.length > 0 ? S.adultCharacters[S.adultCharacters.length - 1] : 'green');
   const charStage = getCharStage(n);
   const homeWrap = document.getElementById('home-creature-wrap');
   if (homeWrap) homeWrap.style.display = 'flex';

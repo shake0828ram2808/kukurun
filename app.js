@@ -576,11 +576,13 @@ function medalBadge(dan) {
   const m = (S.medals[dan] && typeof S.medals[dan] === 'object') ? S.medals[dan] : {};
   const testEmoji = m.test === 'gold' ? '🥇' : m.test === 'silver' ? '🥈' : m.test === 'bronze' ? '🥉' : '';
   const sh = 'filter:drop-shadow(0 1px 1px rgba(0,0,0,.35));';
-  return `<div style="position:absolute;top:3px;right:3px;display:flex;flex-direction:column;align-items:center;gap:0;font-size:11px;line-height:1.1;">
-    <span style="${sh}">${m.oboeru ? '⭐' : '　'}</span>
-    <span style="${sh}">${m.renshu ? '⭐' : '　'}</span>
-    <span style="${sh};font-size:13px;">${testEmoji || '　'}</span>
-  </div>`;
+  const items = [
+    m.oboeru ? `<span style="${sh}">⭐</span>` : '',
+    m.renshu ? `<span style="${sh}">⭐</span>` : '',
+    testEmoji ? `<span style="${sh};font-size:13px;">${testEmoji}</span>` : '',
+  ].filter(s => s).join('');
+  if (!items) return '';
+  return `<div style="position:absolute;top:3px;right:3px;display:flex;flex-direction:column;align-items:center;gap:1px;font-size:11px;line-height:1.1;">${items}</div>`;
 }
 function buildDanGrid() {
   const g = document.getElementById('dan-grid'); g.innerHTML = '';
@@ -1160,6 +1162,7 @@ function doneDan() {
   if (S.dan !== 'random') {
     S.done[S.dan] = true;
   }
+  const growthBefore = getGrowthClears();
   // 正答率6割以上なら れんしゅうメダル を付与（成長トリガー）
   const total = S.probs.length;
   const correct = S.hanamaruCount - (S._hanamaruAtStart || 0);
@@ -1171,40 +1174,37 @@ function doneDan() {
   }
 
   updateCreature();
-  // 卒業遷移中はクリア画面をスキップ
   if (S._pendingGraduation) return;
-  // クリア画面の卵・恐竜を更新
-  updateClearScreen();
-  const clearTitle = S.dan === 'random' ? 'ばらばらのだんが　できたね！' : KD.fw(S.dan) + 'のだんが　できたね！';
-  document.getElementById('clear-title').textContent = clearTitle;
+
+  const grew = getGrowthClears() > growthBefore;
+  updateClearScreen(grew);
+  document.getElementById('clear-title').textContent = grew
+    ? 'せいちょう　したよ！'
+    : (S.dan === 'random' ? 'ばらばらのだんが　できたね！' : KD.fw(S.dan) + 'のだんが　できたね！');
   showScreen('screen-clear');
   confetti();
-  speak('やったー！ぜんもんできたよ！すごい！');
+  speak(grew ? 'せいちょうしたよ！やったね！' : 'やったー！ぜんもんできたよ！すごい！');
 }
 
-function updateClearScreen() {
+function updateClearScreen(grew = false) {
   if (!S.selectedEgg) return;
   const n = getGrowthClears();
   const kind = S.selectedEgg;
   const charStage = getCharStage(n);
-  const stageNames = {newborn:'うまれたて',baby:'あかちゃん',child:'こども',adult:'おとな'};
   const clearEgg = document.getElementById('clear-egg-img');
   const clearLabel = document.getElementById('clear-stage-label');
   const crackSvg = document.getElementById('clear-crack-svg');
-  if (crackSvg) crackSvg.style.display = 'none'; // SVGヒビは使わない
+  if (crackSvg) crackSvg.style.display = 'none';
 
   if (charStage) {
-    if (clearEgg) {
-      clearEgg.src = getCharSprite(kind, charStageIdx(n));
-      clearEgg.style.height = '90px';
-    }
-    if (clearLabel) clearLabel.textContent = 'せいちょう\u3000したね！';
+    if (clearEgg) { clearEgg.src = getCharSprite(kind, charStageIdx(n)); clearEgg.style.height = '90px'; }
   } else {
-    if (clearEgg) {
-      clearEgg.src = getEggSprite(kind, n);
-      clearEgg.style.height = '90px';
-    }
-    if (clearLabel) clearLabel.textContent = 'はなまる ' + KD.fw(S.hanamaruCount) + ' こ';
+    if (clearEgg) { clearEgg.src = getEggSprite(kind, n); clearEgg.style.height = '90px'; }
+  }
+  if (clearLabel) {
+    clearLabel.textContent = grew
+      ? (charStage ? 'せいちょう　したよ！🎉' : 'たまごが　かわったよ！🎉')
+      : 'つぎのメダルで　せいちょうするよ';
   }
 }
 
@@ -1392,6 +1392,7 @@ function doneTest() {
   const pct     = correct / total;
   const dan     = S.dan;
   const cleared = pct >= 0.75;  // 75%以上でクリア
+  const growthBefore = getGrowthClears();
 
   if (cleared && dan !== 'random') {
     const m = getMedals(dan);
@@ -1404,21 +1405,28 @@ function doneTest() {
     if (S._pendingGraduation) return; // 卒業遷移中は結果画面をスキップ
   }
 
+  const grew = getGrowthClears() > growthBefore;
   // 結果画面
   const medal = dan !== 'random' ? getMedals(dan).test : null;
   const medalEm = medal === 'gold' ? '🥇' : medal === 'silver' ? '🥈' : medal === 'bronze' ? '🥉' : '';
   document.getElementById('test-result-medal').textContent = cleared ? medalEm || '⭐' : '😢';
   document.getElementById('test-result-label').textContent =
     cleared ? (medal ? MEDAL_NAMES[medal] + 'メダル　ゲット！' : 'クリア！') : 'もう　いちど！';
-  const titleText = dan === 'random' 
+  const titleText = dan === 'random'
     ? (cleared ? 'ばらばらのだん　クリア！' : 'ばらばらのだん　もう　すこし！')
     : (cleared ? KD.fw(dan) + 'のだん　クリア！' : KD.fw(dan) + 'のだん　もう　すこし！');
   document.getElementById('test-result-title').textContent = titleText;
   document.getElementById('test-result-score').textContent =
     KD.fw(total) + 'もん中　' + KD.fw(correct) + 'もん　せいかい！';
+  const growthEl = document.getElementById('test-result-growth');
+  if (growthEl) {
+    growthEl.textContent = cleared
+      ? (grew ? 'せいちょう　したよ！🎉' : 'つぎのメダルで　せいちょうするよ')
+      : '';
+  }
 
   showScreen('screen-test-result');
-  if (cleared) { confetti(); speak('やったー！メダルゲット！'); }
+  if (cleared) { confetti(); speak(grew ? 'せいちょうしたよ！メダルゲット！' : 'やったー！メダルゲット！'); }
   else { speak('もう　いちど　ちゃれんじして　ね！'); }
 }
 const MEDAL_NAMES = { bronze:'ブロンズ', silver:'ぎん', gold:'きん' };

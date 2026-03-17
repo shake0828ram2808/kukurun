@@ -91,18 +91,18 @@ const eggWobble = (() => {
   let running = false;
 
   function wobbleParams(n) {
-    // n = renshuClears
-    if (n <= 0) return null; // 揺れなし
+    // n = growthClears（成長スコア）
+    // 卵ステージ（0-3）は全てゆれる。段階が進むほど頻度・角度が大きくなる
+    if (n <= 0) return { interval: [8000, 16000], deg: 2, dur: 500 };
     if (n === 1) return { interval: [4000, 8000], deg: 5, dur: 600 };
     if (n === 2) return { interval: [2000, 5000], deg: 9, dur: 700 };
-    return           { interval: [800, 2000],  deg: 14, dur: 800 }; // 孵化直前
+    return              { interval: [800, 2000],  deg: 14, dur: 800 }; // 孵化直前
   }
 
   function wobble() {
     const wrap = document.getElementById('home-egg-wrap');
     if (!wrap || isHatched(getGrowthClears())) { timer = null; return; }
     const params = wobbleParams(getGrowthClears());
-    if (!params) { timer = setTimeout(wobble, 2000); return; }
 
     wrap.classList.remove('egg-wobble');
     wrap.style.setProperty('--wobble-deg', params.deg + 'deg');
@@ -123,8 +123,8 @@ const eggWobble = (() => {
     restart() {
       // ステージ変更時に周期を再設定
       if (timer) clearTimeout(timer);
+      if (isHatched(getGrowthClears())) return;
       const params = wobbleParams(getGrowthClears());
-      if (!params || isHatched(getGrowthClears())) return;
       const next = params.interval[0] * 0.3;
       timer = setTimeout(wobble, next);
     }
@@ -297,7 +297,8 @@ const S = {
   adultCharacters: [],  // 成人になったキャラリスト
   done: {},           // クリア済み段
   medals: {},         // メダル: null|'bronze'|'silver'|'gold'
-  _isAdultEggSelected: false,  // 成人後に卵を再選択したか
+  _growthBase: 0,       // 現在のキャラの成長ベース（卒業ごとに加算）
+  _pendingGraduation: false,  // 卒業遷移中フラグ
   isFirstAccess: true  // 初回アクセスか
 };
 const fullName = () => S.name + S.suffix;
@@ -523,18 +524,10 @@ function growthLevel() {
   return score; // 0-27
 }
 function getGrowthClears() {
-  // 0-27 の合計メダル数を既存の 0-10 ステージ系に変換
-  const s = growthLevel();
-  if (s < 3)  return 0;   // たまご intact
-  if (s < 6)  return 1;   // たまご crack1
-  if (s < 9)  return 2;   // たまご crack2
-  if (s < 12) return 3;   // たまご hatch（孵化直前）
-  if (s < 15) return 4;   // newborn
-  if (s < 18) return 5;   // newborn
-  if (s < 21) return 6;   // baby
-  if (s < 24) return 7;   // baby
-  if (s < 27) return 8;   // child
-  return 10;              // adult（全9段×3モード制覇）
+  // たまご: 1点/ステージ（0=intact, 1=crack1, 2=crack2, 3=hatch）
+  // キャラ: 2点/ステージ（4-5=newborn, 6-7=baby, 8-9=child, 10-11=adult）
+  // 12点以上でadult卒業 → 新卵選択
+  return growthLevel() - S._growthBase;
 }
 function updateGrowthFromMedals() {
   const newClears = getGrowthClears();
@@ -543,6 +536,24 @@ function updateGrowthFromMedals() {
     S.charClears[S.selectedEgg || 'green'] = newClears;
     eggWobble.restart();
   }
+  checkGraduation();
+}
+function checkGraduation() {
+  if (!S.selectedEgg || S._pendingGraduation) return;
+  if (getGrowthClears() < 12) return;
+  S._pendingGraduation = true;
+  if (!S.adultCharacters.includes(S.selectedEgg)) {
+    S.adultCharacters.push(S.selectedEgg);
+  }
+  S._growthBase = growthLevel(); // 次のキャラはここから
+  updateCreature();
+  setTimeout(() => {
+    S._pendingGraduation = false;
+    S.selectedEgg = null;
+    buildEggSelectGrid();
+    showScreen('screen-egg-select');
+    speak('また　あらたまごを　えらんでね！');
+  }, 1500);
 }
 function refreshModeMedals() {
   if (S.dan === 'random') {
@@ -967,7 +978,7 @@ function debugClears(delta) {
   const n = S.renshuClears;
   const stage = getCharStage(n);
   if (stage === 'adult') {
-    S._isAdultEggSelected = false;
+    S._pendingGraduation = false;
     if (!S.adultCharacters.includes(S.selectedEgg)) S.adultCharacters.push(S.selectedEgg);
   }
   const kind = S.selectedEgg;
@@ -986,29 +997,9 @@ function debugClears(delta) {
 }
 function debugShowClear() {
   if (!S.selectedEgg) { S.selectedEgg = 'green'; }
-  
-  const charStage = getCharStage(getGrowthClears());
-  
-  // 成人になったなら記録
-  if (charStage === 'adult' && !S.adultCharacters.includes(S.selectedEgg)) {
-    S.adultCharacters.push(S.selectedEgg);
-  }
-  
   updateClearScreen();
   const title = document.getElementById('clear-title');
   if (title) title.textContent = '🔧 デバッグ確認';
-  
-  // 成人状態かつ未選択なら卵選択画面へ
-  if (charStage === 'adult' && S.selectedEgg && !S._isAdultEggSelected) {
-    S._isAdultEggSelected = true;
-    setTimeout(() => {
-      showScreen('screen-egg-select');
-      buildEggSelectGrid();
-      speak('また　あらたまごを　えらんでね！');
-    }, 1000);
-    return;
-  }
-  
   showScreen('screen-clear');
   confetti();
 }
@@ -1051,41 +1042,71 @@ function showGrowthScreen() {
 function _startGrowthAnim(charStage) {
   stopGrowthAnim();
   const area = document.getElementById('growth-area');
-  const img  = document.getElementById('growth-char-img');
-  if (!area || !img || !charStage) {
+  if (!area) return;
+
+  // 以前のadultキャラimgを削除
+  area.querySelectorAll('.growth-adult-img').forEach(e => e.remove());
+
+  const mainImg = document.getElementById('growth-char-img');
+
+  // アニメーション対象のキャラリスト
+  const chars = [];
+
+  if (charStage && mainImg) {
+    // 孵化後のメインキャラはうろうろ
+    const spd = { newborn: 1.2, baby: 1.8, child: 2.6, adult: 3.5 }[charStage] || 1.5;
+    chars.push({
+      img: mainImg,
+      x: 80, y: 180,
+      vx: spd * (Math.random() > .5 ? 1 : -1), vy: spd * .5,
+      spd, canFly: (charStage === 'child' || charStage === 'adult'),
+      facingLeft: false,
+    });
+  } else if (mainImg) {
     // 卵は中央固定
-    if (img) { img.style.left = '50%'; img.style.top = '50%'; img.style.transform = 'translate(-50%,-60%)'; }
-    return;
+    mainImg.style.left = '50%'; mainImg.style.top = '50%';
+    mainImg.style.transform = 'translate(-50%,-60%)';
   }
 
-  const spd = { newborn: 1.2, baby: 1.8, child: 2.6, adult: 3.5 }[charStage] || 1.5;
-  const canFly = (charStage === 'child' || charStage === 'adult');
-  let x = 100, y = 200, vx = spd * (Math.random() > .5 ? 1 : -1), vy = spd * .5;
-  let facingLeft = false;
+  // 以前に育てたadultキャラをうろうろ
+  S.adultCharacters.forEach(adultKind => {
+    const adultImg = document.createElement('img');
+    adultImg.className = 'growth-adult-img';
+    adultImg.src = SPRITES.char[adultKind].adult;
+    adultImg.style.cssText = 'position:absolute;height:60px;image-rendering:pixelated;';
+    area.appendChild(adultImg);
+    const spd = 2.0 + Math.random() * 1.5;
+    chars.push({
+      img: adultImg,
+      x: 40 + Math.random() * 180, y: 150 + Math.random() * 60,
+      vx: spd * (Math.random() > .5 ? 1 : -1), vy: (Math.random() - .5) * spd,
+      spd, canFly: true,
+      facingLeft: Math.random() > .5,
+    });
+  });
+
+  if (chars.length === 0) return;
 
   function frame() {
     const W = area.clientWidth, H = area.clientHeight;
-    const iW = img.offsetWidth || 80, iH = img.offsetHeight || 80;
-    const floor = canFly ? 20 : H * 0.55;
-
-    x += vx; y += vy;
-    // ランダム小揺らぎ
-    if (Math.random() < 0.015) vx += (Math.random() - .5) * spd * .5;
-    if (Math.random() < 0.015) vy += (Math.random() - .5) * spd * .3;
-    // 速度制限
-    const maxV = spd * 2;
-    if (Math.abs(vx) > maxV) vx = Math.sign(vx) * maxV;
-    if (Math.abs(vy) > maxV) vy = Math.sign(vy) * maxV;
-    // 壁バウンド
-    if (x < 0)         { x = 0;       vx =  Math.abs(vx); }
-    if (x > W - iW)    { x = W - iW;  vx = -Math.abs(vx); }
-    if (y < floor)     { y = floor;   vy =  Math.abs(vy); }
-    if (y > H - iH - 10) { y = H - iH - 10; vy = -Math.abs(vy); }
-
-    facingLeft = vx < -0.1 ? true : vx > 0.1 ? false : facingLeft;
-    img.style.left = x.toFixed(1) + 'px';
-    img.style.top  = y.toFixed(1) + 'px';
-    img.style.transform = facingLeft ? 'scaleX(-1)' : 'scaleX(1)';
+    chars.forEach(c => {
+      const iW = c.img.offsetWidth || 60, iH = c.img.offsetHeight || 60;
+      const floor = c.canFly ? 20 : H * 0.55;
+      c.x += c.vx; c.y += c.vy;
+      if (Math.random() < 0.015) c.vx += (Math.random() - .5) * c.spd * .5;
+      if (Math.random() < 0.015) c.vy += (Math.random() - .5) * c.spd * .3;
+      const maxV = c.spd * 2;
+      if (Math.abs(c.vx) > maxV) c.vx = Math.sign(c.vx) * maxV;
+      if (Math.abs(c.vy) > maxV) c.vy = Math.sign(c.vy) * maxV;
+      if (c.x < 0)           { c.x = 0;         c.vx =  Math.abs(c.vx); }
+      if (c.x > W - iW)      { c.x = W - iW;    c.vx = -Math.abs(c.vx); }
+      if (c.y < floor)       { c.y = floor;      c.vy =  Math.abs(c.vy); }
+      if (c.y > H - iH - 10) { c.y = H - iH-10; c.vy = -Math.abs(c.vy); }
+      c.facingLeft = c.vx < -0.1 ? true : c.vx > 0.1 ? false : c.facingLeft;
+      c.img.style.left = c.x.toFixed(1) + 'px';
+      c.img.style.top  = c.y.toFixed(1) + 'px';
+      c.img.style.transform = c.facingLeft ? 'scaleX(-1)' : 'scaleX(1)';
+    });
     _growthRaf = requestAnimationFrame(frame);
   }
   _growthRaf = requestAnimationFrame(frame);
@@ -1114,30 +1135,13 @@ function doneDan() {
     refreshModeMedals();
   }
 
-  const charStage = getCharStage(getGrowthClears());
-  
-  // 成人になったなら記録
-  if (charStage === 'adult' && S.selectedEgg && !S.adultCharacters.includes(S.selectedEgg)) {
-    S.adultCharacters.push(S.selectedEgg);
-  }
-  
   updateCreature();
+  // 卒業遷移中はクリア画面をスキップ
+  if (S._pendingGraduation) return;
   // クリア画面の卵・恐竜を更新
   updateClearScreen();
   const clearTitle = S.dan === 'random' ? 'ばらばらのだんが　できたね！' : KD.fw(S.dan) + 'のだんが　できたね！';
   document.getElementById('clear-title').textContent = clearTitle;
-  
-  // 大人になった直後なら卵選択画面へ遷移
-  if (charStage === 'adult' && S.selectedEgg && !S._isAdultEggSelected) {
-    S._isAdultEggSelected = true;
-    setTimeout(() => {
-      showScreen('screen-egg-select');
-      buildEggSelectGrid();
-      speak('また　あらたまごを　えらんでね！');
-    }, 1500);
-    return;
-  }
-  
   showScreen('screen-clear');
   confetti();
   speak('やったー！ぜんもんできたよ！すごい！');
@@ -1362,18 +1366,7 @@ function doneTest() {
     updateGrowthFromMedals();
     refreshDanBadge(dan);
     refreshModeMedals();
-
-    // 大人になった直後なら卵選択画面へ
-    const charStage = getCharStage(getGrowthClears());
-    if (charStage === 'adult' && S.selectedEgg && !S._isAdultEggSelected) {
-      S._isAdultEggSelected = true;
-      setTimeout(() => {
-        showScreen('screen-egg-select');
-        buildEggSelectGrid();
-        speak('また　あらたまごを　えらんでね！');
-      }, 1500);
-      return;
-    }
+    if (S._pendingGraduation) return; // 卒業遷移中は結果画面をスキップ
   }
 
   // 結果画面

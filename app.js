@@ -704,9 +704,9 @@ function hlRow(i, p) {
   if (!row) return;
   row.classList.add('current');
   row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  document.getElementById(`kc-${i}`).textContent = '✓'; // タップ直後につける
   // autoモードのみ自動進行; manualモードは読み上げのみ
   speakThen(p.reading, 0.86, () => {
-    document.getElementById(`kc-${i}`).textContent = '✓';
     if ((S._oboeruMode || 'auto') === 'auto') {
       const waitMs = Math.max(1200, p.reading.length * 130);
       const probs = S._oboeruProblems;
@@ -1105,8 +1105,8 @@ function _startGrowthAnim(charStage) {
     if (eggImg) {
       const n = getGrowthClears();
       const wobbleAngle = [2, 5, 9, 14][Math.min(n, 3)];
-      const period      = [14000, 7000, 3500, 1800][Math.min(n, 3)];
-      const wobbleDur   = [500, 600, 700, 800][Math.min(n, 3)];
+      const period      = [6000, 4000, 2500, 1500][Math.min(n, 3)];
+      const wobbleDur   = [600, 700, 800, 900][Math.min(n, 3)];
       const phase = t % period;
       const rot = phase < wobbleDur
         ? Math.sin((phase / wobbleDur) * Math.PI * 2) * wobbleAngle

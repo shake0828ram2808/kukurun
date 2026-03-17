@@ -327,6 +327,7 @@ function showScreen(id) {
    → 右端があ行、左へかきくけこ…
 ════════════════════════════════ */
 let KANA_ROWS = [];
+let HOKA_SECTIONS = [];
 function buildKanaGrid() {
   const g = document.getElementById('kana-grid');
   KANA_ROWS.forEach(row =>
@@ -373,6 +374,73 @@ function delKana() {
     return;
   }
   nd.textContent = t;
+}
+
+/* ════════════════════════════════
+   HOKA MODAL (ほかのもじ)
+════════════════════════════════ */
+let hokaBuilt = false;
+function buildHokaModal() {
+  if (hokaBuilt) return;
+  hokaBuilt = true;
+  const body = document.getElementById('hoka-modal-body');
+
+  const allRows = [];
+  HOKA_SECTIONS.forEach((sec, si) => {
+    if (si > 0) allRows.push(null); // スペーサー列
+    sec.rows.forEach(col => allRows.push(col));
+  });
+
+  const colCount = allRows.length;
+  const grid = document.createElement('div');
+  grid.className = 'hoka-grid';
+  grid.style.gridTemplateColumns = `repeat(${colCount}, 1fr)`;
+  grid.style.gridTemplateRows = 'repeat(5, auto)';
+  grid.style.gridAutoFlow = 'column';
+  grid.style.direction = 'rtl';
+
+  allRows.forEach(col => {
+    if (col === null) {
+      for (let r = 0; r < 5; r++) {
+        const sp = document.createElement('div');
+        sp.className = 'hoka-col-spacer';
+        grid.appendChild(sp);
+      }
+    } else {
+      col.forEach(k => {
+        const b = document.createElement('button');
+        b.className = 'hoka-kana-btn';
+        b.textContent = k;
+        b.onclick = () => { Snd.tap(); speak(k, 1.1); addKana(k); closeHokaModal(); };
+        grid.appendChild(b);
+      });
+    }
+  });
+
+  body.appendChild(grid);
+}
+
+function openHokaModal() {
+  buildHokaModal();
+  const overlay = document.getElementById('hoka-overlay');
+  const modal   = document.getElementById('hoka-modal');
+  overlay.style.display = 'block';
+  modal.style.display   = 'flex';
+  requestAnimationFrame(() => {
+    overlay.classList.add('visible');
+    modal.classList.add('visible');
+  });
+}
+
+function closeHokaModal() {
+  const overlay = document.getElementById('hoka-overlay');
+  const modal   = document.getElementById('hoka-modal');
+  overlay.classList.remove('visible');
+  modal.classList.remove('visible');
+  setTimeout(() => {
+    overlay.style.display = 'none';
+    modal.style.display   = 'none';
+  }, 220);
 }
 
 /* ════════════════════════════════
@@ -1268,9 +1336,11 @@ function handleZenbukesus() {
 Promise.all([
   fetch('kana.json').then(r => r.json()),
   fetch('messages.json').then(r => r.json()),
-]).then(([kana, msg]) => {
+  fetch('kana_hoka.json').then(r => r.json()),
+]).then(([kana, msg, hoka]) => {
   KANA_ROWS      = kana.kanaRows;
   SUFFIXES       = kana.suffixes;
+  HOKA_SECTIONS  = hoka.hokaSections;
   kukurunMessages = msg.kukurunMessages;
   kukurunScripts  = msg.kukurunScripts;
   // kukurun.js側のメッセージも更新
@@ -1288,6 +1358,10 @@ Promise.all([
     ['ら','り','る','れ','ろ'],
   ];
   SUFFIXES = [{l:'なし',v:''},{l:'さん',v:'さん'},{l:'くん',v:'くん'},{l:'ちゃん',v:'ちゃん'}];
+  HOKA_SECTIONS = [
+    {title:'だくてん・はんだくてん',rows:[['が','ぎ','ぐ','げ','ご'],['ざ','じ','ず','ぜ','ぞ'],['だ','ぢ','づ','で','ど'],['ば','び','ぶ','べ','ぼ'],['ぱ','ぴ','ぷ','ぺ','ぽ']]},
+    {title:'ちいさいかな・のばすおと',rows:[['っ','ゃ','ゅ','ょ','ー']]},
+  ];
   kukurunMessages = ['どれを　やる？','がんばろうね！','すごーい！','天才だよ！'];
   kukurunScripts  = [
     {text:'どれを　やる？', sequence:['O','E','O','A','U']},

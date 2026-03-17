@@ -38,17 +38,8 @@ function getCharStage(n) {
 function updateCreature() {
   if (!S.selectedEgg && S.adultCharacters.length === 0) return;
   
-  // 表示対象を決定：成人キャラがあればそれを表示、なければ現在の卵を表示
-  let displayKind = S.selectedEgg;
-  let displayClears = S.renshuClears;
-  
-  // 成人キャラがあれば、最後の成人キャラを表示
-  if (S.adultCharacters.length > 0) {
-    displayKind = S.adultCharacters[S.adultCharacters.length - 1];
-    displayClears = S.charClears[displayKind] || 0;
-  }
-  
-  const n = displayClears;
+  // 成長レベルはメダル合計から計算（1段スパム防止）
+  const n = getGrowthClears();
   const kind = displayKind;
   const charStage = getCharStage(n);
   const homeWrap = document.getElementById('home-creature-wrap');
@@ -109,8 +100,8 @@ const eggWobble = (() => {
 
   function wobble() {
     const wrap = document.getElementById('home-egg-wrap');
-    if (!wrap || isHatched(S.renshuClears)) { timer = null; return; }
-    const params = wobbleParams(S.renshuClears);
+    if (!wrap || isHatched(getGrowthClears())) { timer = null; return; }
+    const params = wobbleParams(getGrowthClears());
     if (!params) { timer = setTimeout(wobble, 2000); return; }
 
     wrap.classList.remove('egg-wobble');
@@ -132,8 +123,8 @@ const eggWobble = (() => {
     restart() {
       // ステージ変更時に周期を再設定
       if (timer) clearTimeout(timer);
-      const params = wobbleParams(S.renshuClears);
-      if (!params || isHatched(S.renshuClears)) return;
+      const params = wobbleParams(getGrowthClears());
+      if (!params || isHatched(getGrowthClears())) return;
       const next = params.interval[0] * 0.3;
       timer = setTimeout(wobble, next);
     }
@@ -510,20 +501,75 @@ function goHomeFromEgg() {
    DAN GRID
 ════════════════════════════════ */
 const MEDAL_CLR = { bronze:'#CD7F32', silver:'#B8C0CC', gold:'#FFD700' };
+
+/* ── メダルヘルパー ──
+   S.medals[dan] = { oboeru: bool, renshu: bool, test: null|'bronze'|'silver'|'gold' }
+   growthLevel(): 全段のメダル合計（max 27）→ 成長ドライバー（1段スパム防止） */
+function getMedals(dan) {
+  if (!S.medals[dan] || typeof S.medals[dan] !== 'object') {
+    S.medals[dan] = { oboeru: false, renshu: false, test: null };
+  }
+  return S.medals[dan];
+}
+function growthLevel() {
+  let score = 0;
+  for (let d = 1; d <= 9; d++) {
+    const m = S.medals[d];
+    if (!m || typeof m !== 'object') continue;
+    if (m.oboeru) score++;
+    if (m.renshu) score++;
+    if (m.test) score++;
+  }
+  return score; // 0-27
+}
+function getGrowthClears() {
+  // 0-27 の合計メダル数を既存の 0-10 ステージ系に変換
+  const s = growthLevel();
+  if (s < 3)  return 0;   // たまご intact
+  if (s < 6)  return 1;   // たまご crack1
+  if (s < 9)  return 2;   // たまご crack2
+  if (s < 12) return 3;   // たまご hatch（孵化直前）
+  if (s < 15) return 4;   // newborn
+  if (s < 18) return 5;   // newborn
+  if (s < 21) return 6;   // baby
+  if (s < 24) return 7;   // baby
+  if (s < 27) return 8;   // child
+  return 10;              // adult（全9段×3モード制覇）
+}
+function updateGrowthFromMedals() {
+  const newClears = getGrowthClears();
+  if (newClears !== S.renshuClears) {
+    S.renshuClears = newClears;
+    S.charClears[S.selectedEgg || 'green'] = newClears;
+    eggWobble.restart();
+  }
+}
+function refreshModeMedals() {
+  if (S.dan === 'random') {
+    ['oboeru','renshu','test'].forEach(k => {
+      const el = document.getElementById('mode-medal-' + k);
+      if (el) el.textContent = '';
+    });
+    return;
+  }
+  const m = getMedals(S.dan);
+  const ob = document.getElementById('mode-medal-oboeru');
+  const rs = document.getElementById('mode-medal-renshu');
+  const ts = document.getElementById('mode-medal-test');
+  if (ob) ob.textContent = m.oboeru ? '⭐' : '';
+  if (rs) rs.textContent = m.renshu ? '⭐' : '';
+  if (ts) ts.textContent = m.test === 'gold' ? '🥇' : m.test === 'silver' ? '🥈' : m.test === 'bronze' ? '🥉' : '';
+}
+
 function medalBadge(dan) {
-  const m = S.medals[dan];
-  const medals = ['bronze', 'silver', 'gold'];
-  const medalEmojis = { bronze: '🥉', silver: '🥈', gold: '🥇' };
-  
-  let html = '<div style="position:absolute;top:4px;right:3px;display:flex;flex-direction:column;gap:1px;font-size:14px;line-height:1;">';
-  
-  medals.forEach(level => {
-    const hasMedal = m && medals.indexOf(m) >= medals.indexOf(level);
-    html += `<span style="filter:drop-shadow(0 1px 1px rgba(0,0,0,.35));">${hasMedal ? medalEmojis[level] : '　'}</span>`;
-  });
-  
-  html += '</div>';
-  return html;
+  const m = (S.medals[dan] && typeof S.medals[dan] === 'object') ? S.medals[dan] : {};
+  const testEmoji = m.test === 'gold' ? '🥇' : m.test === 'silver' ? '🥈' : m.test === 'bronze' ? '🥉' : '';
+  const sh = 'filter:drop-shadow(0 1px 1px rgba(0,0,0,.35));';
+  return `<div style="position:absolute;top:3px;right:3px;display:flex;flex-direction:column;align-items:center;gap:0;font-size:11px;line-height:1.1;">
+    <span style="${sh}">${m.oboeru ? '⭐' : '　'}</span>
+    <span style="${sh}">${m.renshu ? '⭐' : '　'}</span>
+    <span style="${sh};font-size:13px;">${testEmoji || '　'}</span>
+  </div>`;
 }
 function buildDanGrid() {
   const g = document.getElementById('dan-grid'); g.innerHTML = '';
@@ -572,12 +618,24 @@ function selDan(dan) {
     if (testLocked) testLocked.style.display = unlocked ? 'none' : 'flex';
     if (testOpen)   testOpen.style.display   = unlocked ? 'flex' : 'none';
   }
-  showScreen('screen-mode'); speak(lbl + 'をえらんだね！');
+  showScreen('screen-mode');
+  refreshModeMedals();
+  speak(lbl + 'をえらんだね！');
 }
 
 /* ════════════════════════════════
    OBOERU
 ════════════════════════════════ */
+function awardOboeruMedal() {
+  if (S.dan === 'random') return;
+  const m = getMedals(S.dan);
+  if (!m.oboeru) {
+    m.oboeru = true;
+    updateGrowthFromMedals();
+    refreshDanBadge(S.dan);
+    refreshModeMedals();
+  }
+}
 function startOboeru() {
   let problems;
   if (S.dan === 'random') {
@@ -894,31 +952,24 @@ function checkAns(n, btn) {
 }
 
 function debugClears(delta) {
+  // デバッグ: S.renshuClears を直接操作して成長確認
   if (delta === null) {
     S.renshuClears = 0;
   } else {
     S.renshuClears = Math.max(0, S.renshuClears + delta);
   }
-  // 卵未選択時はgreen決め打ちでプレビュー
   if (!S.selectedEgg) {
     S.selectedEgg = 'green';
     const homeWrap = document.getElementById('home-creature-wrap');
     if (homeWrap) homeWrap.style.display = 'flex';
   }
-  // 成長度を charClears に記録
-  S.charClears[S.selectedEgg] = S.renshuClears;
-  
-  // 成人状態に遷移したら卵選択フラグをリセット（デバッグで確認できるように）
+  // デバッグ時は renshuClears を直接使って表示（growthLevel は使わない）
   const n = S.renshuClears;
   const stage = getCharStage(n);
   if (stage === 'adult') {
     S._isAdultEggSelected = false;
-    // 成人になったなら記録
-    if (!S.adultCharacters.includes(S.selectedEgg)) {
-      S.adultCharacters.push(S.selectedEgg);
-    }
+    if (!S.adultCharacters.includes(S.selectedEgg)) S.adultCharacters.push(S.selectedEgg);
   }
-  // ── デバッグパネル内プレビュー更新 ──
   const kind = S.selectedEgg;
   const stageNames = {newborn:'うまれたて',baby:'あかちゃん',child:'こども',adult:'おとな'};
   const previewImg = document.getElementById('debug-preview-img');
@@ -927,19 +978,16 @@ function debugClears(delta) {
     previewImg.style.display = 'block';
   }
   const label = document.getElementById('debug-clears-label');
-  if (label) label.textContent = n + 'かい';
+  if (label) label.textContent = 'スコア:' + growthLevel() + '/27\n' + n + 'clears';
   const stageLabel = document.getElementById('debug-stage-label');
-  if (stageLabel) {
-    stageLabel.textContent = stage ? stageNames[stage] : 'たまご (' + n + '/3)';
-  }
-  // ホーム画面も更新（表示中なら反映される）
+  if (stageLabel) stageLabel.textContent = stage ? stageNames[stage] : 'たまご (' + n + '/10)';
   updateCreature();
   eggWobble.restart();
 }
 function debugShowClear() {
   if (!S.selectedEgg) { S.selectedEgg = 'green'; }
   
-  const charStage = getCharStage(S.renshuClears);
+  const charStage = getCharStage(getGrowthClears());
   
   // 成人になったなら記録
   if (charStage === 'adult' && !S.adultCharacters.includes(S.selectedEgg)) {
@@ -979,7 +1027,7 @@ function debugGoHome() {
 let _growthRaf = null;
 
 function showGrowthScreen() {
-  const n = S.renshuClears;
+  const n = getGrowthClears();
   const kind = S.selectedEgg || 'green';
   const charStage = getCharStage(n);
 
@@ -1056,16 +1104,17 @@ function doneDan() {
   if (S.dan !== 'random') {
     S.done[S.dan] = true;
   }
-  // 正答率6割以上ならrenshuClears+1（成長トリガー）
+  // 正答率6割以上なら れんしゅうメダル を付与（成長トリガー）
   const total = S.probs.length;
   const correct = S.hanamaruCount - (S._hanamaruAtStart || 0);
-  if (correct / total >= 0.6) {
-    S.renshuClears++;
-    S.charClears[S.selectedEgg] = S.renshuClears;  // 現在の卵の成長度を更新
-    eggWobble.restart(); // ステージ変化→揺れ周期更新
+  if (correct / total >= 0.6 && S.dan !== 'random') {
+    getMedals(S.dan).renshu = true;
+    updateGrowthFromMedals();
+    refreshDanBadge(S.dan);
+    refreshModeMedals();
   }
-  
-  const charStage = getCharStage(S.renshuClears);
+
+  const charStage = getCharStage(getGrowthClears());
   
   // 成人になったなら記録
   if (charStage === 'adult' && S.selectedEgg && !S.adultCharacters.includes(S.selectedEgg)) {
@@ -1096,7 +1145,7 @@ function doneDan() {
 
 function updateClearScreen() {
   if (!S.selectedEgg) return;
-  const n = S.renshuClears;
+  const n = getGrowthClears();
   const kind = S.selectedEgg;
   const charStage = getCharStage(n);
   const stageNames = {newborn:'うまれたて',baby:'あかちゃん',child:'こども',adult:'おとな'};
@@ -1306,14 +1355,16 @@ function doneTest() {
   const cleared = pct >= 0.75;  // 75%以上でクリア
 
   if (cleared && dan !== 'random') {
-    const cur  = S.medals[dan] || null;
+    const m = getMedals(dan);
+    const cur  = m.test;
     const next = NEXT_MEDAL[cur];
-    S.medals[dan] = next;
+    m.test = next;
+    updateGrowthFromMedals();
     refreshDanBadge(dan);
-    
-    // 大人になった直後（renshuClears >= 10）で、かつこれが1回目のテストクリアなら
-    // たまご選択画面へ戻す
-    const charStage = getCharStage(S.renshuClears);
+    refreshModeMedals();
+
+    // 大人になった直後なら卵選択画面へ
+    const charStage = getCharStage(getGrowthClears());
     if (charStage === 'adult' && S.selectedEgg && !S._isAdultEggSelected) {
       S._isAdultEggSelected = true;
       setTimeout(() => {
@@ -1326,7 +1377,7 @@ function doneTest() {
   }
 
   // 結果画面
-  const medal = dan !== 'random' ? S.medals[dan] : null;
+  const medal = dan !== 'random' ? getMedals(dan).test : null;
   const medalEm = medal === 'gold' ? '🥇' : medal === 'silver' ? '🥈' : medal === 'bronze' ? '🥉' : '';
   document.getElementById('test-result-medal').textContent = cleared ? medalEm || '⭐' : '😢';
   document.getElementById('test-result-label').textContent =
@@ -1361,16 +1412,10 @@ function buildEggSelectGrid() {
     btn.appendChild(img);
     btn.onclick = () => {
       Snd.tap();
-      // 前の卵の成長度を保存
-      if (S.selectedEgg) {
-        S.charClears[S.selectedEgg] = S.renshuClears;
-      }
-      // 新しい卵を選択
+      // 新しい卵を選択（成長はグローバルメダル数で管理）
       document.querySelectorAll('.egg-sel-btn').forEach(b => b.classList.remove('selected'));
       btn.classList.add('selected');
       S.selectedEgg = kind;
-      // 選んだ卵の成長度を復元
-      S.renshuClears = S.charClears[kind] || 0;
       const okBtn = document.getElementById('egg-ok-btn');
       okBtn.disabled = false; okBtn.style.opacity = '1';
       speak('このたまごにする！');

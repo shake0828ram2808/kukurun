@@ -302,6 +302,7 @@ html, body {
 }
 .sel-main { font-size: 17px; color: var(--text); }
 .sel-sub  { font-size: 12px; color: var(--text2); margin-top: 2px; }
+.mode-medal-badge { margin-left: auto; font-size: 20px; line-height: 1; flex-shrink: 0; }
 
 /* ══════════════════
    DAN GRID

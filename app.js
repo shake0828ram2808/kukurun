@@ -276,7 +276,7 @@ const Spk = (() => {
       if (!window.speechSynthesis) { if (onend) setTimeout(onend, 800); return; }
       speechSynthesis.cancel();
       const u = new SpeechSynthesisUtterance(text);
-      u.lang = 'ja-JP'; u.rate = rate; u.pitch = 1.2;
+      u.lang = 'ja-JP'; u.rate = rate; u.pitch = 1.3;
       const v = speechSynthesis.getVoices().find(x => x.lang.startsWith('ja'));
       if (v) u.voice = v;
       if (onend) u.onend = onend;
@@ -565,7 +565,7 @@ function selDan(dan) {
 function startOboeru() {
   let problems;
   if (S.dan === 'random') {
-    // 全9段から問題を集める
+    // 全9段から問題を集めてシャッフル→10問に絞る
     problems = [];
     for (let d = 1; d <= 9; d++) {
       problems = problems.concat(KD.problems(d));
@@ -575,10 +575,11 @@ function startOboeru() {
       const j = Math.floor(Math.random() * (i + 1));
       [problems[i], problems[j]] = [problems[j], problems[i]];
     }
+    problems = problems.slice(0, 10);
   } else {
     problems = KD.problems(S.dan);
   }
-  S._oboeruProblems = problems;  // 問題リストを保存
+  S._oboeruProblems = problems;  // 問題リストを保存（れんしゅうで再利用）
   S._oboeruMode = S._oboeruMode || 'auto';  // 初期値: じどうで　ぜんぶ
   S._oboeruSelected = [];  // manualモードの選択状態リセット
   const label = S.dan === 'random' ? 'らんだむ' : KD.danLabel(S.dan);
@@ -724,15 +725,17 @@ let rT = null;
 function startRenshu() {
   let probs;
   if (S.dan === 'random') {
-    // 全9段から問題をランダムに抽出
-    probs = [];
-    for (let d = 1; d <= 9; d++) {
-      probs = probs.concat(KD.problems(d));
-    }
-    // Fisher-Yatesシャッフル
-    for (let i = probs.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [probs[i], probs[j]] = [probs[j], probs[i]];
+    // おぼえるで生成した同じ10問を再利用（なければ新規生成）
+    if (S._oboeruProblems && S._oboeruProblems.length) {
+      probs = S._oboeruProblems;
+    } else {
+      probs = [];
+      for (let d = 1; d <= 9; d++) probs = probs.concat(KD.problems(d));
+      for (let i = probs.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [probs[i], probs[j]] = [probs[j], probs[i]];
+      }
+      probs = probs.slice(0, 10);
     }
   } else {
     probs = KD.problems(S.dan);
@@ -1109,7 +1112,7 @@ function startTest() {
     const j = Math.floor(Math.random() * (i + 1));
     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
-  S._testProbs   = shuffled;
+  S._testProbs   = S.dan === 'random' ? shuffled.slice(0, 10) : shuffled;
   S._testIdx     = 0;
   S._testCorrect = 0;
   S._testShown   = false;

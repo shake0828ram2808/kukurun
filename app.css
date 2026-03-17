@@ -345,11 +345,16 @@ html, body {
 .d9 { background: #191C98; }
 .d-rnd {
   background: var(--text); color: #fff;
+  padding: 10px 4px;
 }
 .d-growth {
   background: #e8660a; color: #fff;
   box-shadow: 0 5px 0 #a84600, var(--sh);
+  padding: 10px 4px;
 }
+
+/* ══ せいちょうをみる画面 ══ */
+#screen-growth { height: calc(100dvh - 100px); min-height: 300px; }
 
 /* ══════════════════
    BUTTONS

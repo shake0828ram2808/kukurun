@@ -551,6 +551,16 @@ function refreshDanBadge(dan) {
 }
 function selDan(dan) {
   S.dan = dan;
+  if (dan === 'random') {
+    // ここで問題を生成・固定し、おぼえる／れんしゅうで同じ問題を使う
+    let probs = [];
+    for (let d = 1; d <= 9; d++) probs = probs.concat(KD.problems(d));
+    for (let i = probs.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [probs[i], probs[j]] = [probs[j], probs[i]];
+    }
+    S._oboeruProblems = probs.slice(0, 10);
+  }
   const lbl = dan === 'random' ? 'ばらばらのだん' : KD.fw(dan) + 'のだん';
   document.getElementById('mode-dan-label').textContent = lbl;
   // テストボタン ロック/解除
@@ -571,21 +581,11 @@ function selDan(dan) {
 function startOboeru() {
   let problems;
   if (S.dan === 'random') {
-    // 全9段から問題を集めてシャッフル→10問に絞る
-    problems = [];
-    for (let d = 1; d <= 9; d++) {
-      problems = problems.concat(KD.problems(d));
-    }
-    // Fisher-Yatesシャッフル
-    for (let i = problems.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [problems[i], problems[j]] = [problems[j], problems[i]];
-    }
-    problems = problems.slice(0, 10);
+    problems = S._oboeruProblems;  // selDanで固定済みの問題を使う
   } else {
     problems = KD.problems(S.dan);
   }
-  S._oboeruProblems = problems;  // 問題リストを保存（れんしゅうで再利用）
+  S._oboeruProblems = problems;
   S._oboeruMode = S._oboeruMode || 'auto';  // 初期値: じどうで　ぜんぶ
   S._oboeruSelected = [];  // manualモードの選択状態リセット
   const label = S.dan === 'random' ? 'ばらばらのだん' : KD.danLabel(S.dan);
@@ -982,23 +982,18 @@ function showGrowthScreen() {
   const n = S.renshuClears;
   const kind = S.selectedEgg || 'green';
   const charStage = getCharStage(n);
-  const stageNames = { newborn:'うまれたて', baby:'あかちゃん', child:'こども', adult:'おとな' };
 
   const img = document.getElementById('growth-char-img');
-  const lbl = document.getElementById('growth-stage-label');
 
   if (charStage) {
     img.src = getCharSprite(kind, charStageIdx(n));
     const sz = { newborn: 60, baby: 70, child: 85, adult: 100 }[charStage] || 70;
     img.style.height = sz + 'px';
-    lbl.textContent = stageNames[charStage] + 'だよ！';
   } else if (S.selectedEgg) {
     img.src = getEggSprite(kind, n);
-    img.style.height = '70px';
-    lbl.textContent = 'たまご　' + n + '／３';
+    img.style.height = '80px';
   } else {
     img.src = '';
-    lbl.textContent = 'まだ　たまごが　ないよ';
   }
 
   showScreen('screen-growth');

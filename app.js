@@ -1048,53 +1048,78 @@ function _startGrowthAnim(charStage) {
   area.querySelectorAll('.growth-adult-img').forEach(e => e.remove());
 
   const mainImg = document.getElementById('growth-char-img');
+  let eggImg = null;
 
   // アニメーション対象のキャラリスト
   const chars = [];
 
   if (charStage && mainImg) {
-    // 孵化後のメインキャラはうろうろ
-    const spd = { newborn: 1.2, baby: 1.8, child: 2.6, adult: 3.5 }[charStage] || 1.5;
+    // 孵化後のメインキャラ
+    // adult: 速めなめらか飛行 / それ以外: ゆっくり歩き
+    const isAdult = charStage === 'adult';
+    const spd = { newborn: 0.6, baby: 1.0, child: 1.5, adult: 3.5 }[charStage] || 1.0;
     chars.push({
       img: mainImg,
-      x: 80, y: 180,
-      vx: spd * (Math.random() > .5 ? 1 : -1), vy: spd * .5,
-      spd, canFly: (charStage === 'child' || charStage === 'adult'),
+      x: 80, y: 200,
+      vx: spd * (Math.random() > .5 ? 1 : -1), vy: spd * .4,
+      spd, canFly: isAdult,
       facingLeft: false,
+      walk: !isAdult,
+      walkPeriod: { newborn: 380, baby: 300, child: 240 }[charStage] || 300,
+      walkAngle: { newborn: 5, baby: 6, child: 7 }[charStage] || 5,
     });
   } else if (mainImg) {
-    // 卵は中央固定
+    // 卵は中央固定、ゆれアニメはJSで管理
     mainImg.style.left = '50%'; mainImg.style.top = '50%';
     mainImg.style.transform = 'translate(-50%,-60%)';
+    eggImg = mainImg;
   }
 
-  // 以前に育てたadultキャラをうろうろ
+  // 以前に育てたadultキャラをうろうろ（なめらか飛行）
   S.adultCharacters.forEach(adultKind => {
     const adultImg = document.createElement('img');
     adultImg.className = 'growth-adult-img';
     adultImg.src = SPRITES.char[adultKind].adult;
     adultImg.style.cssText = 'position:absolute;height:60px;image-rendering:pixelated;';
     area.appendChild(adultImg);
-    const spd = 2.0 + Math.random() * 1.5;
+    const spd = 2.5 + Math.random() * 1.5;
     chars.push({
       img: adultImg,
       x: 40 + Math.random() * 180, y: 150 + Math.random() * 60,
       vx: spd * (Math.random() > .5 ? 1 : -1), vy: (Math.random() - .5) * spd,
       spd, canFly: true,
       facingLeft: Math.random() > .5,
+      walk: false,
     });
   });
 
-  if (chars.length === 0) return;
+  if (chars.length === 0 && !eggImg) return;
+
+  const startTime = Date.now();
 
   function frame() {
     const W = area.clientWidth, H = area.clientHeight;
+    const t = Date.now() - startTime;
+
+    // 卵のゆれ（ランダム間欠）
+    if (eggImg) {
+      const n = getGrowthClears();
+      const wobbleAngle = [2, 5, 9, 14][Math.min(n, 3)];
+      const period      = [14000, 7000, 3500, 1800][Math.min(n, 3)];
+      const wobbleDur   = [500, 600, 700, 800][Math.min(n, 3)];
+      const phase = t % period;
+      const rot = phase < wobbleDur
+        ? Math.sin((phase / wobbleDur) * Math.PI * 2) * wobbleAngle
+        : 0;
+      eggImg.style.transform = `translate(-50%,-60%) rotate(${rot.toFixed(2)}deg)`;
+    }
+
     chars.forEach(c => {
       const iW = c.img.offsetWidth || 60, iH = c.img.offsetHeight || 60;
-      const floor = c.canFly ? 20 : H * 0.55;
+      const floor = c.canFly ? 20 : H * 0.6;
       c.x += c.vx; c.y += c.vy;
       if (Math.random() < 0.015) c.vx += (Math.random() - .5) * c.spd * .5;
-      if (Math.random() < 0.015) c.vy += (Math.random() - .5) * c.spd * .3;
+      if (Math.random() < 0.015) c.vy += (Math.random() - .5) * c.spd * (c.canFly ? .3 : .1);
       const maxV = c.spd * 2;
       if (Math.abs(c.vx) > maxV) c.vx = Math.sign(c.vx) * maxV;
       if (Math.abs(c.vy) > maxV) c.vy = Math.sign(c.vy) * maxV;
@@ -1103,9 +1128,19 @@ function _startGrowthAnim(charStage) {
       if (c.y < floor)       { c.y = floor;      c.vy =  Math.abs(c.vy); }
       if (c.y > H - iH - 10) { c.y = H - iH-10; c.vy = -Math.abs(c.vy); }
       c.facingLeft = c.vx < -0.1 ? true : c.vx > 0.1 ? false : c.facingLeft;
+      const flipX = c.facingLeft ? -1 : 1;
+      let tfm;
+      if (c.walk) {
+        // カタカタ歩き: 速度があるときだけ揺れる
+        const moving = Math.abs(c.vx) > 0.2;
+        const walkRot = moving ? Math.sin(t / c.walkPeriod) * c.walkAngle : 0;
+        tfm = `scaleX(${flipX}) rotate(${walkRot.toFixed(2)}deg)`;
+      } else {
+        tfm = `scaleX(${flipX})`;
+      }
       c.img.style.left = c.x.toFixed(1) + 'px';
       c.img.style.top  = c.y.toFixed(1) + 'px';
-      c.img.style.transform = c.facingLeft ? 'scaleX(-1)' : 'scaleX(1)';
+      c.img.style.transform = tfm;
     });
     _growthRaf = requestAnimationFrame(frame);
   }

@@ -4,8 +4,8 @@
    卵: green/pink/blue × intact/crack1/crack2/hatch
    キャラ: green/pink/blue × newborn/baby/child/adult
    ステージ決定: renshuClears（6割クリア回数）
-     0→intact, 1→crack1, 2→crack2, 3→hatch（卵3/3）, 4→newborn,
-     5→baby, 6→child, 7→adult
+     0→intact, 1→crack1, 2→crack2, 3→hatch（卵3/3）,
+     4,5→newborn, 6,7→baby, 8,9→child, 10+→adult（各2クリア）
 ════════════════════════════════ */
 
 // ステージ番号からスプライトを取得
@@ -15,23 +15,24 @@ function getEggSprite(kind, n) {
   if (n === 2) return SPRITES.egg[kind].crack2;
   return SPRITES.egg[kind].hatch; // 孵化直前（3）
 }
-function getCharSprite(kind, n) {
-  // n = renshuClears - 4 (孵化後のステップ数)
-  if (n <= 0) return SPRITES.char[kind].newborn;
-  if (n === 1) return SPRITES.char[kind].baby;
-  if (n === 2) return SPRITES.char[kind].child;
+function getCharSprite(kind, idx) {
+  // idx = charStageIdx(renshuClears)  0:newborn 1:baby 2:child 3:adult
+  if (idx <= 0) return SPRITES.char[kind].newborn;
+  if (idx === 1) return SPRITES.char[kind].baby;
+  if (idx === 2) return SPRITES.char[kind].child;
   return SPRITES.char[kind].adult;
 }
 function isHatched(n) { return n >= 4; } // renshuClears >= 4 で孵化済み（3はhatch卵）
 
+// charStageIdx: null=卵, 0=newborn, 1=baby, 2=child, 3=adult（各ステージ2クリア）
+function charStageIdx(n) {
+  if (n < 4) return null;
+  return Math.min(3, Math.floor((n - 4) / 2));
+}
 // charStage: null=卵（hatch含む）, 'newborn','baby','child','adult'
 function getCharStage(n) {
-  if (n < 4) return null;
-  const after = n - 4;
-  if (after === 0) return 'newborn';
-  if (after === 1) return 'baby';
-  if (after === 2) return 'child';
-  return 'adult';
+  const idx = charStageIdx(n);
+  return idx === null ? null : ['newborn','baby','child','adult'][idx];
 }
 
 // ホーム画面・クリア画面の表示を更新
@@ -57,7 +58,7 @@ function updateCreature() {
   const homeEgg = document.getElementById('home-egg-img');
   if (homeEgg) {
     if (charStage) {
-      homeEgg.src = getCharSprite(kind, n - 4);
+      homeEgg.src = getCharSprite(kind, charStageIdx(n));
       homeEgg.style.height = charStage === 'newborn' ? '45px'
                            : charStage === 'baby'    ? '50px'
                            : charStage === 'child'   ? '55px' : '60px';
@@ -83,7 +84,7 @@ function updateCreature() {
   // suffix画面
   const dinSufEl = document.getElementById('dino-suffix');
   if (dinSufEl) dinSufEl.src = charStage
-    ? getCharSprite(kind, n - 4)
+    ? getCharSprite(kind, charStageIdx(n))
     : getEggSprite(kind, n);
 }
 
@@ -923,7 +924,7 @@ function debugClears(delta) {
   const stageNames = {newborn:'うまれたて',baby:'あかちゃん',child:'こども',adult:'おとな'};
   const previewImg = document.getElementById('debug-preview-img');
   if (previewImg) {
-    previewImg.src = stage ? getCharSprite(kind, n - 4) : getEggSprite(kind, n);
+    previewImg.src = stage ? getCharSprite(kind, charStageIdx(n)) : getEggSprite(kind, n);
     previewImg.style.display = 'block';
   }
   const label = document.getElementById('debug-clears-label');
@@ -988,7 +989,7 @@ function showGrowthScreen() {
   const lbl = document.getElementById('growth-stage-label');
 
   if (charStage) {
-    img.src = getCharSprite(kind, n - 4);
+    img.src = getCharSprite(kind, charStageIdx(n));
     const sz = { newborn: 60, baby: 70, child: 85, adult: 100 }[charStage] || 70;
     img.style.height = sz + 'px';
     lbl.textContent = stageNames[charStage] + 'だよ！';
@@ -1112,7 +1113,7 @@ function updateClearScreen() {
 
   if (charStage) {
     if (clearEgg) {
-      clearEgg.src = getCharSprite(kind, n - 4);
+      clearEgg.src = getCharSprite(kind, charStageIdx(n));
       clearEgg.style.height = '90px';
     }
     if (clearLabel) clearLabel.textContent = 'せいちょう\u3000したね！';
@@ -1316,7 +1317,7 @@ function doneTest() {
     S.medals[dan] = next;
     refreshDanBadge(dan);
     
-    // 大人になった直後（renshuClears >= 6）で、かつこれが1回目のテストクリアなら
+    // 大人になった直後（renshuClears >= 10）で、かつこれが1回目のテストクリアなら
     // たまご選択画面へ戻す
     const charStage = getCharStage(S.renshuClears);
     if (charStage === 'adult' && S.selectedEgg && !S._isAdultEggSelected) {

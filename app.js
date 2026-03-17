@@ -266,6 +266,12 @@ const Snd = (() => {
 })();
 function tapSnd() { Snd.click(); }
 
+// 読み表示用フォーマット：問題部分と答えの間に全角スペースを入れる
+function fmtReading(p) {
+  if (p.reading.includes('が')) return p.reading.replace('が', '\u3000が\u3000');
+  return (p.questionRead || '') + '\u3000' + KD.numYomi(p.answer);
+}
+
 /* ════════════════════════════════
    SPEECH
 ════════════════════════════════ */
@@ -603,7 +609,7 @@ function startOboeru() {
       </button>
       <span class="kuku-eq">${eq}</span>
       <span class="kuku-ans">${KD.fw(p.answer)}</span>
-      <span class="kuku-read">${p.reading.includes('が') ? p.reading.replace('が', '\u3000が\u3000') : p.reading}</span>
+      <span class="kuku-read">${fmtReading(p)}</span>
       <span class="kuku-check" id="kc-${i}"></span>`;
     row.onclick = () => {
       Snd.tap();
@@ -853,11 +859,8 @@ function showAnsEl(p) {
     slot.textContent = KD.fw(p.answer);
     slot.className = 'ans-revealed';
   }
-  // 上段の読みを完全版に（が前後スペース）
-  const fullFmt = p.reading.includes('が')
-    ? p.reading.replace('が', '\u3000が\u3000')
-    : p.reading;
-  document.getElementById('renshu-reading').textContent = fullFmt;
+  // 上段の読みを完全版に（問題と答えの間にスペース）
+  document.getElementById('renshu-reading').textContent = fmtReading(p);
   document.getElementById('renshu-hint').textContent = '';
   document.getElementById('renshu-next-btn').style.display = 'block';
 }
@@ -896,7 +899,6 @@ function debugClears(delta) {
   } else {
     S.renshuClears = Math.max(0, S.renshuClears + delta);
   }
-  save();
   // 卵未選択時はgreen決め打ちでプレビュー
   if (!S.selectedEgg) {
     S.selectedEgg = 'green';
@@ -1199,8 +1201,7 @@ function testInputDigit(d) {
     // ？を答えで置換
     const slot = document.getElementById('tq-slot');
     if (slot) { slot.textContent = KD.fw(p.answer); slot.className = 'ans-revealed'; }
-    const fullFmt = p.reading.includes('が') ? p.reading.replace('が', '\u3000が\u3000') : p.reading;
-    document.getElementById('test-reading').textContent = fullFmt;
+    document.getElementById('test-reading').textContent = fmtReading(p);
     speakThen(p.reading, 0.86, () => {
       setTimeout(() => { S._testInput = ''; testNextProb(); }, 800);
     });

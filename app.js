@@ -4,8 +4,8 @@
    卵: green/pink/blue × intact/crack1/crack2/hatch
    キャラ: green/pink/blue × newborn/baby/child/adult
    ステージ決定: renshuClears（6割クリア回数）
-     0→intact, 1→crack1, 2→crack2, 3→hatch→newborn,
-     4→baby, 5→child, 6→adult
+     0→intact, 1→crack1, 2→crack2, 3→hatch（卵3/3）, 4→newborn,
+     5→baby, 6→child, 7→adult
 ════════════════════════════════ */
 
 // ステージ番号からスプライトを取得
@@ -16,18 +16,18 @@ function getEggSprite(kind, n) {
   return SPRITES.egg[kind].hatch; // 孵化直前（3）
 }
 function getCharSprite(kind, n) {
-  // n = renshuClears - 3 (孵化後のステップ数)
+  // n = renshuClears - 4 (孵化後のステップ数)
   if (n <= 0) return SPRITES.char[kind].newborn;
   if (n === 1) return SPRITES.char[kind].baby;
   if (n === 2) return SPRITES.char[kind].child;
   return SPRITES.char[kind].adult;
 }
-function isHatched(n) { return n >= 3; } // renshuClears >= 3 で孵化済み
+function isHatched(n) { return n >= 4; } // renshuClears >= 4 で孵化済み（3はhatch卵）
 
-// charStage: null=卵, 'newborn','baby','child','adult'
+// charStage: null=卵（hatch含む）, 'newborn','baby','child','adult'
 function getCharStage(n) {
-  if (n < 3) return null;
-  const after = n - 3;
+  if (n < 4) return null;
+  const after = n - 4;
   if (after === 0) return 'newborn';
   if (after === 1) return 'baby';
   if (after === 2) return 'child';
@@ -57,7 +57,7 @@ function updateCreature() {
   const homeEgg = document.getElementById('home-egg-img');
   if (homeEgg) {
     if (charStage) {
-      homeEgg.src = getCharSprite(kind, n - 3);
+      homeEgg.src = getCharSprite(kind, n - 4);
       homeEgg.style.height = charStage === 'newborn' ? '45px'
                            : charStage === 'baby'    ? '50px'
                            : charStage === 'child'   ? '55px' : '60px';
@@ -83,7 +83,7 @@ function updateCreature() {
   // suffix画面
   const dinSufEl = document.getElementById('dino-suffix');
   if (dinSufEl) dinSufEl.src = charStage
-    ? getCharSprite(kind, n - 3)
+    ? getCharSprite(kind, n - 4)
     : getEggSprite(kind, n);
 }
 
@@ -923,7 +923,7 @@ function debugClears(delta) {
   const stageNames = {newborn:'うまれたて',baby:'あかちゃん',child:'こども',adult:'おとな'};
   const previewImg = document.getElementById('debug-preview-img');
   if (previewImg) {
-    previewImg.src = stage ? getCharSprite(kind, n - 3) : getEggSprite(kind, n);
+    previewImg.src = stage ? getCharSprite(kind, n - 4) : getEggSprite(kind, n);
     previewImg.style.display = 'block';
   }
   const label = document.getElementById('debug-clears-label');
@@ -1033,7 +1033,7 @@ function updateClearScreen() {
 
   if (charStage) {
     if (clearEgg) {
-      clearEgg.src = getCharSprite(kind, n - 3);
+      clearEgg.src = getCharSprite(kind, n - 4);
       clearEgg.style.height = '90px';
     }
     if (clearLabel) clearLabel.textContent = 'せいちょう\u3000したね！';

@@ -1,6 +1,5 @@
-
 /* ════════════════════════════════
-   SPRITE SYSTEM
+   SPRITE SYSTEM — スプライト管理
    卵: green/pink/blue × intact/crack1/crack2/hatch
    キャラ: green/pink/blue × newborn/baby/child/adult
    ステージ決定: renshuClears（6割クリア回数）

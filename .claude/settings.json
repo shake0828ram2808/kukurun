@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "FILE=$(jq -r '.tool_input.file_path // empty'); [[ \"$FILE\" == /home/user/kukurun/* ]] && sed -i \"s/ver\\.[0-9]\\{4\\}\\.[0-9]\\{4\\}\\.[0-9]\\{4\\}/ver.$(date +%Y.%m%d.%H%M)/g\" /home/user/kukurun/index.html 2>/dev/null || true"
+          }
+        ]
+      }
+    ]
+  }
+}

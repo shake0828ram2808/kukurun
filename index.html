@@ -384,19 +384,21 @@
     <div class="sec-lbl">どれを　やる？</div>
     <div class="dan-grid" id="dan-grid"></div>
     <div style="height:10px;"></div>
-    <button class="dan-btn d-rnd" style="width:100%;border-radius:var(--r);"
-            onclick="tapSnd();selDan('random')">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
-           stroke="rgba(255,255,255,.8)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="2" y="2" width="20" height="20" rx="4"/>
-        <circle cx="8"  cy="8"  r="1.3" fill="rgba(255,255,255,.8)" stroke="none"/>
-        <circle cx="16" cy="8"  r="1.3" fill="rgba(255,255,255,.8)" stroke="none"/>
-        <circle cx="12" cy="12" r="1.3" fill="rgba(255,255,255,.8)" stroke="none"/>
-        <circle cx="8"  cy="16" r="1.3" fill="rgba(255,255,255,.8)" stroke="none"/>
-        <circle cx="16" cy="16" r="1.3" fill="rgba(255,255,255,.8)" stroke="none"/>
-      </svg>
-      <span class="dn">らんだむ</span>
-    </button>
+    <div style="display:flex;gap:10px;">
+      <button class="dan-btn d-rnd" style="flex:2;"
+              onclick="tapSnd();selDan('random')">
+        <span class="dn">ばらばら</span>
+        <span class="dl">のだん</span>
+      </button>
+      <button class="dan-btn d-growth" style="flex:1;"
+              onclick="tapSnd();showGrowthScreen()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+             stroke="rgba(255,255,255,.85)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22V12"/><path d="M5 3a7 7 0 0 1 14 0c0 5-4 8-7 11C9 11 5 8 5 3z"/>
+        </svg>
+        <span style="font-size:10px;color:rgba(255,255,255,.9);line-height:1.4;text-align:center;">せいちょう<br>をみる</span>
+      </button>
+    </div>
   </div>
 </div>
 
@@ -592,6 +594,19 @@
     <button onclick="debugGoHome()" style="font-family:var(--font);font-size:13px;padding:6px 0;border:2px solid #17a2b8;border-radius:8px;background:#fff;color:#17a2b8;cursor:pointer;flex:1;">🏠 ホーム画面</button>
   </div>
 </div>
+<!-- ══ SCREEN: GROWTH ══ -->
+<div class="screen" id="screen-growth" style="padding:0;overflow:hidden;">
+  <button class="back-btn" style="position:absolute;top:12px;left:12px;z-index:2;"
+          onclick="tapSnd();stopGrowthAnim();showScreen('screen-home')">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    もどる
+  </button>
+  <div id="growth-area" style="position:relative;width:100%;height:100%;background:linear-gradient(180deg,#d6eeff 0%,#b8d8f8 55%,#a8e8b8 100%);overflow:hidden;">
+    <img id="growth-char-img" src="" style="position:absolute;width:auto;image-rendering:pixelated;" alt="">
+  </div>
+  <div id="growth-stage-label" style="position:absolute;bottom:20px;left:0;right:0;text-align:center;font-family:var(--font);font-size:18px;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.3);pointer-events:none;"></div>
+</div>
+
 </div><!-- /#app -->
 
 <script src="questions.js?v=1772807941"></script>

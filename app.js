@@ -551,7 +551,7 @@ function refreshDanBadge(dan) {
 }
 function selDan(dan) {
   S.dan = dan;
-  const lbl = dan === 'random' ? 'らんだむ' : KD.fw(dan) + 'のだん';
+  const lbl = dan === 'random' ? 'ばらばらのだん' : KD.fw(dan) + 'のだん';
   document.getElementById('mode-dan-label').textContent = lbl;
   // テストボタン ロック/解除
   const testRow = document.getElementById('mode-test-row');
@@ -588,7 +588,7 @@ function startOboeru() {
   S._oboeruProblems = problems;  // 問題リストを保存（れんしゅうで再利用）
   S._oboeruMode = S._oboeruMode || 'auto';  // 初期値: じどうで　ぜんぶ
   S._oboeruSelected = [];  // manualモードの選択状態リセット
-  const label = S.dan === 'random' ? 'らんだむ' : KD.danLabel(S.dan);
+  const label = S.dan === 'random' ? 'ばらばらのだん' : KD.danLabel(S.dan);
   document.getElementById('oboeru-dan-label').textContent = label;
   // スイッチ表示を現在のモードに合わせる
   _updateOboeruSwitch();
@@ -973,6 +973,85 @@ function debugGoHome() {
   updateCreature();
 }
 
+/* ════════════════════════════════
+   GROWTH SCREEN — せいちょうをみる
+════════════════════════════════ */
+let _growthRaf = null;
+
+function showGrowthScreen() {
+  const n = S.renshuClears;
+  const kind = S.selectedEgg || 'green';
+  const charStage = getCharStage(n);
+  const stageNames = { newborn:'うまれたて', baby:'あかちゃん', child:'こども', adult:'おとな' };
+
+  const img = document.getElementById('growth-char-img');
+  const lbl = document.getElementById('growth-stage-label');
+
+  if (charStage) {
+    img.src = getCharSprite(kind, n - 4);
+    const sz = { newborn: 60, baby: 70, child: 85, adult: 100 }[charStage] || 70;
+    img.style.height = sz + 'px';
+    lbl.textContent = stageNames[charStage] + 'だよ！';
+  } else if (S.selectedEgg) {
+    img.src = getEggSprite(kind, n);
+    img.style.height = '70px';
+    lbl.textContent = 'たまご　' + n + '／３';
+  } else {
+    img.src = '';
+    lbl.textContent = 'まだ　たまごが　ないよ';
+  }
+
+  showScreen('screen-growth');
+  _startGrowthAnim(charStage);
+}
+
+function _startGrowthAnim(charStage) {
+  stopGrowthAnim();
+  const area = document.getElementById('growth-area');
+  const img  = document.getElementById('growth-char-img');
+  if (!area || !img || !charStage) {
+    // 卵は中央固定
+    if (img) { img.style.left = '50%'; img.style.top = '50%'; img.style.transform = 'translate(-50%,-60%)'; }
+    return;
+  }
+
+  const spd = { newborn: 1.2, baby: 1.8, child: 2.6, adult: 3.5 }[charStage] || 1.5;
+  const canFly = (charStage === 'child' || charStage === 'adult');
+  let x = 100, y = 200, vx = spd * (Math.random() > .5 ? 1 : -1), vy = spd * .5;
+  let facingLeft = false;
+
+  function frame() {
+    const W = area.clientWidth, H = area.clientHeight;
+    const iW = img.offsetWidth || 80, iH = img.offsetHeight || 80;
+    const floor = canFly ? 20 : H * 0.55;
+
+    x += vx; y += vy;
+    // ランダム小揺らぎ
+    if (Math.random() < 0.015) vx += (Math.random() - .5) * spd * .5;
+    if (Math.random() < 0.015) vy += (Math.random() - .5) * spd * .3;
+    // 速度制限
+    const maxV = spd * 2;
+    if (Math.abs(vx) > maxV) vx = Math.sign(vx) * maxV;
+    if (Math.abs(vy) > maxV) vy = Math.sign(vy) * maxV;
+    // 壁バウンド
+    if (x < 0)         { x = 0;       vx =  Math.abs(vx); }
+    if (x > W - iW)    { x = W - iW;  vx = -Math.abs(vx); }
+    if (y < floor)     { y = floor;   vy =  Math.abs(vy); }
+    if (y > H - iH - 10) { y = H - iH - 10; vy = -Math.abs(vy); }
+
+    facingLeft = vx < -0.1 ? true : vx > 0.1 ? false : facingLeft;
+    img.style.left = x.toFixed(1) + 'px';
+    img.style.top  = y.toFixed(1) + 'px';
+    img.style.transform = facingLeft ? 'scaleX(-1)' : 'scaleX(1)';
+    _growthRaf = requestAnimationFrame(frame);
+  }
+  _growthRaf = requestAnimationFrame(frame);
+}
+
+function stopGrowthAnim() {
+  if (_growthRaf) { cancelAnimationFrame(_growthRaf); _growthRaf = null; }
+}
+
 function nextRenshu() {
   S.idx++;
   if (S.idx >= S.probs.length) doneDan();
@@ -1001,7 +1080,7 @@ function doneDan() {
   updateCreature();
   // クリア画面の卵・恐竜を更新
   updateClearScreen();
-  const clearTitle = S.dan === 'random' ? 'らんだむが　できたね！' : KD.fw(S.dan) + 'のだんが　できたね！';
+  const clearTitle = S.dan === 'random' ? 'ばらばらのだんが　できたね！' : KD.fw(S.dan) + 'のだんが　できたね！';
   document.getElementById('clear-title').textContent = clearTitle;
   
   // 大人になった直後なら卵選択画面へ遷移
@@ -1119,7 +1198,7 @@ function startTest() {
   S._testCorrect = 0;
   S._testShown   = false;
   S._testInput   = '';
-  const testLabel = S.dan === 'random' ? 'らんだむ　テスト' : KD.danLabel(S.dan) + '　テスト';
+  const testLabel = S.dan === 'random' ? 'ばらばらのだん　テスト' : KD.danLabel(S.dan) + '　テスト';
   document.getElementById('test-dan-label').textContent = testLabel;
   buildTestGrid();
   showScreen('screen-test');
@@ -1258,7 +1337,7 @@ function doneTest() {
   document.getElementById('test-result-label').textContent =
     cleared ? (medal ? MEDAL_NAMES[medal] + 'メダル　ゲット！' : 'クリア！') : 'もう　いちど！';
   const titleText = dan === 'random' 
-    ? (cleared ? 'らんだむ　クリア！' : 'らんだむ　もう　すこし！')
+    ? (cleared ? 'ばらばらのだん　クリア！' : 'ばらばらのだん　もう　すこし！')
     : (cleared ? KD.fw(dan) + 'のだん　クリア！' : KD.fw(dan) + 'のだん　もう　すこし！');
   document.getElementById('test-result-title').textContent = titleText;
   document.getElementById('test-result-score').textContent =

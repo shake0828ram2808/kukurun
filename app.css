@@ -345,8 +345,10 @@ html, body {
 .d9 { background: #191C98; }
 .d-rnd {
   background: var(--text); color: #fff;
-  grid-column: span 3; flex-direction: row;
-  gap: 10px; padding: 13px 18px;
+}
+.d-growth {
+  background: #e8660a; color: #fff;
+  box-shadow: 0 5px 0 #a84600, var(--sh);
 }
 
 /* ══════════════════

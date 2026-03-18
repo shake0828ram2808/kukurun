@@ -281,8 +281,11 @@ const Spk = (() => {
     }
   };
 })();
-function speak(t, r) { Spk.say(t, r); }
-function speakThen(t, r, cb) { Spk.say(t, r, cb); }
+function speak(t, r) { if (S.speechEnabled !== false) Spk.say(t, r); }
+function speakThen(t, r, cb) {
+  if (S.speechEnabled !== false) { Spk.say(t, r, cb); }
+  else if (cb) setTimeout(cb, 50);
+}
 
 /* ════════════════════════════════
    STATE
@@ -299,9 +302,52 @@ const S = {
   medals: {},         // メダル: null|'bronze'|'silver'|'gold'
   _growthBase: 0,       // 現在のキャラの成長ベース（卒業ごとに加算）
   _pendingGraduation: false,  // 卒業遷移中フラグ
-  isFirstAccess: true  // 初回アクセスか
+  isFirstAccess: true,  // 初回アクセスか
+  speechEnabled: true,  // 音声読み上げon/off
 };
 const fullName = () => S.name + S.suffix;
+
+/* ════════════════════════════════
+   PERSISTENCE — LocalStorage
+════════════════════════════════ */
+const SAVE_KEY = 'kukurun_state';
+function saveState() {
+  try {
+    localStorage.setItem(SAVE_KEY, JSON.stringify({
+      name: S.name, suffix: S.suffix,
+      speechEnabled: S.speechEnabled,
+      medals: S.medals,
+      adultCharacters: S.adultCharacters,
+      selectedEgg: S.selectedEgg,
+      _growthBase: S._growthBase,
+      renshuClears: S.renshuClears,
+      done: S.done,
+      hanamaruCount: S.hanamaruCount,
+      isFirstAccess: S.isFirstAccess,
+    }));
+  } catch(e) {}
+}
+function loadState() {
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (!raw) return;
+    const d = JSON.parse(raw);
+    ['name','suffix','speechEnabled','medals','adultCharacters',
+     'selectedEgg','_growthBase','renshuClears','done','hanamaruCount','isFirstAccess']
+      .forEach(k => { if (d[k] !== undefined) S[k] = d[k]; });
+  } catch(e) {}
+}
+function restoreSession() {
+  if (S.isFirstAccess || !S.name) return;
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-home').classList.add('active');
+  const greetingText = fullName() + '、おかえり！';
+  const balloonText = document.getElementById('balloon-text');
+  if (balloonText) balloonText.textContent = greetingText;
+  buildDanGrid();
+  updateCreature();
+  eggWobble.start();
+}
 
 /* ════════════════════════════════
    SCREEN NAV
@@ -474,8 +520,8 @@ function goSuffix() {
 // sufixから卵選択へ
 function goEggSelect() {
   Snd.tap(); S.suffix = S.selSuffix;
+  saveState();
   buildEggSelectGrid();
-  // dino-egg-sel は現状なし（まだ卵未選択）
   showScreen('screen-egg-select');
   speak('すきなたまごをえらんでね！');
 }
@@ -487,6 +533,8 @@ function goHome() {
   // くくるんの吹き出しにも反映
   const balloonText = document.getElementById('balloon-text');
   if (balloonText) balloonText.textContent = greetingText;
+  S.isFirstAccess = false;
+  saveState();
   updateCreature();
   buildDanGrid(); showScreen('screen-home');
   speak(nm + '、くくるんへようこそ！');
@@ -546,10 +594,12 @@ function checkGraduation() {
     S.adultCharacters.push(S.selectedEgg);
   }
   S._growthBase = growthLevel(); // 次のキャラはここから
+  saveState();
   updateCreature();
   setTimeout(() => {
     S._pendingGraduation = false;
     S.selectedEgg = null;
+    saveState();
     buildEggSelectGrid();
     showScreen('screen-egg-select');
     speak('また　あらたまごを　えらんでね！');
@@ -649,6 +699,7 @@ function awardOboeruMedal() {
     updateGrowthFromMedals();
     refreshDanBadge(S.dan);
     refreshModeMedals();
+    saveState();
   }
 }
 function startOboeru() {
@@ -1173,6 +1224,7 @@ function doneDan() {
     updateGrowthFromMedals();
     refreshDanBadge(S.dan);
     refreshModeMedals();
+    saveState();
   }
 
   updateCreature();
@@ -1404,6 +1456,7 @@ function doneTest() {
     updateGrowthFromMedals();
     refreshDanBadge(dan);
     refreshModeMedals();
+    saveState();
     if (S._pendingGraduation) return; // 卒業遷移中は結果画面をスキップ
   }
 
@@ -1442,7 +1495,7 @@ function buildEggSelectGrid() {
   const g = document.getElementById('egg-select-grid'); g.innerHTML = '';
   EGG_KINDS.forEach(kind => {
     const btn = document.createElement('button');
-    btn.className = 'egg-sel-btn';
+    btn.className = 'egg-sel-btn' + (S.selectedEgg === kind ? ' selected' : '');
     btn.dataset.egg = kind;
     const img = document.createElement('img');
     img.src = SPRITES.egg[kind].intact;
@@ -1450,7 +1503,6 @@ function buildEggSelectGrid() {
     btn.appendChild(img);
     btn.onclick = () => {
       Snd.tap();
-      // 新しい卵を選択（成長はグローバルメダル数で管理）
       document.querySelectorAll('.egg-sel-btn').forEach(b => b.classList.remove('selected'));
       btn.classList.add('selected');
       S.selectedEgg = kind;
@@ -1460,6 +1512,9 @@ function buildEggSelectGrid() {
     };
     g.appendChild(btn);
   });
+  // 既に選択済みの卵があればOKボタンを有効化
+  const okBtn = document.getElementById('egg-ok-btn');
+  if (okBtn && S.selectedEgg) { okBtn.disabled = false; okBtn.style.opacity = '1'; }
 }
 
 
@@ -1490,6 +1545,77 @@ function handleZenbukesus() {
     debugTapTimer = setTimeout(() => {
       debugTapCount = 0;
     }, 2000);
+  }
+}
+
+/* ════════════════════════════════
+   SETTINGS
+════════════════════════════════ */
+function openSettings() {
+  const nameLabel = document.getElementById('settings-name-label');
+  if (nameLabel) nameLabel.textContent = fullName() || '（なし）';
+  const toggle = document.getElementById('speech-toggle');
+  if (toggle) {
+    toggle.classList.toggle('on', S.speechEnabled !== false);
+  }
+  showScreen('screen-settings');
+}
+
+function toggleSpeech() {
+  S.speechEnabled = !S.speechEnabled;
+  const toggle = document.getElementById('speech-toggle');
+  if (toggle) toggle.classList.toggle('on', S.speechEnabled);
+  saveState();
+}
+
+function goChangeName() {
+  // 名前入力画面へ（現在の名前をクリア）
+  const nd = document.getElementById('name-display');
+  if (nd) nd.innerHTML = '<span class="name-placeholder">ここに　でるよ</span>';
+  const ok = document.getElementById('name-ok-btn');
+  if (ok) { ok.disabled = true; ok.style.opacity = '.4'; }
+  showScreen('screen-name');
+  speak('あたらしい　なまえを　おしえてね');
+}
+
+let _confirmType = null;
+function openConfirm(type) {
+  _confirmType = type;
+  const title = document.getElementById('confirm-title');
+  const msg = document.getElementById('confirm-msg');
+  if (type === 'medal') {
+    if (title) title.textContent = 'めだるを　りせっと';
+    if (msg) msg.textContent = 'メダルと　せいちょうきろくが　ぜんぶ　きえるよ。\nほんとうに　りせっとする？';
+  } else {
+    if (title) title.textContent = 'あぷりを　りせっと';
+    if (msg) msg.textContent = 'なまえや　メダルが　ぜんぶ　きえて\nはじめから　やりなおしになるよ。\nほんとうに　りせっとする？';
+  }
+  const overlay = document.getElementById('confirm-overlay');
+  if (overlay) overlay.style.display = 'flex';
+}
+function closeConfirm() {
+  const overlay = document.getElementById('confirm-overlay');
+  if (overlay) overlay.style.display = 'none';
+  _confirmType = null;
+}
+function executeConfirm() {
+  if (_confirmType === 'medal') {
+    S.medals = {};
+    S._growthBase = 0;
+    S.adultCharacters = [];
+    S.selectedEgg = null;
+    S.renshuClears = 0;
+    S.done = {};
+    S.hanamaruCount = 0;
+    saveState();
+    closeConfirm();
+    buildDanGrid();
+    updateCreature();
+    showScreen('screen-home');
+    speak('めだるを　りせっとしたよ');
+  } else if (_confirmType === 'app') {
+    try { localStorage.removeItem(SAVE_KEY); } catch(e) {}
+    location.reload();
   }
 }
 
@@ -1531,12 +1657,15 @@ Promise.all([
   buildKanaGrid();
 });
 
+loadState();
 initDinos();
 
 initKukurun();
 
-// イントロアニメーション再生
-playIntroAnimation();
+restoreSession();
+
+// イントロアニメーション再生（初回アクセス時のみ）
+if (S.isFirstAccess) playIntroAnimation();
 
 // iOS: 初回タッチでAudioContext起動
 document.addEventListener('touchstart', () => { try { Snd.tap(); } catch(e) {} }, { once: true, passive: true });

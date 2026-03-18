@@ -9,7 +9,7 @@
 </head>
 <body>
 
-<div id="version-badge">ver.2026.0318.1307</div>
+<div id="version-badge">ver.2026.0318.1322</div>
 
 <!-- ══ 花丸オーバーレイ ══ -->
 <div id="hanamaru-ov">
@@ -602,6 +602,45 @@
     <button onclick="debugGoHome()" style="font-family:var(--font);font-size:13px;padding:6px 0;border:2px solid #17a2b8;border-radius:8px;background:#fff;color:#17a2b8;cursor:pointer;flex:1;">🏠 ホーム画面</button>
   </div>
 </div>
+<!-- ══ SCREEN: SETTINGS ══ -->
+<div class="screen" id="screen-settings">
+  <button class="back-btn" onclick="tapSnd();showScreen('screen-home')">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    もどる
+  </button>
+  <div class="card">
+    <div class="sec-lbl" style="margin-bottom:8px;">せってい</div>
+    <div class="settings-row">
+      <div>
+        <div class="settings-row-label">ことばを　よみあげる</div>
+        <div class="settings-row-sub">オンにすると　こえで　よむよ</div>
+      </div>
+      <button class="toggle-switch on" id="speech-toggle" onclick="toggleSpeech()"></button>
+    </div>
+    <div class="settings-row">
+      <div>
+        <div class="settings-row-label">なまえ・よびかた</div>
+        <div class="settings-row-sub" id="settings-name-label"></div>
+      </div>
+      <button class="btn btn-sm btn-outline" style="font-size:13px;padding:6px 14px;" onclick="tapSnd();goChangeName()">かえる</button>
+    </div>
+    <div class="settings-row">
+      <div>
+        <div class="settings-row-label">めだるを　りせっと</div>
+        <div class="settings-row-sub">メダルとせいちょうが　きえるよ</div>
+      </div>
+      <button class="btn btn-sm" style="font-size:13px;padding:6px 14px;background:#E8E8FF;color:var(--theme);border:none;" onclick="tapSnd();openConfirm('medal')">りせっと</button>
+    </div>
+    <div class="settings-row">
+      <div>
+        <div class="settings-row-label">あぷりを　りせっと</div>
+        <div class="settings-row-sub">はじめから　やりなおすよ</div>
+      </div>
+      <button class="btn btn-sm" style="font-size:13px;padding:6px 14px;background:#FFE8E8;color:#E03030;border:none;" onclick="tapSnd();openConfirm('app')">りせっと</button>
+    </div>
+  </div>
+</div>
+
 <!-- ══ SCREEN: GROWTH ══ -->
 <div class="screen" id="screen-growth" style="padding:0;overflow:hidden;">
   <button class="back-btn" style="position:absolute;top:12px;left:12px;z-index:2;"
@@ -655,6 +694,36 @@
   <div class="hoka-modal-title">ほかの　もじ</div>
   <div class="hoka-modal-body" id="hoka-modal-body"></div>
   <button class="hoka-close-btn" onclick="closeHokaModal()">とじる</button>
+</div>
+
+<!-- ══ MODAL: CONFIRM ══ -->
+<div id="confirm-overlay" style="display:none;">
+  <div id="confirm-modal">
+    <div class="confirm-title" id="confirm-title"></div>
+    <div class="confirm-msg" id="confirm-msg"></div>
+    <div class="confirm-btns">
+      <button class="btn" onclick="closeConfirm()">やめる</button>
+      <button class="btn btn-primary" id="confirm-ok-btn" onclick="executeConfirm()">りせっとする</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ BOTTOM BAR ══ -->
+<div id="bottom-bar">
+  <button class="bottom-btn" onclick="tapSnd();openSettings()">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="3"/>
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+    </svg>
+    せってい
+  </button>
+  <button class="bottom-btn" onclick="tapSnd();showGrowthScreen()">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 22V12"/>
+      <path d="M17 7s0 5-5 5-5-5-5-5 2.5-5 5-5 5 2.5 5 5z"/>
+    </svg>
+    せいちょう
+  </button>
 </div>
 
 </body>

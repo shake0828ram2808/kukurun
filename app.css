@@ -782,3 +782,112 @@ html, body {
   width: 90px;
   height: 14px;
 }
+
+/* ══════════════════
+   BOTTOM BAR
+══════════════════ */
+#bottom-bar {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: 54px;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  z-index: 100;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+.bottom-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  font-family: var(--font);
+  font-size: 11px;
+  color: var(--text2);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px 20px;
+  border-radius: var(--r-sm);
+  transition: background .15s, color .15s;
+  line-height: 1;
+}
+.bottom-btn:active { background: var(--surface2); }
+.bottom-btn svg { stroke: var(--text2); }
+
+/* ══════════════════
+   SETTINGS SCREEN
+══════════════════ */
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+  gap: 12px;
+}
+.settings-row:last-child { border-bottom: none; }
+.settings-row-label { font-size: 15px; }
+.settings-row-sub { font-size: 12px; color: var(--text2); margin-top: 3px; }
+
+/* トグルスイッチ */
+.toggle-switch {
+  position: relative;
+  width: 50px; height: 28px;
+  background: var(--border);
+  border-radius: var(--r-pill);
+  cursor: pointer;
+  transition: background .2s;
+  border: none;
+  flex-shrink: 0;
+}
+.toggle-switch.on { background: var(--theme); }
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: 3px; left: 3px;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: #fff;
+  transition: left .2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,.22);
+}
+.toggle-switch.on::after { left: 25px; }
+
+/* ══════════════════
+   CONFIRM MODAL
+══════════════════ */
+#confirm-overlay {
+  position: fixed; inset: 0;
+  background: rgba(27,38,64,.5);
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#confirm-modal {
+  background: var(--surface);
+  border-radius: var(--r);
+  padding: 24px 20px 20px;
+  width: 88%; max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: center;
+}
+.confirm-title { font-size: 18px; font-weight: bold; }
+.confirm-msg {
+  font-size: 14px;
+  color: var(--text2);
+  line-height: 1.7;
+  white-space: pre-line;
+}
+.confirm-btns {
+  display: flex;
+  gap: 10px;
+  margin-top: 6px;
+}
+.confirm-btns button { flex: 1; }

@@ -42,32 +42,6 @@ function updateCreature() {
   const n = getGrowthClears();
   const kind = S.selectedEgg || (S.adultCharacters.length > 0 ? S.adultCharacters[S.adultCharacters.length - 1] : 'green');
   const charStage = getCharStage(n);
-  const homeWrap = document.getElementById('home-creature-wrap');
-  if (homeWrap) { homeWrap.style.display = 'flex'; homeWrap.style.visibility = 'visible'; }
-
-  const homeEgg = document.getElementById('home-egg-img');
-  if (homeEgg) {
-    if (charStage) {
-      homeEgg.src = getCharSprite(kind, charStageIdx(n));
-      homeEgg.style.height = charStage === 'newborn' ? '45px'
-                           : charStage === 'baby'    ? '50px'
-                           : charStage === 'child'   ? '55px' : '60px';
-    } else {
-      homeEgg.src = getEggSprite(kind, n);
-      homeEgg.style.height = '50px';
-    }
-  }
-  // ヒビSVGオーバーレイは使わない（画像差し替えで表現）
-  const homeCrackSvg = document.getElementById('home-crack-svg');
-  if (homeCrackSvg) homeCrackSvg.style.display = 'none';
-
-  const stageNames = {newborn:'うまれたて',baby:'あかちゃん',child:'こども',adult:'おとな'};
-  const homeLabel = document.getElementById('home-stage-label');
-  if (homeLabel) {
-    if (charStage) homeLabel.textContent = stageNames[charStage] + 'になったよ！';
-    else homeLabel.textContent = 'はなまる ' + KD.fw(S.hanamaruCount) + ' こ';
-  }
-
   // アニメ制御
   charAnim.updateStage(charStage, n);
 
@@ -1040,8 +1014,6 @@ function debugClears(delta) {
   }
   if (!S.selectedEgg) {
     S.selectedEgg = 'green';
-    const homeWrap = document.getElementById('home-creature-wrap');
-    if (homeWrap) homeWrap.style.display = 'flex';
   }
   // デバッグ時は renshuClears を直接使って表示（growthLevel は使わない）
   const n = S.renshuClears;

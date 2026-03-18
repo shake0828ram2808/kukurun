@@ -60,7 +60,7 @@ html, body {
   position: relative; z-index: 1;
   min-height: 100dvh;
   display: flex; flex-direction: column; align-items: center;
-  padding: 48px 16px 72px;
+  padding: 48px 16px calc(72px + env(safe-area-inset-bottom, 0));
 }
 
 /* ── screens ── */
@@ -400,6 +400,7 @@ html, body {
   align-self: flex-start;
   background: var(--surface); border: 2px solid var(--border);
   border-radius: var(--r-pill); padding: 7px 15px;
+  height: 36px; box-sizing: border-box;
   font-family: var(--font); font-size: 13px; color: var(--text2);
   cursor: pointer; box-shadow: 0 4px 0 var(--border), var(--sh);
   transition: border-color .12s, color .12s, transform .1s, box-shadow .08s;

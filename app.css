@@ -615,6 +615,7 @@ body {
   padding: 12px 6px; cursor: pointer;
   box-shadow: 0 4px 0 #BDD4EA, 0 2px 8px rgba(27,38,64,.10);
   transition: border-color .1s, background .1s, transform .08s, box-shadow .08s;
+  touch-action: manipulation;
 }
 .ans-btn:hover  { border-color: var(--theme); color: var(--theme); }
 .ans-btn:active {
@@ -818,9 +819,12 @@ body {
   border-radius: var(--r-sm);
   transition: background .15s, color .15s;
   line-height: 1;
+  touch-action: manipulation;
 }
 .bottom-btn:active { background: var(--surface2); }
 .bottom-btn svg { stroke: var(--text2); }
+.bottom-btn--active { background: #EEF0FF; color: var(--theme); }
+.bottom-btn--active svg { stroke: var(--theme); }
 
 /* ══════════════════
    SETTINGS SCREEN

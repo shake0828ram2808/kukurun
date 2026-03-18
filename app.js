@@ -337,10 +337,18 @@ function restoreSession() {
 // 直前の画面IDを記録（せってい・せいちょうの「もどる」に使用）
 let _prevScreenId = 'screen-home';
 
+function updateBottomBar(which) {
+  ['home', 'settings', 'growth'].forEach(k => {
+    document.getElementById('bottom-btn-' + k)
+      ?.classList.toggle('bottom-btn--active', k === which);
+  });
+}
+
 function showScreen(id) {
   if (id === 'screen-home') {
     const label = document.getElementById('debug-clears-label');
     if (label) label.textContent = S.renshuClears + 'かい';
+    updateBottomBar('home');
   }
   if (id === 'screen-oboeru') {
     _updateOboeruReadSelectedBtn();
@@ -1090,6 +1098,7 @@ function debugGoHome() {
 let _growthRaf = null;
 
 function showGrowthScreen() {
+  updateBottomBar('growth');
   const n = getGrowthClears();
   const kind = S.selectedEgg || 'green';
   const charStage = getCharStage(n);
@@ -1575,6 +1584,7 @@ function openSettings() {
   if (toggle) {
     toggle.classList.toggle('on', S.speechEnabled !== false);
   }
+  updateBottomBar('settings');
   showScreen('screen-settings');
 }
 

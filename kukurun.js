@@ -222,7 +222,7 @@ function _nextBalloonMsg(screen) {
 function _buildMsgs(screen) {
   if (screen === 'home') {
     const name = (typeof fullName === 'function') ? fullName() : '';
-    const greeting = name ? 'どれを　やる？' + name + '！' : 'どれを　やる？';
+    const greeting = name ? 'どれを　やる？　' + name + '♪' : 'どれを　やる？';
     return [greeting, ...SCREEN_MESSAGES.home];
   }
   return SCREEN_MESSAGES[screen] || [];

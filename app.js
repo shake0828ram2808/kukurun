@@ -210,23 +210,24 @@ const Snd = (() => {
   }
   function run(fn) {
     const c = ac();
-    (c.state === 'suspended' ? c.resume() : Promise.resolve()).then(fn).catch(() => {});
+    if (c.state === 'suspended') c.resume(); // 同期的にトリガー（iOS: user-gesture内を維持）
+    fn(c);
   }
-  function beep(freq, t, dur, vol = 0.3, type = 'sine', c = null) {
-    const ctx = c || ac();
+  function beep(ctx, freq, dur, vol, type = 'sine') {
+    const t = ctx.currentTime;
     const o = ctx.createOscillator(), g = ctx.createGain();
     o.connect(g); g.connect(ctx.destination);
     o.type = type; o.frequency.setValueAtTime(freq, t);
     g.gain.setValueAtTime(0, t);
-    g.gain.linearRampToValueAtTime(vol, t + 0.01);
+    g.gain.linearRampToValueAtTime(vol, t + 0.008);
     g.gain.exponentialRampToValueAtTime(0.001, t + dur);
     o.start(t); o.stop(t + dur + 0.02);
   }
   return {
-    tap()      { run(() => beep(600, ac().currentTime, 0.06, 0.1)); },
-    click()    { run(() => beep(880, ac().currentTime, 0.055, 0.18, 'sine')); },
-    pingpong() { run(() => { const c = ac(), now = c.currentTime; beep(880, now, .24, .34, 'sine', c); beep(1047, now + .3, .24, .34, 'sine', c); }); },
-    miss()     { run(() => { const c = ac(), now = c.currentTime; beep(440, now, .17, .12, 'sine', c); beep(370, now + .1, .17, .08, 'sine', c); }); }
+    tap()      { run(c => beep(c, 660, 0.07, 0.22)); },
+    click()    { run(c => beep(c, 880, 0.055, 0.30)); },
+    pingpong() { run(c => { beep(c, 880, .24, .34); const t=c.currentTime; setTimeout(()=>beep(c,1047,.24,.34),300); }); },
+    miss()     { run(c => { beep(c, 440, .17, .15); setTimeout(()=>beep(c,370,.17,.10),100); }); }
   };
 })();
 function tapSnd() { Snd.click(); }

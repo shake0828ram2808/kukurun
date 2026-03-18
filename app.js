@@ -204,30 +204,36 @@ function initDinos() {
 ════════════════════════════════ */
 const Snd = (() => {
   let _ctx = null;
-  function ac() {
+  function getCtx() {
     if (!_ctx) _ctx = new (window.AudioContext || window.webkitAudioContext)();
     return _ctx;
   }
-  function run(fn) {
-    const c = ac();
-    if (c.state === 'suspended') c.resume(); // 同期的にトリガー（iOS: user-gesture内を維持）
-    fn(c);
+  // iOS Safari: サイレントバッファ再生でAudioContextをアンロック
+  function unlock() {
+    const ctx = getCtx();
+    const buf = ctx.createBuffer(1, 1, 22050);
+    const src = ctx.createBufferSource();
+    src.buffer = buf; src.connect(ctx.destination); src.start(0);
+    ctx.resume();
   }
-  function beep(ctx, freq, dur, vol, type = 'sine') {
-    const t = ctx.currentTime;
-    const o = ctx.createOscillator(), g = ctx.createGain();
-    o.connect(g); g.connect(ctx.destination);
-    o.type = type; o.frequency.setValueAtTime(freq, t);
-    g.gain.setValueAtTime(0, t);
-    g.gain.linearRampToValueAtTime(vol, t + 0.008);
-    g.gain.exponentialRampToValueAtTime(0.001, t + dur);
-    o.start(t); o.stop(t + dur + 0.02);
+  function beep(freq, dur, vol, type = 'sine') {
+    try {
+      const ctx = getCtx();
+      const t = ctx.currentTime + 0.04; // 40ms先にスケジュール（resume遅延対策）
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.type = type; o.frequency.setValueAtTime(freq, t);
+      g.gain.setValueAtTime(vol, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+      o.start(t); o.stop(t + dur + 0.01);
+    } catch(e) {}
   }
   return {
-    tap()      { run(c => beep(c, 660, 0.07, 0.22)); },
-    click()    { run(c => beep(c, 880, 0.055, 0.30)); },
-    pingpong() { run(c => { beep(c, 880, .24, .34); const t=c.currentTime; setTimeout(()=>beep(c,1047,.24,.34),300); }); },
-    miss()     { run(c => { beep(c, 440, .17, .15); setTimeout(()=>beep(c,370,.17,.10),100); }); }
+    unlock,
+    tap()      { beep(660, 0.07, 0.22); },
+    click()    { beep(880, 0.06, 0.30); },
+    pingpong() { beep(880, .24, .34); setTimeout(() => beep(1047, .24, .34), 300); },
+    miss()     { beep(440, .17, .15); setTimeout(() => beep(370, .17, .10), 100); }
   };
 })();
 function tapSnd() { Snd.click(); }
@@ -1654,5 +1660,5 @@ restoreSession();
 // イントロアニメーション（毎回表示）
 playIntroAnimation();
 
-// iOS: 初回タッチでAudioContext起動
-document.addEventListener('touchstart', () => { try { Snd.tap(); } catch(e) {} }, { once: true, passive: true });
+// iOS: 初回タッチでAudioContextをアンロック（サイレント再生）
+document.addEventListener('touchstart', () => Snd.unlock(), { once: true, passive: true });

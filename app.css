@@ -374,6 +374,7 @@ body {
   cursor: pointer; position: relative; overflow: hidden;
   transition: transform .08s, box-shadow .08s, background .1s, border-color .1s;
   user-select: none;
+  touch-action: manipulation;
 }
 .btn:active { transform: translateY(3px) !important; box-shadow: none !important; }
 
@@ -698,6 +699,7 @@ body {
   cursor: pointer;
   transition: border-color .14s, transform .12s cubic-bezier(.34,1.56,.64,1);
   position: relative;
+  touch-action: manipulation;
 }
 .egg-sel-btn img { height: 50px; width: auto; display: block; }
 .egg-sel-btn:hover  { border-color: var(--theme); }

@@ -349,6 +349,8 @@ function updateBottomBar(which) {
 }
 
 function showScreen(id) {
+  // 画面が切り替わるたびに読み上げを止める
+  if (window.speechSynthesis) speechSynthesis.cancel();
   if (id === 'screen-home') {
     const label = document.getElementById('debug-clears-label');
     if (label) label.textContent = S.renshuClears + 'かい';
@@ -1524,6 +1526,9 @@ const MEDAL_NAMES = { bronze:'ブロンズ', silver:'ぎん', gold:'きん' };
 const EGG_KINDS = ['green','pink','blue'];
 function buildEggSelectGrid() {
   const g = document.getElementById('egg-select-grid'); g.innerHTML = '';
+  // OKボタンを毎回 disabled 状態にリセット（前回の enabled 状態が残らないよう）
+  const okBtn = document.getElementById('egg-ok-btn');
+  if (okBtn) { okBtn.disabled = true; okBtn.style.opacity = '.4'; }
   EGG_KINDS.forEach(kind => {
     const btn = document.createElement('button');
     btn.className = 'egg-sel-btn' + (S.selectedEgg === kind ? ' selected' : '');

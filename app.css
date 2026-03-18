@@ -831,6 +831,7 @@ html, body {
 }
 .settings-row:last-child { border-bottom: none; }
 .settings-row-text { flex: 1; min-width: 0; }
+.settings-row .btn { width: auto; align-self: flex-start; padding: 8px 16px; font-size: 13px; }
 .settings-row-label { font-size: 15px; }
 .settings-row-sub { font-size: 12px; color: var(--text2); margin-top: 3px; }
 

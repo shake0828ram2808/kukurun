@@ -339,9 +339,7 @@ function loadState() {
 }
 function restoreSession() {
   if (S.isFirstAccess || !S.name) return;
-  // イントロモーダルを即座に非表示（名前登録済みユーザーには不要）
-  const introModal = document.getElementById('intro-modal');
-  if (introModal) introModal.style.display = 'none';
+  // イントロ表示中もバックグラウンドでホーム状態を準備
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-home').classList.add('active');
   const greetingText = fullName() + '、おかえり！';
@@ -1667,8 +1665,8 @@ initKukurun();
 
 restoreSession();
 
-// イントロアニメーション再生（初回アクセス時のみ）
-if (S.isFirstAccess) playIntroAnimation();
+// イントロアニメーション（毎回表示）
+playIntroAnimation();
 
 // iOS: 初回タッチでAudioContext起動
 document.addEventListener('touchstart', () => { try { Snd.tap(); } catch(e) {} }, { once: true, passive: true });

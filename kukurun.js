@@ -386,10 +386,17 @@ async function kukurunTalkSmall() {
 /* ── イントロモーダル ── */
 function closeIntroModal(e) {
   const modal = document.getElementById('intro-modal');
-  if (modal) {
-    modal.style.animation = 'fadeOut 0.3s ease forwards';
-    setTimeout(() => { modal.style.display = 'none'; showScreen('screen-name'); }, 300);
-  }
+  if (!modal || modal.style.display === 'none') return;
+  modal.style.animation = 'fadeOut 0.3s ease forwards';
+  setTimeout(() => {
+    modal.style.display = 'none';
+    // 名前登録済みならホーム、未登録なら名前入力へ
+    if (typeof S !== 'undefined' && S.name) {
+      showScreen('screen-home');
+    } else {
+      showScreen('screen-name');
+    }
+  }, 300);
 }
 
 function setIntroKukurunMouth(state) {

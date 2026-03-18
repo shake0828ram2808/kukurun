@@ -1549,7 +1549,6 @@ function buildEggSelectGrid() {
     g.appendChild(btn);
   });
   // 既に選択済みの卵があればOKボタンを有効化
-  const okBtn = document.getElementById('egg-ok-btn');
   if (okBtn && S.selectedEgg) { okBtn.disabled = false; okBtn.style.opacity = '1'; }
 }
 

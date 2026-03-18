@@ -9,7 +9,7 @@
 </head>
 <body>
 
-<div id="version-badge">ver.2026.0318.1330</div>
+<div id="version-badge">ver.2026.0318.1335</div>
 
 <!-- ══ 花丸オーバーレイ ══ -->
 <div id="hanamaru-ov">
@@ -598,39 +598,39 @@
 </div>
 <!-- ══ SCREEN: SETTINGS ══ -->
 <div class="screen" id="screen-settings">
-  <button class="back-btn" onclick="tapSnd();showScreen('screen-home')">
+  <button class="back-btn" onclick="tapSnd();goBack()">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
     もどる
   </button>
   <div class="card">
     <div class="sec-lbl" style="margin-bottom:8px;">せってい</div>
     <div class="settings-row">
-      <div>
+      <div class="settings-row-text">
         <div class="settings-row-label">ことばを　よみあげる</div>
         <div class="settings-row-sub">オンにすると　こえで　よむよ</div>
       </div>
       <button class="toggle-switch on" id="speech-toggle" onclick="toggleSpeech()"></button>
     </div>
     <div class="settings-row">
-      <div>
-        <div class="settings-row-label">なまえ・よびかた</div>
+      <div class="settings-row-text">
+        <div class="settings-row-label">なまえ・よびかたを　かえる</div>
         <div class="settings-row-sub" id="settings-name-label"></div>
       </div>
-      <button class="btn btn-sm btn-outline" style="font-size:13px;padding:6px 14px;" onclick="tapSnd();goChangeName()">かえる</button>
+      <button class="btn btn-sm btn-outline" style="white-space:nowrap;" onclick="tapSnd();goChangeName()">かえる</button>
     </div>
     <div class="settings-row">
-      <div>
-        <div class="settings-row-label">めだるを　りせっと</div>
-        <div class="settings-row-sub">メダルとせいちょうが　きえるよ</div>
+      <div class="settings-row-text">
+        <div class="settings-row-label">メダルを　りせっとする</div>
+        <div class="settings-row-sub">メダルと　せいちょうが　きえるよ</div>
       </div>
-      <button class="btn btn-sm" style="font-size:13px;padding:6px 14px;background:#E8E8FF;color:var(--theme);border:none;" onclick="tapSnd();openConfirm('medal')">りせっと</button>
+      <button class="btn btn-sm" style="background:#E8E8FF;color:var(--theme);border:none;white-space:nowrap;" onclick="tapSnd();openConfirm('medal')">りせっと</button>
     </div>
     <div class="settings-row">
-      <div>
-        <div class="settings-row-label">あぷりを　りせっと</div>
+      <div class="settings-row-text">
+        <div class="settings-row-label">あぷりを　りせっとする</div>
         <div class="settings-row-sub">はじめから　やりなおすよ</div>
       </div>
-      <button class="btn btn-sm" style="font-size:13px;padding:6px 14px;background:#FFE8E8;color:#E03030;border:none;" onclick="tapSnd();openConfirm('app')">りせっと</button>
+      <button class="btn btn-sm" style="background:#FFE8E8;color:#E03030;border:none;white-space:nowrap;" onclick="tapSnd();openConfirm('app')">りせっと</button>
     </div>
   </div>
 </div>
@@ -638,7 +638,7 @@
 <!-- ══ SCREEN: GROWTH ══ -->
 <div class="screen" id="screen-growth" style="padding:0;overflow:hidden;">
   <button class="back-btn" style="position:absolute;top:12px;left:12px;z-index:2;"
-          onclick="tapSnd();stopGrowthAnim();showScreen('screen-home')">
+          onclick="tapSnd();stopGrowthAnim();goBack()">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
     もどる
   </button>

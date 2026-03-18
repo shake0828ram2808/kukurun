@@ -353,6 +353,9 @@ function restoreSession() {
 /* ════════════════════════════════
    SCREEN NAV
 ════════════════════════════════ */
+// 直前の画面IDを記録（せってい・せいちょうの「もどる」に使用）
+let _prevScreenId = 'screen-home';
+
 function showScreen(id) {
   if (id === 'screen-home') {
     const label = document.getElementById('debug-clears-label');
@@ -361,9 +364,19 @@ function showScreen(id) {
   if (id === 'screen-oboeru') {
     _updateOboeruReadSelectedBtn();
   }
+  // 遷移前の画面を記録（settings/growthへ行くときのみ意味を持つ）
+  const cur = document.querySelector('.screen.active');
+  if (cur && cur.id !== id) _prevScreenId = cur.id;
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   window.scrollTo(0, 0);
+}
+
+function goBack() {
+  // せってい・せいちょうから直前画面へ戻る
+  const target = _prevScreenId || 'screen-home';
+  if (target === 'screen-growth') stopGrowthAnim();
+  showScreen(target);
 }
 
 /* ════════════════════════════════

@@ -211,25 +211,21 @@ const _msgIdx = { name: 0, suffix: 0, egg: 0, home: 0 };
 // 各画面のタイマー
 const _msgTimers = {};
 
-/** 指定画面の吹き出しテキストを次のメッセージに切り替え */
+/** 指定画面の吹き出しテキストを次のメッセージに切り替え（読み上げあり） */
 function _nextBalloonMsg(screen) {
   const msgs = _buildMsgs(screen);
   _msgIdx[screen] = (_msgIdx[screen] + 1) % msgs.length;
-  _setBalloon(screen, msgs[_msgIdx[screen]]);
+  _setBalloon(screen, msgs[_msgIdx[screen]], true);
 }
 
 /** ユーザー名込みのメッセージリストを返す */
 function _buildMsgs(screen) {
-  if (screen === 'home') {
-    const name = (typeof fullName === 'function') ? fullName() : '';
-    const greeting = name ? 'どれを　やる？　' + name + '♪' : 'どれを　やる？';
-    return [greeting, ...SCREEN_MESSAGES.home];
-  }
-  return SCREEN_MESSAGES[screen] || [];
+  const name = (typeof fullName === 'function') ? fullName() : '';
+  return (SCREEN_MESSAGES[screen] || []).map(m => m.replace(/\{name\}/g, name));
 }
 
-/** 指定画面の吹き出し要素にテキストをセット */
-function _setBalloon(screen, text) {
+/** 指定画面の吹き出し要素にテキストをセット。doSpeak=true なら読み上げ */
+function _setBalloon(screen, text, doSpeak) {
   const idMap = {
     name:   'name-balloon-text',
     suffix: 'suffix-balloon-text',
@@ -238,14 +234,15 @@ function _setBalloon(screen, text) {
   };
   const el = document.getElementById(idMap[screen]);
   if (el) el.textContent = text;
+  if (doSpeak && typeof speak === 'function') speak(text);
 }
 
 /** 5秒タイマーを開始（画面遷移時に呼ぶ） */
 function startBalloonTimer(screen) {
   stopBalloonTimer(screen);
-  // まず最初のメッセージを表示
+  // まず最初のメッセージを表示（読み上げなし：ウェルカム読み上げを邪魔しないため）
   _msgIdx[screen] = 0;
-  _setBalloon(screen, _buildMsgs(screen)[0]);
+  _setBalloon(screen, _buildMsgs(screen)[0], false);
   // 5秒ごとに切り替え
   _msgTimers[screen] = setInterval(() => _nextBalloonMsg(screen), 5000);
 }

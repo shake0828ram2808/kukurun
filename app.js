@@ -1661,7 +1661,8 @@ Promise.all([
   fetch('kana.json').then(r => r.json()),
   fetch('messages.json').then(r => r.json()),
   fetch('kana_hoka.json').then(r => r.json()),
-]).then(([kana, msg, hoka]) => {
+  fetch('balloon_messages.json').then(r => r.json()),
+]).then(([kana, msg, hoka, balloon]) => {
   KANA_ROWS      = kana.kanaRows;
   SUFFIXES       = kana.suffixes;
   HOKA_SECTIONS  = hoka.hokaSections;
@@ -1670,6 +1671,10 @@ Promise.all([
   // kukurun.js側のメッセージも更新
   if (typeof HOME_KUKURUN_MESSAGES !== 'undefined') {
     HOME_KUKURUN_MESSAGES.splice(0, HOME_KUKURUN_MESSAGES.length, ...msg.homeMessages);
+  }
+  // 吹き出しメッセージをJSONで上書き
+  if (typeof SCREEN_MESSAGES !== 'undefined') {
+    Object.assign(SCREEN_MESSAGES, balloon);
   }
   buildKanaGrid();
 }).catch(err => {

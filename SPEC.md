@@ -108,6 +108,7 @@
 | `kana.json` | ひらがな一覧（`kanaRows`）と名前のよびかた選択肢（`suffixes`） |
 | `kana_hoka.json` | だくてん・はんだくてん・ちいさいかな の拡張かなデータ（`hokaSections`） |
 | `messages.json` | くくるんのセリフ・読み上げスクリプト・画面別メッセージ |
+| `balloon_messages.json` | 各画面のフキダシメッセージ（`{name}` プレースホルダでユーザー名を埋め込み） |
 
 ---
 

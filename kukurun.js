@@ -211,11 +211,11 @@ const _msgIdx = { name: 0, suffix: 0, egg: 0, home: 0 };
 // 各画面のタイマー
 const _msgTimers = {};
 
-/** 指定画面の吹き出しテキストを次のメッセージに切り替え（読み上げあり） */
+/** 指定画面の吹き出しテキストを次のメッセージに切り替え（読み上げなし） */
 function _nextBalloonMsg(screen) {
   const msgs = _buildMsgs(screen);
   _msgIdx[screen] = (_msgIdx[screen] + 1) % msgs.length;
-  _setBalloon(screen, msgs[_msgIdx[screen]], true);
+  _setBalloon(screen, msgs[_msgIdx[screen]], false);
 }
 
 /** ユーザー名込みのメッセージリストを返す */
@@ -240,9 +240,9 @@ function _setBalloon(screen, text, doSpeak) {
 /** 5秒タイマーを開始（画面遷移時に呼ぶ） */
 function startBalloonTimer(screen) {
   stopBalloonTimer(screen);
-  // まず最初のメッセージを表示（読み上げなし：ウェルカム読み上げを邪魔しないため）
+  // まず最初のメッセージを表示・読み上げ
   _msgIdx[screen] = 0;
-  _setBalloon(screen, _buildMsgs(screen)[0], false);
+  _setBalloon(screen, _buildMsgs(screen)[0], true);
   // 5秒ごとに切り替え
   _msgTimers[screen] = setInterval(() => _nextBalloonMsg(screen), 5000);
 }

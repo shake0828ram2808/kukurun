@@ -524,7 +524,6 @@ function goSuffix() {
   buildSuffixGrid(); S.selSuffix = '';
   document.getElementById('suffix-preview').textContent = S.name;
   showScreen('screen-suffix');
-  speak(S.name + '、よびかたをえらんでね');
 }
 // sufixから卵選択へ
 function goEggSelect() {
@@ -532,21 +531,15 @@ function goEggSelect() {
   saveState();
   buildEggSelectGrid();
   showScreen('screen-egg-select');
-  speak('すきなたまごをえらんでね！');
 }
 function goHome() {
   Snd.tap();
   const nm = fullName();
-  const greetingText = '　' + nm + '、こんにちは♪';
-  document.getElementById('greeting-text').textContent = greetingText;
-  // くくるんの吹き出しにも反映
-  const balloonText = document.getElementById('balloon-text');
-  if (balloonText) balloonText.textContent = greetingText;
+  document.getElementById('greeting-text').textContent = '　' + nm + '、こんにちは♪';
   S.isFirstAccess = false;
   saveState();
   updateCreature();
   buildDanGrid(); showScreen('screen-home');
-  speak(nm + '、くくるんへようこそ！');
 }
 function goHomeFromEgg() {
   Snd.tap();
@@ -618,7 +611,6 @@ function checkGraduation() {
     saveState();
     buildEggSelectGrid();
     showScreen('screen-egg-select');
-    speak('また　あらたまごを　えらんでね！');
   }, 1500);
 }
 function refreshModeMedals() {

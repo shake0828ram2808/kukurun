@@ -542,10 +542,13 @@ function goHome() {
   buildDanGrid(); showScreen('screen-home');
 }
 function goHomeFromEgg() {
-  Snd.tap();
-  updateCreature();
-  eggWobble.start();
-  goHome();
+  try { Snd.tap(); } catch(e) {}
+  S.isFirstAccess = false;
+  try { saveState(); } catch(e) {}
+  try { updateCreature(); } catch(e) {}
+  try { eggWobble.start(); } catch(e) {}
+  try { buildDanGrid(); } catch(e) {}
+  showScreen('screen-home');
 }
 
 /* ════════════════════════════════

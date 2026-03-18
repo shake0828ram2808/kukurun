@@ -224,7 +224,7 @@ const Snd = (() => {
   }
   return {
     tap()      { run(() => beep(600, ac().currentTime, 0.06, 0.1)); },
-    click()    { run(() => beep(1200, ac().currentTime, 0.025, 0.055, 'square')); },
+    click()    { run(() => beep(880, ac().currentTime, 0.055, 0.18, 'sine')); },
     pingpong() { run(() => { const c = ac(), now = c.currentTime; beep(880, now, .24, .34, 'sine', c); beep(1047, now + .3, .24, .34, 'sine', c); }); },
     miss()     { run(() => { const c = ac(), now = c.currentTime; beep(440, now, .17, .12, 'sine', c); beep(370, now + .1, .17, .08, 'sine', c); }); }
   };
@@ -316,7 +316,7 @@ function restoreSession() {
   // イントロ表示中もバックグラウンドでホーム状態を準備
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-home').classList.add('active');
-  const greetingText = fullName() + '、おかえり！';
+  const greetingText = '　' + fullName() + '、おかえり♪';
   const balloonText = document.getElementById('balloon-text');
   if (balloonText) balloonText.textContent = greetingText;
   buildDanGrid();
@@ -516,7 +516,7 @@ function goEggSelect() {
 function goHome() {
   Snd.tap();
   const nm = fullName();
-  const greetingText = nm + '、こんにちは！';
+  const greetingText = '　' + nm + '、こんにちは♪';
   document.getElementById('greeting-text').textContent = greetingText;
   // くくるんの吹き出しにも反映
   const balloonText = document.getElementById('balloon-text');

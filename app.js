@@ -450,7 +450,7 @@ function buildHokaModal() {
         const b = document.createElement('button');
         b.className = 'hoka-kana-btn';
         b.textContent = k;
-        b.onclick = () => { Snd.tap(); speak(k, 1.1); addKana(k); closeHokaModal(); };
+        b.onclick = () => { Snd.tap(); speak(k, 1.1); addKana(k); };
         grid.appendChild(b);
       });
     }

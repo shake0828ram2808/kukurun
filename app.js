@@ -267,6 +267,10 @@ function speakThen(t, r, cb) {
   if (S.speechEnabled !== false) { Spk.say(t, r, cb); }
   else if (cb) setTimeout(cb, 50);
 }
+// 九九の読みをTTSに渡す前に「は」を「ハ」へ変換する。
+// 日本語TTSは助詞の「は」を「わ」と読むため、カタカナのハ（常に「は」）で回避する。
+// ただし「はち」の一部である「は」（後ろに「ち」が続く）は対象外。
+function kukuTts(t) { return t.replace(/は(?!ち)/g, 'ハ'); }
 
 /* ════════════════════════════════
    STATE
@@ -706,18 +710,19 @@ function awardOboeruMedal() {
   }
 }
 function showOboeruClear() {
-  // チェックが全部ついていればメダル付与（idempotent）
   const checks = document.querySelectorAll('.kuku-check');
   const allChecked = checks.length > 0 && Array.from(checks).every(el => el.textContent === '✓');
-  if (allChecked) awardOboeruMedal();
-
-  const m = getMedals(S.dan);
+  if (!allChecked) {
+    speak('まだ　ぜんぶ　みていないよ！');
+    return;
+  }
+  awardOboeruMedal();
   const danLabel = S.dan === 'random' ? 'ばらばらのだん' : KD.fw(S.dan) + 'のだん';
-  document.getElementById('oboeru-clear-medal').textContent = m.oboeru ? '⭐' : '✨';
+  document.getElementById('oboeru-clear-medal').textContent = '⭐';
   document.getElementById('oboeru-clear-title').textContent = danLabel + '　おぼえたね！';
   showScreen('screen-oboeru-clear');
-  if (m.oboeru && allChecked) { confetti(); speak('やったー！メダルゲット！'); }
-  else speak('よくできました！');
+  confetti();
+  speak('やったー！メダルゲット！');
 }
 function startOboeru() {
   let problems;
@@ -788,7 +793,7 @@ function hlRow(i, p) {
     return;
   }
   // autoモードのみ自動進行; manualモードは読み上げのみ
-  speakThen(p.reading, 0.86, () => {
+  speakThen(kukuTts(p.reading), 0.86, () => {
     if ((S._oboeruMode || 'auto') === 'auto') {
       const waitMs = Math.max(1200, p.reading.length * 130);
       const probs = S._oboeruProblems;
@@ -798,7 +803,7 @@ function hlRow(i, p) {
     }
   });
 }
-function speakRow(i) { speak(S._oboeruProblems[i].reading); }
+function speakRow(i) { speak(kukuTts(S._oboeruProblems[i].reading)); }
 
 // ── おぼえるモード切り替え ──
 function setOboeruMode(mode) {
@@ -853,7 +858,7 @@ function readSelectedRows() {
     document.querySelectorAll('.kuku-row').forEach(r => r.classList.remove('current'));
     const row = document.getElementById(`kr-${i}`);
     if (row) { row.classList.add('current'); row.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
-    speakThen(p.reading, 0.86, () => {
+    speakThen(kukuTts(p.reading), 0.86, () => {
       const waitMs = Math.max(1000, p.reading.length * 120);
       setTimeout(readNext, waitMs);
     });
@@ -964,7 +969,7 @@ function inputDigit(d) {
     S.hanamaruCount++;
     setTimeout(() => { Snd.pingpong(); showHanamaru(); }, 180);
     showAnsEl(p);
-    speakThen(p.reading, 0.86, () => {
+    speakThen(kukuTts(p.reading), 0.86, () => {
       setTimeout(() => { nextRenshu(); S.ansInput = ''; }, 1000);
     });
   } else if (p.answer < 10 || S.ansInput.length >= 2) {
@@ -998,7 +1003,7 @@ function showProb() {
   S.ansShown = false; S.ansInput = '';
   updateQSlotInput();
   // 音声：「が」で終わる場合はそのまま「が？」、それ以外は読みだけ＋「？」
-  const speechQ = p.questionRead + '？';
+  const speechQ = kukuTts(p.questionRead) + '？';
   speak(speechQ);
   const waitTime = p.answer >= 10 ? 8000 : 5000;
   rT = setTimeout(showAns, waitTime);
@@ -1020,7 +1025,7 @@ function showAns() {
   if (S.ansShown) return;
   S.ansShown = true;
   const p = S.probs[S.idx];
-  showAnsEl(p); speak(p.reading);
+  showAnsEl(p); speak(kukuTts(p.reading));
 }
 function checkAns(n, btn) {
   if (S.ansShown) return;
@@ -1034,7 +1039,7 @@ function checkAns(n, btn) {
     setTimeout(() => { Snd.pingpong(); showHanamaru(); }, 180);
     showAnsEl(p);
     // 読み上げ終了後1秒で自動次問
-    speakThen(p.reading, 0.86, () => {
+    speakThen(kukuTts(p.reading), 0.86, () => {
       setTimeout(() => nextRenshu(), 1000);
     });
   } else {
@@ -1408,7 +1413,7 @@ function showTestProb() {
   document.querySelectorAll('#test-grid .ans-btn').forEach(b => { b.classList.remove('correct','wrong','test-btn-correct','test-btn-wrong'); b.disabled = false; });
   S._testShown = false; S._testInput = '';
   updateTestSlot();
-  const speechQ = p.questionRead.endsWith('が') ? p.questionRead + '？' : p.questionRead + '\u3000わ？';
+  const speechQ = p.questionRead.endsWith('が') ? kukuTts(p.questionRead) + '？' : kukuTts(p.questionRead) + '\u3000わ？';
   speak(speechQ);
 }
 
@@ -1444,7 +1449,7 @@ function testInputDigit(d) {
     const slot = document.getElementById('tq-slot');
     if (slot) { slot.textContent = KD.fw(p.answer); slot.className = 'ans-revealed'; }
     document.getElementById('test-reading').textContent = fmtReading(p);
-    speakThen(p.reading, 0.86, () => {
+    speakThen(kukuTts(p.reading), 0.86, () => {
       setTimeout(() => { S._testInput = ''; testNextProb(); }, 800);
     });
   } else if (p.answer < 10 || S._testInput.length >= 2) {

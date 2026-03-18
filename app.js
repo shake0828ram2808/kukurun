@@ -339,6 +339,9 @@ function loadState() {
 }
 function restoreSession() {
   if (S.isFirstAccess || !S.name) return;
+  // イントロモーダルを即座に非表示（名前登録済みユーザーには不要）
+  const introModal = document.getElementById('intro-modal');
+  if (introModal) introModal.style.display = 'none';
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-home').classList.add('active');
   const greetingText = fullName() + '、おかえり！';

@@ -410,6 +410,8 @@ function playIntroAnimation() {
     for (let m of ['O', 'I', 'A', 'U', 'O']) { setIntroKukurunMouth(m); await new Promise(r => setTimeout(r, 120)); }
     setIntroKukurunMouth('munyu');
   })();
+  // 3秒後に自動で閉じる
+  setTimeout(() => closeIntroModal(), 3000);
 }
 
 

@@ -574,12 +574,14 @@ function refreshModeMedals() {
 
 function medalBadge(dan) {
   const m = (S.medals[dan] && typeof S.medals[dan] === 'object') ? S.medals[dan] : {};
-  const testEmoji = m.test === 'gold' ? '🥇' : m.test === 'silver' ? '🥈' : m.test === 'bronze' ? '🥉' : '';
   const sh = 'filter:drop-shadow(0 1px 1px rgba(0,0,0,.35));';
+  // テストメダルは累積表示（bronze取得済みならsilver以上でも🥉も表示）
   const items = [
     m.oboeru ? `<span style="${sh}">⭐</span>` : '',
     m.renshu ? `<span style="${sh}">⭐</span>` : '',
-    testEmoji ? `<span style="${sh};font-size:13px;">${testEmoji}</span>` : '',
+    (m.test === 'bronze' || m.test === 'silver' || m.test === 'gold') ? `<span style="${sh};font-size:13px;">🥉</span>` : '',
+    (m.test === 'silver' || m.test === 'gold') ? `<span style="${sh};font-size:13px;">🥈</span>` : '',
+    m.test === 'gold' ? `<span style="${sh};font-size:13px;">🥇</span>` : '',
   ].filter(s => s).join('');
   if (!items) return '';
   return `<div style="position:absolute;top:3px;right:3px;display:flex;flex-direction:column;align-items:center;gap:1px;font-size:11px;line-height:1.1;">${items}</div>`;

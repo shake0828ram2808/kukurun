@@ -1661,7 +1661,7 @@ Promise.all([
   fetch('kana.json').then(r => r.json()),
   fetch('messages.json').then(r => r.json()),
   fetch('kana_hoka.json').then(r => r.json()),
-  fetch('balloon_messages.json').then(r => r.json()),
+  fetch('balloon_messages.json').then(r => r.ok ? r.json() : {}).catch(() => ({})),
 ]).then(([kana, msg, hoka, balloon]) => {
   KANA_ROWS      = kana.kanaRows;
   SUFFIXES       = kana.suffixes;

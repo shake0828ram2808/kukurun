@@ -564,7 +564,14 @@ function growthLevel() {
     if (m.renshu) score++;
     if (m.test) score++;
   }
-  return score; // 0-27
+  // ばらばらのだんのメダルも加算
+  const rm = S.medals['random'];
+  if (rm && typeof rm === 'object') {
+    if (rm.oboeru) score++;
+    if (rm.renshu) score++;
+    if (rm.test) score++;
+  }
+  return score; // 0-30
 }
 function getGrowthClears() {
   // たまご: 1点/ステージ（0=intact, 1=crack1, 2=crack2, 3=hatch）
@@ -601,13 +608,6 @@ function checkGraduation() {
   }, 1500);
 }
 function refreshModeMedals() {
-  if (S.dan === 'random') {
-    ['oboeru','renshu','test'].forEach(k => {
-      const el = document.getElementById('mode-medal-' + k);
-      if (el) el.textContent = '';
-    });
-    return;
-  }
   const m = getMedals(S.dan);
   const ob = document.getElementById('mode-medal-oboeru');
   const rs = document.getElementById('mode-medal-renshu');
@@ -641,9 +641,10 @@ function buildDanGrid() {
     b.onclick = () => { Snd.tap(); selDan(d); };
     g.appendChild(b);
   }
+  refreshDanBadge('random');
 }
 function refreshDanBadge(dan) {
-  const b = document.getElementById(`dan-btn-${dan}`);
+  const b = document.getElementById(dan === 'random' ? 'dan-btn-random' : `dan-btn-${dan}`);
   if (!b) return;
   // メダルバッジだけ更新（古いバッジを削除）
   const existing = b.querySelector('div[style*="position:absolute"]');
@@ -687,7 +688,6 @@ function selDan(dan) {
    OBOERU
 ════════════════════════════════ */
 function awardOboeruMedal() {
-  if (S.dan === 'random') return;
   const m = getMedals(S.dan);
   if (!m.oboeru) {
     m.oboeru = true;
@@ -696,6 +696,20 @@ function awardOboeruMedal() {
     refreshModeMedals();
     saveState();
   }
+}
+function showOboeruClear() {
+  // チェックが全部ついていればメダル付与（idempotent）
+  const checks = document.querySelectorAll('.kuku-check');
+  const allChecked = checks.length > 0 && Array.from(checks).every(el => el.textContent === '✓');
+  if (allChecked) awardOboeruMedal();
+
+  const m = getMedals(S.dan);
+  const danLabel = S.dan === 'random' ? 'ばらばらのだん' : KD.fw(S.dan) + 'のだん';
+  document.getElementById('oboeru-clear-medal').textContent = m.oboeru ? '⭐' : '✨';
+  document.getElementById('oboeru-clear-title').textContent = danLabel + '　おぼえたね！';
+  showScreen('screen-oboeru-clear');
+  if (m.oboeru && allChecked) { confetti(); speak('やったー！メダルゲット！'); }
+  else speak('よくできました！');
 }
 function startOboeru() {
   let problems;
@@ -755,6 +769,16 @@ function hlRow(i, p) {
   row.classList.add('current');
   row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   document.getElementById(`kc-${i}`).textContent = '✓'; // タップ直後につける
+  // 全チェック済みならメダル付与 → クリア画面へ
+  const total = S._oboeruProblems ? S._oboeruProblems.length : 0;
+  const checked = document.querySelectorAll('.kuku-check').length > 0
+    ? Array.from(document.querySelectorAll('.kuku-check')).filter(el => el.textContent === '✓').length
+    : 0;
+  if (total > 0 && checked === total) {
+    awardOboeruMedal();
+    setTimeout(() => showOboeruClear(), (S._oboeruMode || 'auto') === 'auto' ? 800 : 300);
+    return;
+  }
   // autoモードのみ自動進行; manualモードは読み上げのみ
   speakThen(p.reading, 0.86, () => {
     if ((S._oboeruMode || 'auto') === 'auto') {
@@ -1212,7 +1236,7 @@ function doneDan() {
   // 正答率6割以上なら れんしゅうメダル を付与（成長トリガー）
   const total = S.probs.length;
   const correct = S.hanamaruCount - (S._hanamaruAtStart || 0);
-  if (correct / total >= 0.6 && S.dan !== 'random') {
+  if (correct / total >= 0.6) {
     getMedals(S.dan).renshu = true;
     updateGrowthFromMedals();
     refreshDanBadge(S.dan);
@@ -1441,7 +1465,7 @@ function doneTest() {
   const cleared = pct >= 0.75;  // 75%以上でクリア
   const growthBefore = getGrowthClears();
 
-  if (cleared && dan !== 'random') {
+  if (cleared) {
     const m = getMedals(dan);
     const cur  = m.test;
     const next = NEXT_MEDAL[cur];
@@ -1455,7 +1479,7 @@ function doneTest() {
 
   const grew = getGrowthClears() > growthBefore;
   // 結果画面
-  const medal = dan !== 'random' ? getMedals(dan).test : null;
+  const medal = getMedals(dan).test;
   const medalEm = medal === 'gold' ? '🥇' : medal === 'silver' ? '🥈' : medal === 'bronze' ? '🥉' : '';
   document.getElementById('test-result-medal').textContent = cleared ? medalEm || '⭐' : '😢';
   document.getElementById('test-result-label').textContent =

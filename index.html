@@ -376,7 +376,7 @@
     <div class="sec-lbl">どれを　やる？</div>
     <div class="dan-grid" id="dan-grid"></div>
     <div style="height:10px;"></div>
-    <button class="dan-btn d-rnd" style="width:100%;"
+    <button class="dan-btn d-rnd" id="dan-btn-random" style="width:100%;position:relative;"
             onclick="tapSnd();selDan('random')">
       <span class="dn">ばらばら</span>
       <span class="dl">のだん</span>
@@ -441,7 +441,7 @@
 
 <!-- ══ SCREEN: OBOERU ══ -->
 <div class="screen" id="screen-oboeru">
-  <button class="back-btn" onclick="tapSnd();speak('もどる');showScreen('screen-mode')">
+  <button class="back-btn" onclick="tapSnd();showOboeruClear()">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
     もどる
   </button>
@@ -462,10 +462,31 @@
       </button>
     </div>
     <div id="kuku-list"></div>
-    <button class="btn btn-fwd" onclick="tapSnd();speak('れんしゅうへ　すすむ');awardOboeruMedal();startRenshu()" style="margin-top:10px;">
+    <button class="btn btn-fwd" onclick="tapSnd();showOboeruClear()" style="margin-top:10px;">
       れんしゅうへ　すすむ
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
     </button>
+  </div>
+</div>
+
+<!-- ══ SCREEN: OBOERU CLEAR ══ -->
+<div class="screen" id="screen-oboeru-clear" style="padding-top:32px;align-items:center;">
+  <div style="display:flex;flex-direction:column;align-items:center;gap:10px;">
+    <div id="oboeru-clear-medal" style="font-size:72px;line-height:1;"></div>
+    <div id="oboeru-clear-title" style="font-size:22px;text-align:center;"></div>
+  </div>
+  <div class="card" style="text-align:center;margin-top:16px;width:100%;">
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <button class="btn btn-primary"
+              onclick="tapSnd();speak('ほーむに　もどる');showScreen('screen-home')">ほーむに　もどる</button>
+      <button class="btn btn-fwd"
+              onclick="tapSnd();speak('れんしゅうに　すすむ');startRenshu()">
+        れんしゅうに　すすむ
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+      <button class="btn btn-outline"
+              onclick="tapSnd();showGrowthScreen()">せいちょうを　みる</button>
+    </div>
   </div>
 </div>
 
@@ -624,7 +645,7 @@
       </div>
       <button class="btn" style="background:#FFE8E8;color:#E03030;border:none;" onclick="tapSnd();openConfirm('app')">りせっと</button>
     </div>
-    <div id="version-badge">ver.2026.0318.0004</div>
+    <div id="version-badge">ver.2026.0318.</div>
   </div>
 </div>
 

@@ -1072,10 +1072,6 @@ function debugClears(delta) {
   // デバッグ時は renshuClears を直接使って表示（growthLevel は使わない）
   const n = S.renshuClears;
   const stage = getCharStage(n);
-  if (stage === 'adult') {
-    S._pendingGraduation = false;
-    if (!S.adultCharacters.includes(S.selectedEgg)) S.adultCharacters.push(S.selectedEgg);
-  }
   const kind = S.selectedEgg;
   const stageNames = {newborn:'うまれたて',baby:'あかちゃん',child:'こども',adult:'おとな'};
   const previewImg = document.getElementById('debug-preview-img');
@@ -1087,6 +1083,20 @@ function debugClears(delta) {
   if (label) label.textContent = 'スコア:' + growthLevel() + '/27\n' + n + 'clears';
   const stageLabel = document.getElementById('debug-stage-label');
   if (stageLabel) stageLabel.textContent = stage ? stageNames[stage] : 'たまご (' + n + '/10)';
+  // adult到達 かつ 卒業前 → 卒業フローへ
+  if (stage === 'adult' && S.selectedEgg && !S._pendingGraduation) {
+    if (!S.adultCharacters.includes(S.selectedEgg)) S.adultCharacters.push(S.selectedEgg);
+    S._pendingGraduation = true;
+    updateCreature();
+    setTimeout(() => {
+      S._pendingGraduation = false;
+      S.renshuClears = 0;
+      S.selectedEgg = null;
+      buildEggSelectGrid();
+      showScreen('screen-egg-select');
+    }, 1000);
+    return;
+  }
   updateCreature();
   eggWobble.restart();
 }

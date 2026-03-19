@@ -709,8 +709,8 @@ function awardOboeruMedal() {
   }
 }
 function showOboeruClear() {
-  const clearScreen = document.getElementById('screen-oboeru-clear');
-  if (clearScreen && clearScreen.classList.contains('active')) return;
+  if (S._oboeruClearShown) return;
+  S._oboeruClearShown = true;
   const checks = document.querySelectorAll('.kuku-check');
   const allChecked = checks.length > 0 && Array.from(checks).every(el => el.textContent === '✓');
   if (!allChecked) {
@@ -730,6 +730,7 @@ function showOboeruClear() {
   speak(alreadyHad ? 'めだるは　もう　もってるよ！' : 'やったー！めだるを　もらえたよ！');
 }
 function startOboeru() {
+  S._oboeruClearShown = false;
   let problems;
   if (S.dan === 'random') {
     problems = S._oboeruProblems;  // selDanで固定済みの問題を使う

@@ -714,13 +714,16 @@ function showOboeruClear() {
     startRenshu();
     return;
   }
+  const alreadyHad = getMedals(S.dan).oboeru;
   awardOboeruMedal();
   const danLabel = S.dan === 'random' ? 'ばらばらのだん' : KD.fw(S.dan) + 'のだん';
   document.getElementById('oboeru-clear-medal').textContent = '⭐';
   document.getElementById('oboeru-clear-title').textContent = danLabel + '　おぼえたね！';
+  document.getElementById('oboeru-clear-msg').textContent =
+    alreadyHad ? 'めだるは　もう　もってるよ！' : 'めだるを　もらえたよ！';
   showScreen('screen-oboeru-clear');
   confetti();
-  speak('やったー！メダルゲット！');
+  speak(alreadyHad ? 'めだるは　もう　もってるよ！' : 'やったー！めだるを　もらえたよ！');
 }
 function startOboeru() {
   let problems;
@@ -1248,7 +1251,9 @@ function doneDan() {
   // 正答率6割以上なら れんしゅうメダル を付与（成長トリガー）
   const total = S.probs.length;
   const correct = S.hanamaruCount - (S._hanamaruAtStart || 0);
-  if (correct / total >= 0.6) {
+  const passedRenshu = correct / total >= 0.6;
+  const alreadyHadRenshu = getMedals(S.dan).renshu;
+  if (passedRenshu) {
     getMedals(S.dan).renshu = true;
     updateGrowthFromMedals();
     refreshDanBadge(S.dan);
@@ -1264,6 +1269,12 @@ function doneDan() {
   document.getElementById('clear-title').textContent = grew
     ? 'せいちょう　したよ！'
     : (S.dan === 'random' ? 'ばらばらのだんが　できたね！' : KD.fw(S.dan) + 'のだんが　できたね！');
+  const medalMsgEl = document.getElementById('clear-medal-msg');
+  if (medalMsgEl) {
+    medalMsgEl.textContent = passedRenshu
+      ? (alreadyHadRenshu ? 'めだるは　もう　もってるよ！' : 'めだるを　もらえたよ！')
+      : '';
+  }
   showScreen('screen-clear');
   confetti();
   speak(grew ? 'せいちょうしたよ！やったね！' : 'やったー！ぜんもんできたよ！すごい！');
@@ -1476,6 +1487,7 @@ function doneTest() {
   const dan     = S.dan;
   const cleared = pct >= 0.75;  // 75%以上でクリア
   const growthBefore = getGrowthClears();
+  const preAwardMedal = getMedals(dan).test;  // 付与前のメダル状態を保存
 
   if (cleared) {
     const m = getMedals(dan);
@@ -1506,6 +1518,12 @@ function doneTest() {
   if (growthEl) {
     growthEl.textContent = cleared
       ? (grew ? 'せいちょう　したよ！🎉' : 'つぎのメダルで　せいちょうするよ')
+      : '';
+  }
+  const testMedalMsgEl = document.getElementById('test-medal-msg');
+  if (testMedalMsgEl) {
+    testMedalMsgEl.textContent = cleared
+      ? (preAwardMedal === 'gold' ? 'めだるは　もう　もってるよ！' : 'めだるを　もらえたよ！')
       : '';
   }
 

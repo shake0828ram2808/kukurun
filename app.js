@@ -710,7 +710,8 @@ function showOboeruClear() {
   const checks = document.querySelectorAll('.kuku-check');
   const allChecked = checks.length > 0 && Array.from(checks).every(el => el.textContent === '✓');
   if (!allChecked) {
-    speak('まだ　ぜんぶ　みていないよ！');
+    // 全部見ていなくてもれんしゅうには進める
+    startRenshu();
     return;
   }
   awardOboeruMedal();

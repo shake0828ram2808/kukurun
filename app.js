@@ -709,6 +709,8 @@ function awardOboeruMedal() {
   }
 }
 function showOboeruClear() {
+  const clearScreen = document.getElementById('screen-oboeru-clear');
+  if (clearScreen && clearScreen.classList.contains('active')) return;
   const checks = document.querySelectorAll('.kuku-check');
   const allChecked = checks.length > 0 && Array.from(checks).every(el => el.textContent === '✓');
   if (!allChecked) {

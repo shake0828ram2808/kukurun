@@ -614,9 +614,9 @@
 </div>
 <!-- ══ SCREEN: SETTINGS ══ -->
 <div class="screen" id="screen-settings">
-  <button class="back-btn" onclick="tapSnd();goBack()">
+  <button class="back-btn" onclick="tapSnd();showScreen('screen-home')">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
-    もどる
+    ほーむに　もどる
   </button>
   <div class="card">
     <div class="sec-lbl" style="margin-bottom:8px;">せってい</div>
@@ -629,7 +629,7 @@
     </div>
     <div class="settings-row">
       <div class="settings-row-text">
-        <div class="settings-row-label">なまえ・よびかたを　かえる</div>
+        <div class="settings-row-label">なまえを　かえる</div>
         <div class="settings-row-sub" id="settings-name-label"></div>
       </div>
       <button class="btn btn-outline" onclick="tapSnd();goChangeName()">かえる</button>
@@ -648,16 +648,16 @@
       </div>
       <button class="btn" style="background:#FFE8E8;color:#E03030;border:none;" onclick="tapSnd();openConfirm('app')">りせっと</button>
     </div>
-    <div id="version-badge">ver.2026.0319.0002</div>
+    <div id="version-badge">ver.2026.0319.0007</div>
   </div>
 </div>
 
 <!-- ══ SCREEN: GROWTH ══ -->
 <div class="screen" id="screen-growth" style="padding:0;overflow:hidden;">
   <button class="back-btn" style="position:absolute;top:12px;left:12px;z-index:2;"
-          onclick="tapSnd();stopGrowthAnim();goBack()">
+          onclick="tapSnd();stopGrowthAnim();showScreen('screen-home')">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
-    もどる
+    ほーむに　もどる
   </button>
   <div id="growth-area" style="position:relative;width:100%;flex:1;background:linear-gradient(180deg,#d6eeff 0%,#b8d8f8 55%,#a8e8b8 100%);overflow:hidden;">
     <img id="growth-char-img" src="" style="position:absolute;width:auto;image-rendering:pixelated;" alt="">

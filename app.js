@@ -1507,7 +1507,7 @@ function doneTest() {
   const medalEm = medal === 'gold' ? '🥇' : medal === 'silver' ? '🥈' : medal === 'bronze' ? '🥉' : '';
   document.getElementById('test-result-medal').textContent = cleared ? medalEm || '⭐' : '😢';
   document.getElementById('test-result-label').textContent =
-    cleared ? (medal ? MEDAL_NAMES[medal] + 'メダル　ゲット！' : 'クリア！') : 'もう　いちど！';
+    cleared ? (medal ? MEDAL_NAMES[medal] + (preAwardMedal === 'gold' ? 'メダル' : 'メダル　ゲット！') : 'クリア！') : 'もう　いちど！';
   const titleText = dan === 'random'
     ? (cleared ? 'ばらばらのだん　クリア！' : 'ばらばらのだん　もう　すこし！')
     : (cleared ? KD.fw(dan) + 'のだん　クリア！' : KD.fw(dan) + 'のだん　もう　すこし！');

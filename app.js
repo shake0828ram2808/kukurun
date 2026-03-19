@@ -637,6 +637,7 @@ function medalBadge(dan) {
     (m.test === 'silver' || m.test === 'gold') ? `<span style="${sh}">🥈</span>` : '',
     m.test === 'gold' ? `<span style="${sh}">🥇</span>` : '',
   ].filter(s => s).join('');
+  if (!items) return '';
   return `<div class="dan-medal-row">${items}</div>`;
 }
 function buildDanGrid() {
@@ -644,7 +645,7 @@ function buildDanGrid() {
   for (let d = 1; d <= 9; d++) {
     const b = document.createElement('button'); b.className = `dan-btn d${d}`;
     b.style.position = 'relative';
-    b.innerHTML = `${medalBadge(d)}<span class="dn">${KD.fw(d)}</span><span class="dl">のだん</span>`;
+    b.innerHTML = `${medalBadge(d)}<div class="dan-main"><span class="dn">${KD.fw(d)}</span><span class="dl">のだん</span></div>`;
     b.id = `dan-btn-${d}`;
     b.onclick = () => { Snd.tap(); selDan(d); };
     g.appendChild(b);
@@ -658,11 +659,13 @@ function refreshDanBadge(dan) {
   const existing = b.querySelector('.dan-medal-row');
   if (existing) existing.remove();
 
-  // 新しいバッジを先頭に挿入
+  // 新しいバッジを先頭に挿入（メダルがある場合のみ）
   const badgeHtml = medalBadge(dan);
-  const temp = document.createElement('div');
-  temp.innerHTML = badgeHtml;
-  b.insertBefore(temp.firstChild, b.firstChild);
+  if (badgeHtml) {
+    const temp = document.createElement('div');
+    temp.innerHTML = badgeHtml;
+    b.insertBefore(temp.firstChild, b.firstChild);
+  }
 }
 function selDan(dan) {
   S.dan = dan;
@@ -788,7 +791,6 @@ function hlRow(i, p) {
     ? Array.from(document.querySelectorAll('.kuku-check')).filter(el => el.textContent === '✓').length
     : 0;
   if (total > 0 && checked === total) {
-    awardOboeruMedal();
     setTimeout(() => showOboeruClear(), (S._oboeruMode || 'auto') === 'auto' ? 800 : 300);
     return;
   }

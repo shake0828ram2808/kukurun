@@ -364,6 +364,8 @@ function showScreen(id) {
   if (cur && cur.id !== id) _prevScreenId = cur.id;
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
+  const bb = document.getElementById('bottom-bar');
+  if (bb) bb.style.display = ['screen-name', 'screen-suffix', 'screen-egg-select'].includes(id) ? 'none' : '';
   window.scrollTo(0, 0);
 }
 
@@ -645,7 +647,9 @@ function buildDanGrid() {
   for (let d = 1; d <= 9; d++) {
     const b = document.createElement('button'); b.className = `dan-btn d${d}`;
     b.style.position = 'relative';
-    b.innerHTML = `${medalBadge(d)}<div class="dan-main"><span class="dn">${KD.fw(d)}</span><span class="dl">のだん</span></div>`;
+    const badge = medalBadge(d);
+    b.innerHTML = `${badge}<div class="dan-main"><span class="dn">${KD.fw(d)}</span><span class="dl">のだん</span></div>`;
+    b.classList.toggle('has-medals', !!badge);
     b.id = `dan-btn-${d}`;
     b.onclick = () => { Snd.tap(); selDan(d); };
     g.appendChild(b);
@@ -666,6 +670,7 @@ function refreshDanBadge(dan) {
     temp.innerHTML = badgeHtml;
     b.insertBefore(temp.firstChild, b.firstChild);
   }
+  b.classList.toggle('has-medals', !!badgeHtml);
 }
 function selDan(dan) {
   S.dan = dan;

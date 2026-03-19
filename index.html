@@ -378,8 +378,7 @@
     <div style="height:10px;"></div>
     <button class="dan-btn d-rnd" id="dan-btn-random" style="width:100%;position:relative;"
             onclick="tapSnd();selDan('random')">
-      <span class="dn">ばらばら</span>
-      <span class="dl">のだん</span>
+      <div class="dan-main"><span class="dn">ばらばら</span><span class="dl">のだん</span></div>
     </button>
   </div>
 </div>
@@ -554,8 +553,8 @@
   <div class="card" style="text-align:center;margin-top:14px;">
     <div id="test-result-title" style="font-size:22px;margin-bottom:8px;"></div>
     <div id="test-result-score" style="font-size:16px;color:var(--text2);margin-bottom:8px;"></div>
-    <div id="test-result-growth" style="font-size:14px;font-weight:bold;color:var(--theme);margin-bottom:4px;"></div>
-    <div id="test-medal-msg" style="font-size:15px;color:var(--theme);font-weight:bold;margin-bottom:12px;"></div>
+    <div id="test-medal-msg" style="font-size:15px;color:var(--theme);font-weight:bold;margin-bottom:4px;"></div>
+    <div id="test-result-growth" style="font-size:14px;font-weight:bold;color:var(--theme);margin-bottom:12px;"></div>
     <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
       <button class="btn btn-primary"
               onclick="tapSnd();speak('ホームに　もどる');showScreen('screen-home')">ホームに　もどる</button>
@@ -580,9 +579,9 @@
         </g>
       </svg>
     </div>
+    <div id="clear-medal-msg" style="font-size:15px;color:var(--theme);font-weight:bold;margin-top:4px;"></div>
     <div id="clear-stage-label" style="background:var(--theme);color:#fff;border-radius:var(--r-pill);
          padding:4px 18px;font-size:13px;"></div>
-    <div id="clear-medal-msg" style="font-size:15px;color:var(--theme);font-weight:bold;margin-top:4px;"></div>
   </div>
   <div class="card" style="text-align:center;margin-top:14px;">
     <div id="clear-title" style="font-size:26px;margin-bottom:16px;">できたね！</div>
@@ -648,7 +647,7 @@
       </div>
       <button class="btn" style="background:#FFE8E8;color:#E03030;border:none;" onclick="tapSnd();openConfirm('app')">りせっと</button>
     </div>
-    <div id="version-badge">ver.2026.0319.0014</div>
+    <div id="version-badge">ver.2026.0319.0011</div>
   </div>
 </div>
 

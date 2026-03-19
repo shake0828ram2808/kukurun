@@ -1546,13 +1546,28 @@ const MEDAL_NAMES = { bronze:'ブロンズ', silver:'ぎん', gold:'きん' };
 /* ════════════════════════════════
    EGG SELECT — 3種から選ぶ（green/pink/blue）
 ════════════════════════════════ */
-const EGG_KINDS = ['green','pink','blue'];
+const EGG_KINDS_FIRST  = ['green','pink','blue'];
+const EGG_KINDS_ALL    = ['green','pink','blue','purple','orange','silver'];
+
+function _pickEggChoices() {
+  // 初回（卵を一度も選んでいない）: 元の3種固定
+  if (S.adultCharacters.length === 0) return EGG_KINDS_FIRST;
+  // 2回目以降: 6種からランダムで3つ
+  const pool = EGG_KINDS_ALL.slice();
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  return pool.slice(0, 3);
+}
+
 function buildEggSelectGrid() {
   const g = document.getElementById('egg-select-grid'); g.innerHTML = '';
   // OKボタンを毎回 disabled 状態にリセット（前回の enabled 状態が残らないよう）
   const okBtn = document.getElementById('egg-ok-btn');
   if (okBtn) { okBtn.disabled = true; okBtn.style.opacity = '.4'; }
-  EGG_KINDS.forEach(kind => {
+  const choices = _pickEggChoices();
+  choices.forEach(kind => {
     const btn = document.createElement('button');
     btn.className = 'egg-sel-btn' + (S.selectedEgg === kind ? ' selected' : '');
     btn.dataset.egg = kind;

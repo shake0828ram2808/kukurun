@@ -621,31 +621,30 @@ function refreshModeMedals() {
   const ob = document.getElementById('mode-medal-oboeru');
   const rs = document.getElementById('mode-medal-renshu');
   const ts = document.getElementById('mode-medal-test');
-  if (ob) ob.textContent = m.oboeru ? '⭐' : '';
-  if (rs) rs.textContent = m.renshu ? '⭐' : '';
+  if (ob) ob.textContent = m.oboeru ? '🎖️' : '';
+  if (rs) rs.textContent = m.renshu ? '🎖️' : '';
   if (ts) ts.textContent = m.test === 'gold' ? '🥇' : m.test === 'silver' ? '🥈' : m.test === 'bronze' ? '🥉' : '';
 }
 
 function medalBadge(dan) {
   const m = (S.medals[dan] && typeof S.medals[dan] === 'object') ? S.medals[dan] : {};
   const sh = 'filter:drop-shadow(0 1px 1px rgba(0,0,0,.35));';
-  // テストメダルは累積表示（bronze取得済みならsilver以上でも🥉も表示）
+  // テストメダルは累積表示
   const items = [
-    m.oboeru ? `<span style="${sh}">⭐</span>` : '',
-    m.renshu ? `<span style="${sh}">⭐</span>` : '',
-    (m.test === 'bronze' || m.test === 'silver' || m.test === 'gold') ? `<span style="${sh};font-size:13px;">🥉</span>` : '',
-    (m.test === 'silver' || m.test === 'gold') ? `<span style="${sh};font-size:13px;">🥈</span>` : '',
-    m.test === 'gold' ? `<span style="${sh};font-size:13px;">🥇</span>` : '',
+    m.oboeru ? `<span style="${sh}">🎖️</span>` : '',
+    m.renshu ? `<span style="${sh}">🎖️</span>` : '',
+    (m.test === 'bronze' || m.test === 'silver' || m.test === 'gold') ? `<span style="${sh}">🥉</span>` : '',
+    (m.test === 'silver' || m.test === 'gold') ? `<span style="${sh}">🥈</span>` : '',
+    m.test === 'gold' ? `<span style="${sh}">🥇</span>` : '',
   ].filter(s => s).join('');
-  if (!items) return '';
-  return `<div style="position:absolute;top:3px;right:3px;display:flex;flex-direction:column;align-items:center;gap:1px;font-size:11px;line-height:1.1;">${items}</div>`;
+  return `<div class="dan-medal-row">${items}</div>`;
 }
 function buildDanGrid() {
   const g = document.getElementById('dan-grid'); g.innerHTML = '';
   for (let d = 1; d <= 9; d++) {
     const b = document.createElement('button'); b.className = `dan-btn d${d}`;
     b.style.position = 'relative';
-    b.innerHTML = `<span class="dn">${KD.fw(d)}</span><span class="dl">のだん</span>${medalBadge(d)}`;
+    b.innerHTML = `${medalBadge(d)}<span class="dn">${KD.fw(d)}</span><span class="dl">のだん</span>`;
     b.id = `dan-btn-${d}`;
     b.onclick = () => { Snd.tap(); selDan(d); };
     g.appendChild(b);
@@ -656,14 +655,14 @@ function refreshDanBadge(dan) {
   const b = document.getElementById(dan === 'random' ? 'dan-btn-random' : `dan-btn-${dan}`);
   if (!b) return;
   // メダルバッジだけ更新（古いバッジを削除）
-  const existing = b.querySelector('div[style*="position:absolute"]');
+  const existing = b.querySelector('.dan-medal-row');
   if (existing) existing.remove();
-  
-  // 新しいバッジを追加
+
+  // 新しいバッジを先頭に挿入
   const badgeHtml = medalBadge(dan);
   const temp = document.createElement('div');
   temp.innerHTML = badgeHtml;
-  b.appendChild(temp.firstChild);
+  b.insertBefore(temp.firstChild, b.firstChild);
 }
 function selDan(dan) {
   S.dan = dan;
@@ -717,7 +716,7 @@ function showOboeruClear() {
   const alreadyHad = getMedals(S.dan).oboeru;
   awardOboeruMedal();
   const danLabel = S.dan === 'random' ? 'ばらばらのだん' : KD.fw(S.dan) + 'のだん';
-  document.getElementById('oboeru-clear-medal').textContent = '⭐';
+  document.getElementById('oboeru-clear-medal').textContent = '🎖️';
   document.getElementById('oboeru-clear-title').textContent = danLabel + '　おぼえたね！';
   document.getElementById('oboeru-clear-msg').textContent =
     alreadyHad ? 'めだるは　もう　もってるよ！' : 'めだるを　もらえたよ！';

@@ -1215,7 +1215,7 @@ function _startGrowthAnim(charStage) {
     // adult: なめらか飛行+ゆらゆら / child: ゆっくり歩き / baby: 地面を左右のみ
     const isAdult = charStage === 'adult';
     const isBaby  = charStage === 'baby';
-    const spd = { newborn: 0.3, baby: 0.5, child: 0.7, adult: 1.5 }[charStage] || 0.5;
+    const spd = { newborn: 0.15, baby: 0.25, child: 0.35, adult: 0.75 }[charStage] || 0.25;
     const stageH = { newborn: 37, baby: 47, child: 60, adult: 73 }[charStage] || 73;
     mainImg.style.height = stageH + 'px';
     chars.push({
@@ -1242,7 +1242,7 @@ function _startGrowthAnim(charStage) {
     adultImg.src = SPRITES.char[adultKind].adult;
     adultImg.style.cssText = 'position:absolute;height:53px;image-rendering:pixelated;';
     area.appendChild(adultImg);
-    const spd = 1.0 + Math.random() * 0.7;
+    const spd = 0.5 + Math.random() * 0.35;
     chars.push({
       img: adultImg,
       x: 40 + Math.random() * 180, y: 150 + Math.random() * 60,
@@ -1332,6 +1332,27 @@ function _startGrowthAnim(charStage) {
       c.img.style.top  = c.y.toFixed(1) + 'px';
       c.img.style.transform = tfm;
     });
+
+    // キャラ同士の重なりを解消
+    for (let i = 0; i < chars.length; i++) {
+      for (let j = i + 1; j < chars.length; j++) {
+        const ci = chars[i], cj = chars[j];
+        const wiW = ci.img.offsetWidth || 60, wiH = ci.img.offsetHeight || 60;
+        const wjW = cj.img.offsetWidth || 60, wjH = cj.img.offsetHeight || 60;
+        const dx = (ci.x + wiW / 2) - (cj.x + wjW / 2);
+        const dy = (ci.y + wiH / 2) - (cj.y + wjH / 2);
+        const minDist = (wiW + wjW) / 2;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist > 0 && dist < minDist) {
+          const push = (minDist - dist) / 2;
+          const nx = dx / dist, ny = dy / dist;
+          ci.x += nx * push; ci.y += ny * push;
+          cj.x -= nx * push; cj.y -= ny * push;
+          ci.vx += nx * 0.1; cj.vx -= nx * 0.1;
+        }
+      }
+    }
+
     _growthRaf = requestAnimationFrame(frame);
   }
   _growthRaf = requestAnimationFrame(frame);

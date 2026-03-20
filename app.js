@@ -39,7 +39,7 @@ function updateCreature() {
   if (!S.selectedEgg && S.adultCharacters.length === 0) return;
   
   // 成長レベルはメダル合計から計算（1段スパム防止）
-  const n = getGrowthClears();
+  const n = S.renshuClears;
   const kind = S.selectedEgg || (S.adultCharacters.length > 0 ? S.adultCharacters[S.adultCharacters.length - 1] : 'green');
   const charStage = getCharStage(n);
   // アニメ制御
@@ -75,8 +75,8 @@ const eggWobble = (() => {
 
   function wobble() {
     const wrap = document.getElementById('home-egg-wrap');
-    if (!wrap || isHatched(getGrowthClears())) { timer = null; return; }
-    const params = wobbleParams(getGrowthClears());
+    if (!wrap || isHatched(S.renshuClears)) { timer = null; return; }
+    const params = wobbleParams(S.renshuClears);
 
     wrap.classList.remove('egg-wobble');
     wrap.style.setProperty('--wobble-deg', params.deg + 'deg');
@@ -97,8 +97,8 @@ const eggWobble = (() => {
     restart() {
       // ステージ変更時に周期を再設定
       if (timer) clearTimeout(timer);
-      if (isHatched(getGrowthClears())) return;
-      const params = wobbleParams(getGrowthClears());
+      if (isHatched(S.renshuClears)) return;
+      const params = wobbleParams(S.renshuClears);
       const next = params.interval[0] * 0.3;
       timer = setTimeout(wobble, next);
     }
@@ -1091,6 +1091,7 @@ function debugClears(delta) {
     setTimeout(() => {
       S._pendingGraduation = false;
       S.renshuClears = 0;
+      S._growthBase = growthLevel();
       S.selectedEgg = null;
       buildEggSelectGrid();
       showScreen('screen-egg-select');
@@ -1124,7 +1125,7 @@ let _growthRaf = null;
 
 function showGrowthScreen() {
   updateBottomBar('growth');
-  const n = getGrowthClears();
+  const n = S.renshuClears;
   const kind = S.selectedEgg || 'green';
   const charStage = getCharStage(n);
 
@@ -1209,7 +1210,7 @@ function _startGrowthAnim(charStage) {
 
     // 卵のゆれ（ランダム間欠）
     if (eggImg) {
-      const n = getGrowthClears();
+      const n = S.renshuClears;
       const wobbleAngle = [2, 5, 9, 14][Math.min(n, 3)];
       const period      = [6000, 4000, 2500, 1500][Math.min(n, 3)];
       const wobbleDur   = [600, 700, 800, 900][Math.min(n, 3)];
@@ -1301,7 +1302,7 @@ function doneDan() {
 
 function updateClearScreen(grew = false) {
   if (!S.selectedEgg) return;
-  const n = getGrowthClears();
+  const n = S.renshuClears;
   const kind = S.selectedEgg;
   const charStage = getCharStage(n);
   const clearEgg = document.getElementById('clear-egg-img');

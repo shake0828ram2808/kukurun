@@ -1558,7 +1558,7 @@ const MEDAL_NAMES = { bronze:'ブロンズ', silver:'ぎん', gold:'きん' };
    EGG SELECT — 3種から選ぶ（green/pink/blue）
 ════════════════════════════════ */
 const EGG_KINDS_FIRST  = ['green','pink','blue'];
-const EGG_KINDS_ALL    = ['green','pink','blue','purple','orange','silver'];
+const EGG_KINDS_ALL    = ['green','pink','blue'];
 
 function _pickEggChoices() {
   // 初回（卵を一度も選んでいない）: 元の3種固定

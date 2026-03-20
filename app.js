@@ -1229,8 +1229,8 @@ function _startGrowthAnim(charStage) {
       walkAngle: { newborn: 5, baby: 6, child: 7, adult: 7 }[charStage] || 5,
     });
   } else if (mainImg) {
-    // 卵は中央固定、ゆれアニメはJSで管理
-    mainImg.style.left = '50%'; mainImg.style.top = '50%';
+    // 卵は下寄り固定、ゆれアニメはJSで管理
+    mainImg.style.left = '50%'; mainImg.style.top = '74%';
     mainImg.style.transform = 'translate(-50%,-60%)';
     eggImg = mainImg;
   }
@@ -1256,6 +1256,14 @@ function _startGrowthAnim(charStage) {
 
   if (chars.length === 0 && !eggImg) return;
 
+  // 草地の煌めき（下部の緑エリア）
+  const grassSparkles = Array.from({length: 60}, () => ({
+    px: Math.random(), py: 0.70 + Math.random() * 0.30,
+    r: 0.4 + Math.random() * 1.0,
+    phase: Math.random() * Math.PI * 2,
+    spd: 0.0008 + Math.random() * 0.0025,
+  }));
+
   const startTime = Date.now();
 
   function frame() {
@@ -1280,6 +1288,14 @@ function _startGrowthAnim(charStage) {
       sCtx.beginPath();
       sCtx.arc(s.px * W, s.py * H, s.r, 0, Math.PI * 2);
       sCtx.fillStyle = `rgba(255,255,255,${alpha.toFixed(2)})`;
+      sCtx.fill();
+    });
+    // 草地の煌めき
+    grassSparkles.forEach(s => {
+      const alpha = 0.15 + 0.65 * (0.5 + 0.5 * Math.sin(t * s.spd + s.phase));
+      sCtx.beginPath();
+      sCtx.arc(s.px * W, s.py * H, s.r, 0, Math.PI * 2);
+      sCtx.fillStyle = `rgba(210,255,220,${alpha.toFixed(2)})`;
       sCtx.fill();
     });
 

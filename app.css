@@ -361,7 +361,7 @@ body {
 }
 
 /* ══ せいちょうをみる画面 ══ */
-#screen-growth { height: calc(100dvh - 100px); min-height: 300px; }
+#screen-growth { height: calc(100dvh - 100px); min-height: 300px; border-radius: var(--r); overflow: hidden; }
 /* scaleアニメを無効化（back-btnの位置ずれ防止） */
 #screen-growth.active { animation: growthFadeIn .22s ease; }
 @keyframes growthFadeIn { from { opacity: 0; } }

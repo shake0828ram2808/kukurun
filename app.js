@@ -1161,15 +1161,16 @@ function _startGrowthAnim(charStage) {
   starsCanvas.id = 'growth-stars-canvas';
   starsCanvas.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;';
   area.insertBefore(starsCanvas, area.firstChild);
+  // py を二乗分布にして上に行くほど密集させ、上位10%に収める
   const _stars = [
     ...Array.from({length: 80}, () => ({
-      px: Math.random(), py: Math.random() * 0.7,
+      px: Math.random(), py: Math.pow(Math.random(), 2) * 0.10,
       r: 0.3 + Math.random() * 1.5,
       phase: Math.random() * Math.PI * 2,
       spd: 0.0015 + Math.random() * 0.004,
     })),
     ...Array.from({length: 10}, () => ({
-      px: Math.random(), py: Math.random() * 0.28,
+      px: Math.random(), py: Math.pow(Math.random(), 2) * 0.10,
       r: 0.15 + Math.random() * 0.25,
       phase: Math.random() * Math.PI * 2,
       spd: 0.004 + Math.random() * 0.006,

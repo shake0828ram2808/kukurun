@@ -1,15 +1,3 @@
 {
-  "hooks": {
-    "PostToolUse": [
-      {
-        "matcher": "Edit|Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "FILE=$(jq -r '.tool_input.file_path // empty'); if [ \"$(echo \"$FILE\" | grep -c '/home/user/kukurun/')\" -gt 0 ]; then H=/home/user/kukurun/index.html; VER=$(grep -oE 'ver\\.[0-9]+\\.[0-9]+\\.[0-9]+' \"$H\" | head -1 | grep -oE '[0-9]+$'); NEXT=$(printf '%04d' $((${VER:-0}+1))); TODAY=$(date +%Y.%m%d); sed -i \"s/ver\\.[0-9]\\{4\\}\\.[0-9]\\{4\\}\\.[0-9]*/ver.${TODAY}.${NEXT}/g\" \"$H\"; fi 2>/dev/null || true"
-          }
-        ]
-      }
-    ]
-  }
+  "hooks": {}
 }

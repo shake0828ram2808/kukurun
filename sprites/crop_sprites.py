@@ -57,7 +57,7 @@ def find_bleed_amount(prev_cell):
     return 0
 
 
-def crop_sheet(sheet_path, kinds, col_names, prefix, target_w=TARGET_W, target_h=TARGET_H):
+def crop_sheet(sheet_path, kinds, col_names, prefix, target_w=TARGET_W, target_h=TARGET_H, tight=False):
     img = Image.open(sheet_path).convert("RGBA")
     W, H = img.size
     rows = len(kinds)
@@ -109,13 +109,18 @@ def crop_sheet(sheet_path, kinds, col_names, prefix, target_w=TARGET_W, target_h
 
             # ターゲットサイズにリサイズ（アスペクト比維持でフィット）
             cell.thumbnail((target_w, target_h), Image.LANCZOS)
-            # 透明背景キャンバスに中央配置
-            canvas = Image.new("RGBA", (target_w, target_h), (0, 0, 0, 0))
-            x = (target_w - cell.width) // 2
-            y = (target_h - cell.height) // 2
-            canvas.paste(cell, (x, y), cell)
+            if tight:
+                # パディングなし: タイトなbboxのまま保存
+                out = cell
+            else:
+                # 透明背景キャンバスに中央配置
+                canvas = Image.new("RGBA", (target_w, target_h), (0, 0, 0, 0))
+                x = (target_w - cell.width) // 2
+                y = (target_h - cell.height) // 2
+                canvas.paste(cell, (x, y), cell)
+                out = canvas
             out_path = os.path.join(SCRIPT_DIR, f"{prefix}_{kind}_{col}.png")
-            canvas.save(out_path)
+            out.save(out_path)
             print(f"  -> {out_path}")
 
 
@@ -139,8 +144,9 @@ if os.path.exists(char_sheet):
         kinds=["purple", "orange", "silver"],
         col_names=["newborn", "baby", "child", "adult"],
         prefix="char",
-        target_w=120,
-        target_h=150,
+        target_w=200,
+        target_h=200,
+        tight=True,
     )
 else:
     print(f"[SKIP] {char_sheet} が見つかりません")

@@ -1214,15 +1214,14 @@ function _startGrowthAnim(charStage) {
     mainImg.style.width = 'auto';
     // adult: なめらか飛行+ゆらゆら / child: ゆっくり歩き / baby: 地面を左右のみ
     const isAdult = charStage === 'adult';
-    const isBaby  = charStage === 'baby';
     const spd = { newborn: 0.15, baby: 0.25, child: 0.35, adult: 0.75 }[charStage] || 0.25;
     const stageH = { newborn: 37, baby: 47, child: 60, adult: 73 }[charStage] || 73;
     mainImg.style.height = stageH + 'px';
     chars.push({
       img: mainImg,
       x: 80, y: 200,
-      vx: spd * (Math.random() > .5 ? 1 : -1), vy: isBaby ? 0 : spd * .4,
-      spd, canFly: isAdult, groundOnly: isBaby,
+      vx: spd * (Math.random() > .5 ? 1 : -1), vy: isAdult ? spd * .4 : 0,
+      spd, canFly: isAdult, groundOnly: !isAdult,
       facingLeft: false,
       walk: true,
       walkPeriod: { newborn: 500, baby: 400, child: 300, adult: 220 }[charStage] || 300,
@@ -1367,6 +1366,25 @@ function _startGrowthAnim(charStage) {
           ci.vx += nx * 0.1; cj.vx -= nx * 0.1;
         }
       }
+    }
+
+    // 卵とキャラの重なりを解消
+    if (eggImg) {
+      const eW = eggImg.offsetWidth || 50, eH = eggImg.offsetHeight || 60;
+      const eCx = W * 0.5, eCy = H * 0.74 - eH * 0.1;
+      chars.forEach(c => {
+        const cW = c.img.offsetWidth || 60, cH = c.img.offsetHeight || 60;
+        const cCx = c.x + cW / 2, cCy = c.y + cH / 2;
+        const dx = cCx - eCx, dy = cCy - eCy;
+        const minDist = (eW + cW) / 2 * 0.85;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist > 0 && dist < minDist) {
+          const push = minDist - dist;
+          const nx = dx / dist;
+          c.x += nx * push;
+          c.vx += nx * 0.2;
+        }
+      });
     }
 
     _growthRaf = requestAnimationFrame(frame);

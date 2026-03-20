@@ -1133,11 +1133,11 @@ function showGrowthScreen() {
 
   if (charStage) {
     img.src = getCharSprite(kind, charStageIdx(n));
-    const sz = { newborn: 60, baby: 70, child: 85, adult: 100 }[charStage] || 70;
+    const sz = { newborn: 40, baby: 47, child: 57, adult: 67 }[charStage] || 47;
     img.style.height = sz + 'px';
   } else if (S.selectedEgg) {
     img.src = getEggSprite(kind, n);
-    img.style.height = '80px';
+    img.style.height = '53px';
   } else {
     img.src = '';
   }
@@ -1161,22 +1161,22 @@ function _startGrowthAnim(charStage) {
   const chars = [];
 
   if (charStage && mainImg) {
-    // 孵化後のメインキャラ（段階ごとにサイズを変えて成長感を表現）
-    const stageH = { newborn: 55, baby: 70, child: 90, adult: 110 }[charStage] || 110;
-    mainImg.style.height = stageH + 'px';
     mainImg.style.width = 'auto';
-    // adult: 速めなめらか飛行 / それ以外: ゆっくり歩き
+    // adult: なめらか飛行+ゆらゆら / child: ゆっくり歩き / baby: 地面を左右のみ
     const isAdult = charStage === 'adult';
-    const spd = { newborn: 0.6, baby: 1.0, child: 1.5, adult: 3.5 }[charStage] || 1.0;
+    const isBaby  = charStage === 'baby';
+    const spd = { newborn: 0.3, baby: 0.5, child: 0.7, adult: 1.5 }[charStage] || 0.5;
+    const stageH = { newborn: 37, baby: 47, child: 60, adult: 73 }[charStage] || 73;
+    mainImg.style.height = stageH + 'px';
     chars.push({
       img: mainImg,
       x: 80, y: 200,
-      vx: spd * (Math.random() > .5 ? 1 : -1), vy: spd * .4,
-      spd, canFly: isAdult,
+      vx: spd * (Math.random() > .5 ? 1 : -1), vy: isBaby ? 0 : spd * .4,
+      spd, canFly: isAdult, groundOnly: isBaby,
       facingLeft: false,
-      walk: !isAdult,
-      walkPeriod: { newborn: 380, baby: 300, child: 240 }[charStage] || 300,
-      walkAngle: { newborn: 5, baby: 6, child: 7 }[charStage] || 5,
+      walk: true,
+      walkPeriod: { newborn: 500, baby: 400, child: 300, adult: 220 }[charStage] || 300,
+      walkAngle: { newborn: 5, baby: 6, child: 7, adult: 7 }[charStage] || 5,
     });
   } else if (mainImg) {
     // 卵は中央固定、ゆれアニメはJSで管理
@@ -1190,16 +1190,17 @@ function _startGrowthAnim(charStage) {
     const adultImg = document.createElement('img');
     adultImg.className = 'growth-adult-img';
     adultImg.src = SPRITES.char[adultKind].adult;
-    adultImg.style.cssText = 'position:absolute;height:80px;image-rendering:pixelated;';
+    adultImg.style.cssText = 'position:absolute;height:53px;image-rendering:pixelated;';
     area.appendChild(adultImg);
-    const spd = 2.5 + Math.random() * 1.5;
+    const spd = 1.0 + Math.random() * 0.7;
     chars.push({
       img: adultImg,
       x: 40 + Math.random() * 180, y: 150 + Math.random() * 60,
       vx: spd * (Math.random() > .5 ? 1 : -1), vy: (Math.random() - .5) * spd,
       spd, canFly: true,
       facingLeft: Math.random() > .5,
-      walk: false,
+      walk: true,
+      walkPeriod: 220, walkAngle: 7,
     });
   });
 
@@ -1227,16 +1228,24 @@ function _startGrowthAnim(charStage) {
     chars.forEach(c => {
       const iW = c.img.offsetWidth || 60, iH = c.img.offsetHeight || 60;
       const floor = c.canFly ? 20 : H * 0.6;
-      c.x += c.vx; c.y += c.vy;
+      c.x += c.vx;
+      if (c.groundOnly) {
+        // 赤ちゃんは地面を左右のみ
+        c.y = H - iH - 10;
+        c.vy = 0;
+      } else {
+        c.y += c.vy;
+        if (Math.random() < 0.015) c.vy += (Math.random() - .5) * c.spd * (c.canFly ? .3 : .1);
+        const maxVy = c.spd * 2;
+        if (Math.abs(c.vy) > maxVy) c.vy = Math.sign(c.vy) * maxVy;
+        if (c.y < floor)       { c.y = floor;      c.vy =  Math.abs(c.vy); }
+        if (c.y > H - iH - 10) { c.y = H - iH-10; c.vy = -Math.abs(c.vy); }
+      }
       if (Math.random() < 0.015) c.vx += (Math.random() - .5) * c.spd * .5;
-      if (Math.random() < 0.015) c.vy += (Math.random() - .5) * c.spd * (c.canFly ? .3 : .1);
       const maxV = c.spd * 2;
       if (Math.abs(c.vx) > maxV) c.vx = Math.sign(c.vx) * maxV;
-      if (Math.abs(c.vy) > maxV) c.vy = Math.sign(c.vy) * maxV;
       if (c.x < 0)           { c.x = 0;         c.vx =  Math.abs(c.vx); }
       if (c.x > W - iW)      { c.x = W - iW;    c.vx = -Math.abs(c.vx); }
-      if (c.y < floor)       { c.y = floor;      c.vy =  Math.abs(c.vy); }
-      if (c.y > H - iH - 10) { c.y = H - iH-10; c.vy = -Math.abs(c.vy); }
       c.facingLeft = c.vx < -0.1 ? true : c.vx > 0.1 ? false : c.facingLeft;
       const flipX = c.facingLeft ? -1 : 1;
       let tfm;

@@ -15,12 +15,14 @@
 ## 修正完了時の対応
 
 - **修正が完了したら、画面確認用に更新後のバージョン番号を回答に含める。**
-  `index.html` の `#version-badge` に表示されているバージョン（例: `ver.2026.0317.1300`）を回答の末尾に記載すること。
+  コミット後に `grep -oE 'ver\.[0-9]+\.[0-9]+\.[0-9]+' index.html | head -1` で取得した値を回答の末尾に記載すること。
+  **自分で数字を作らず、必ずファイルから読んだ値を使うこと。**
 
 ## バージョン管理
 
-- ファイルを編集するたびに `index.html` の `#version-badge` が自動更新される（`.claude/settings.json` のフック）。
-  フォーマット: `ver.YYYY.MMDD.HHmm`
+- **git pre-commitフック** (`.git/hooks/pre-commit`) により、コミット時に自動で `index.html` の `#version-badge` をインクリメントしてステージングする。
+  フォーマット: `ver.YYYY.MMDD.NNNN`（NNNNは連番）
+- `.claude/settings.json` のPostToolUseフックは廃止済み。ファイル編集時にはバージョンは変わらない。
 
 ## ファイル構成の概要
 

@@ -1175,6 +1175,13 @@ function _startGrowthAnim(charStage) {
       phase: Math.random() * Math.PI * 2,
       spd: 0.004 + Math.random() * 0.006,
     })),
+    // 上位10〜20%に追加（全星の半数相当）
+    ...Array.from({length: 45}, () => ({
+      px: Math.random(), py: 0.10 + Math.random() * 0.10,
+      r: 0.3 + Math.random() * 1.2,
+      phase: Math.random() * Math.PI * 2,
+      spd: 0.0015 + Math.random() * 0.004,
+    })),
   ];
   const _nebulae = [
     { px: 0.22, py: 0.10, pr: 0.26, rgb: '130,55,220' },

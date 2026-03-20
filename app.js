@@ -1151,8 +1151,28 @@ function _startGrowthAnim(charStage) {
   const area = document.getElementById('growth-area');
   if (!area) return;
 
-  // 以前のadultキャラimgを削除
+  // 以前のadultキャラimgと星空キャンバスを削除
   area.querySelectorAll('.growth-adult-img').forEach(e => e.remove());
+  const _oldCanvas = document.getElementById('growth-stars-canvas');
+  if (_oldCanvas) _oldCanvas.remove();
+
+  // 星空キャンバス（最背面）
+  const starsCanvas = document.createElement('canvas');
+  starsCanvas.id = 'growth-stars-canvas';
+  starsCanvas.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;';
+  area.insertBefore(starsCanvas, area.firstChild);
+  const _stars = Array.from({length: 80}, () => ({
+    px: Math.random(), py: Math.random() * 0.7,
+    r: 0.3 + Math.random() * 1.5,
+    phase: Math.random() * Math.PI * 2,
+    spd: 0.0005 + Math.random() * 0.0018,
+  }));
+  const _nebulae = [
+    { px: 0.22, py: 0.10, pr: 0.26, rgb: '130,55,220' },
+    { px: 0.78, py: 0.06, pr: 0.18, rgb: '55,90,240'  },
+    { px: 0.50, py: 0.30, pr: 0.16, rgb: '200,70,170' },
+    { px: 0.10, py: 0.40, pr: 0.14, rgb: '80,130,210' },
+  ];
 
   const mainImg = document.getElementById('growth-char-img');
   let eggImg = null;
@@ -1211,6 +1231,27 @@ function _startGrowthAnim(charStage) {
   function frame() {
     const W = area.clientWidth, H = area.clientHeight;
     const t = Date.now() - startTime;
+
+    // 星空描画
+    const sCtx = starsCanvas.getContext('2d');
+    if (starsCanvas.width !== W || starsCanvas.height !== H) {
+      starsCanvas.width = W; starsCanvas.height = H;
+    }
+    sCtx.clearRect(0, 0, W, H);
+    _nebulae.forEach(n => {
+      const grd = sCtx.createRadialGradient(n.px*W, n.py*H, 0, n.px*W, n.py*H, n.pr*W);
+      grd.addColorStop(0, `rgba(${n.rgb},0.13)`);
+      grd.addColorStop(1, 'rgba(0,0,0,0)');
+      sCtx.fillStyle = grd;
+      sCtx.fillRect(0, 0, W, H);
+    });
+    _stars.forEach(s => {
+      const alpha = 0.3 + 0.7 * (0.5 + 0.5 * Math.sin(t * s.spd + s.phase));
+      sCtx.beginPath();
+      sCtx.arc(s.px * W, s.py * H, s.r, 0, Math.PI * 2);
+      sCtx.fillStyle = `rgba(255,255,255,${alpha.toFixed(2)})`;
+      sCtx.fill();
+    });
 
     // 卵のゆれ（ランダム間欠）
     if (eggImg) {

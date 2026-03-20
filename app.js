@@ -1137,7 +1137,8 @@ function showGrowthScreen() {
     img.style.height = sz + 'px';
   } else if (S.selectedEgg) {
     img.src = getEggSprite(kind, n);
-    img.style.height = '53px';
+    // crack2はひびが広く視覚的に小さく見えるため補正
+    img.style.height = (n === 2 ? '65' : '53') + 'px';
   } else {
     img.src = '';
   }

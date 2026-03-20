@@ -1161,8 +1161,9 @@ function _startGrowthAnim(charStage) {
   const chars = [];
 
   if (charStage && mainImg) {
-    // 孵化後のメインキャラ（高さを明示してパディングなしスプライトを正しく表示）
-    mainImg.style.height = '130px';
+    // 孵化後のメインキャラ（段階ごとにサイズを変えて成長感を表現）
+    const stageH = { newborn: 55, baby: 70, child: 90, adult: 110 }[charStage] || 110;
+    mainImg.style.height = stageH + 'px';
     mainImg.style.width = 'auto';
     // adult: 速めなめらか飛行 / それ以外: ゆっくり歩き
     const isAdult = charStage === 'adult';
@@ -1189,7 +1190,7 @@ function _startGrowthAnim(charStage) {
     const adultImg = document.createElement('img');
     adultImg.className = 'growth-adult-img';
     adultImg.src = SPRITES.char[adultKind].adult;
-    adultImg.style.cssText = 'position:absolute;height:120px;image-rendering:pixelated;';
+    adultImg.style.cssText = 'position:absolute;height:110px;image-rendering:pixelated;';
     area.appendChild(adultImg);
     const spd = 2.5 + Math.random() * 1.5;
     chars.push({

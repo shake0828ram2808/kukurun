@@ -151,4 +151,24 @@ if os.path.exists(char_sheet):
 else:
     print(f"[SKIP] {char_sheet} が見つかりません")
 
+# --- 後処理: 紫wolfから橙羽先を色マスクで除去 ---
+def remove_orange_pixels(path):
+    img = Image.open(path).convert("RGBA")
+    pixels = img.load()
+    w, h = img.size
+    changed = 0
+    for y in range(h):
+        for x in range(w):
+            r, g, b, a = pixels[x, y]
+            if a > 10 and r > 140 and max(g, 1) > 0 and max(b, 1) > 0:
+                if r / max(g, 1) > 1.6 and r / max(b, 1) > 2.8:
+                    pixels[x, y] = (0, 0, 0, 0)
+                    changed += 1
+    if changed:
+        img.save(path)
+        print(f"  橙汚染除去: {changed}px → {path}")
+
+remove_orange_pixels(os.path.join(SCRIPT_DIR, "char_purple_adult.png"))
+remove_orange_pixels(os.path.join(SCRIPT_DIR, "char_purple_child.png"))
+
 print("完了！")

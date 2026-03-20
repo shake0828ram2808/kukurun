@@ -1190,7 +1190,7 @@ function _startGrowthAnim(charStage) {
     const adultImg = document.createElement('img');
     adultImg.className = 'growth-adult-img';
     adultImg.src = SPRITES.char[adultKind].adult;
-    adultImg.style.cssText = 'position:absolute;height:110px;image-rendering:pixelated;';
+    adultImg.style.cssText = 'position:absolute;height:80px;image-rendering:pixelated;';
     area.appendChild(adultImg);
     const spd = 2.5 + Math.random() * 1.5;
     chars.push({

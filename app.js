@@ -1165,7 +1165,7 @@ function _startGrowthAnim(charStage) {
     px: Math.random(), py: Math.random() * 0.7,
     r: 0.3 + Math.random() * 1.5,
     phase: Math.random() * Math.PI * 2,
-    spd: 0.0005 + Math.random() * 0.0018,
+    spd: 0.0015 + Math.random() * 0.004,
   }));
   const _nebulae = [
     { px: 0.22, py: 0.10, pr: 0.26, rgb: '130,55,220' },

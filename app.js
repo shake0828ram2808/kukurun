@@ -1161,12 +1161,20 @@ function _startGrowthAnim(charStage) {
   starsCanvas.id = 'growth-stars-canvas';
   starsCanvas.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;';
   area.insertBefore(starsCanvas, area.firstChild);
-  const _stars = Array.from({length: 80}, () => ({
-    px: Math.random(), py: Math.random() * 0.7,
-    r: 0.3 + Math.random() * 1.5,
-    phase: Math.random() * Math.PI * 2,
-    spd: 0.0015 + Math.random() * 0.004,
-  }));
+  const _stars = [
+    ...Array.from({length: 80}, () => ({
+      px: Math.random(), py: Math.random() * 0.7,
+      r: 0.3 + Math.random() * 1.5,
+      phase: Math.random() * Math.PI * 2,
+      spd: 0.0015 + Math.random() * 0.004,
+    })),
+    ...Array.from({length: 10}, () => ({
+      px: Math.random(), py: Math.random() * 0.28,
+      r: 0.15 + Math.random() * 0.25,
+      phase: Math.random() * Math.PI * 2,
+      spd: 0.004 + Math.random() * 0.006,
+    })),
+  ];
   const _nebulae = [
     { px: 0.22, py: 0.10, pr: 0.26, rgb: '130,55,220' },
     { px: 0.78, py: 0.06, pr: 0.18, rgb: '55,90,240'  },

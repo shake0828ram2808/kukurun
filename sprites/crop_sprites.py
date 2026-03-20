@@ -19,8 +19,8 @@ import os
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
-TARGET_W = 71
-TARGET_H = 89
+TARGET_W = 74
+TARGET_H = 92
 ALPHA_THRESHOLD = 10  # alpha <= この値は透明とみなす
 
 
@@ -48,6 +48,15 @@ def col_opaque_count(img, x, threshold=ALPHA_THRESHOLD):
     return sum(1 for y in range(h) if pixels[x, y][3] > threshold)
 
 
+def find_bleed_amount(prev_cell):
+    """前セルの右端からgapを探し、はみ出し量(px)を返す。見つからなければ0。"""
+    w, _ = prev_cell.size
+    for bx in range(w - 1, -1, -1):
+        if col_opaque_count(prev_cell, bx) == 0:
+            return w - bx - 1
+    return 0
+
+
 def crop_sheet(sheet_path, kinds, col_names, prefix, target_w=TARGET_W, target_h=TARGET_H):
     img = Image.open(sheet_path).convert("RGBA")
     W, H = img.size
@@ -57,6 +66,20 @@ def crop_sheet(sheet_path, kinds, col_names, prefix, target_w=TARGET_W, target_h
     cell_h = H // rows
     print(f"{sheet_path}: {W}x{H}, cell={cell_w}x{cell_h}")
 
+    # --- パス1: 各列間のbleed量を検出 ---
+    # bleed[(r, c)] = c列の左端が (c-1) 列からはみ出している量 (px)
+    bleed = {}
+    for r in range(rows):
+        for c in range(1, cols):
+            cell = img.crop((c * cell_w, r * cell_h, (c + 1) * cell_w, (r + 1) * cell_h))
+            if col_opaque_count(cell, 0) > 5:
+                prev_cell = img.crop(((c - 1) * cell_w, r * cell_h, c * cell_w, (r + 1) * cell_h))
+                amount = find_bleed_amount(prev_cell)
+                if amount > 0:
+                    bleed[(r, c)] = amount
+                    print(f"  [{kinds[r]}_{col_names[c]}] bleed検出: 左へ{amount}px (前セルからのはみ出し)")
+
+    # --- パス2: 切り出し・リサイズ・保存 ---
     for r, kind in enumerate(kinds):
         for c, col in enumerate(col_names):
             x0 = c * cell_w
@@ -64,37 +87,20 @@ def crop_sheet(sheet_path, kinds, col_names, prefix, target_w=TARGET_W, target_h
             x1 = x0 + cell_w
             y1 = y0 + cell_h
 
-            cell = img.crop((x0, y0, x1, y1))
+            # 左拡張: このセルが前セルからbleedを受けている場合
+            expand_left = bleed.get((r, c), 0)
+            # 右トリム: 次のセルがこのセルからbleedを受けている場合
+            trim_right = bleed.get((r, c + 1), 0)
 
-            # 左端にコンテンツが接触している場合、前のセルからはみ出た部分を取り込む
-            if c > 0 and col_opaque_count(cell, 0) > 5:
-                prev_cell = img.crop(((c - 1) * cell_w, y0, c * cell_w, y1))
-                # 前セルの右端から左へ走査し、コンテンツが始まる列を探す
-                bleed_start = cell_w
-                for bx in range(cell_w - 1, -1, -1):
-                    if col_opaque_count(prev_cell, bx) == 0:
-                        bleed_start = bx + 1
-                        break
-                if bleed_start < cell_w:
-                    extra = cell_w - bleed_start
-                    cell = img.crop((x0 - extra, y0, x1, y1))
-                    print(f"  [{kind}_{col}] 左へ{extra}px拡張 (隣セルからのはみ出し対応)")
+            crop_x0 = x0 - expand_left
+            crop_x1 = x1 - trim_right
 
-            # 右端にコンテンツが接触している場合、右端をトリム（次セルへのはみ出しを除外）
-            if c < cols - 1 and col_opaque_count(cell, cell.width - 1) > 5:
-                next_cell = img.crop(((c + 1) * cell_w, y0, (c + 2) * cell_w, y1))
-                # 次セルの左端にコンテンツがあるか確認（はみ出しの証拠）
-                if col_opaque_count(next_cell, 0) > 5:
-                    # 現セルの右端から左へ走査し、はみ出し分の開始列を探す
-                    trim_at = cell.width
-                    for bx in range(cell.width - 1, cell.width - 50, -1):
-                        if col_opaque_count(cell, bx) == 0:
-                            trim_at = bx + 1
-                            break
-                    if trim_at < cell.width:
-                        trimmed = cell.width - trim_at
-                        cell = cell.crop((0, 0, trim_at, cell_h))
-                        print(f"  [{kind}_{col}] 右を{trimmed}px削除 (次セルへのはみ出し除外)")
+            cell = img.crop((crop_x0, y0, crop_x1, y1))
+
+            if expand_left:
+                print(f"  [{kind}_{col}] 左へ{expand_left}px拡張")
+            if trim_right:
+                print(f"  [{kind}_{col}] 右を{trim_right}px削除")
 
             # alpha閾値ベースのバウンディングボックスでトリム
             bbox = get_content_bbox(cell)

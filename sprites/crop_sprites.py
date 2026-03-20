@@ -21,6 +21,32 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 TARGET_W = 71
 TARGET_H = 89
+ALPHA_THRESHOLD = 10  # alpha <= この値は透明とみなす
+
+
+def get_content_bbox(img, threshold=ALPHA_THRESHOLD):
+    """alpha > threshold のピクセルのバウンディングボックスを返す。"""
+    w, h = img.size
+    pixels = img.load()
+    min_x, min_y, max_x, max_y = w, h, 0, 0
+    found = False
+    for y in range(h):
+        for x in range(w):
+            if pixels[x, y][3] > threshold:
+                if x < min_x: min_x = x
+                if y < min_y: min_y = y
+                if x > max_x: max_x = x
+                if y > max_y: max_y = y
+                found = True
+    return (min_x, min_y, max_x + 1, max_y + 1) if found else None
+
+
+def col_opaque_count(img, x, threshold=ALPHA_THRESHOLD):
+    """指定列で alpha > threshold のピクセル数を返す。"""
+    pixels = img.load()
+    _, h = img.size
+    return sum(1 for y in range(h) if pixels[x, y][3] > threshold)
+
 
 def crop_sheet(sheet_path, kinds, col_names, prefix, target_w=TARGET_W, target_h=TARGET_H):
     img = Image.open(sheet_path).convert("RGBA")
@@ -33,12 +59,48 @@ def crop_sheet(sheet_path, kinds, col_names, prefix, target_w=TARGET_W, target_h
 
     for r, kind in enumerate(kinds):
         for c, col in enumerate(col_names):
-            box = (c * cell_w, r * cell_h, (c + 1) * cell_w, (r + 1) * cell_h)
-            cell = img.crop(box)
-            # 透明ピクセルを除いたバウンディングボックス
-            bbox = cell.getbbox()
+            x0 = c * cell_w
+            y0 = r * cell_h
+            x1 = x0 + cell_w
+            y1 = y0 + cell_h
+
+            cell = img.crop((x0, y0, x1, y1))
+
+            # 左端にコンテンツが接触している場合、前のセルからはみ出た部分を取り込む
+            if c > 0 and col_opaque_count(cell, 0) > 5:
+                prev_cell = img.crop(((c - 1) * cell_w, y0, c * cell_w, y1))
+                # 前セルの右端から左へ走査し、コンテンツが始まる列を探す
+                bleed_start = cell_w
+                for bx in range(cell_w - 1, -1, -1):
+                    if col_opaque_count(prev_cell, bx) == 0:
+                        bleed_start = bx + 1
+                        break
+                if bleed_start < cell_w:
+                    extra = cell_w - bleed_start
+                    cell = img.crop((x0 - extra, y0, x1, y1))
+                    print(f"  [{kind}_{col}] 左へ{extra}px拡張 (隣セルからのはみ出し対応)")
+
+            # 右端にコンテンツが接触している場合、右端をトリム（次セルへのはみ出しを除外）
+            if c < cols - 1 and col_opaque_count(cell, cell.width - 1) > 5:
+                next_cell = img.crop(((c + 1) * cell_w, y0, (c + 2) * cell_w, y1))
+                # 次セルの左端にコンテンツがあるか確認（はみ出しの証拠）
+                if col_opaque_count(next_cell, 0) > 5:
+                    # 現セルの右端から左へ走査し、はみ出し分の開始列を探す
+                    trim_at = cell.width
+                    for bx in range(cell.width - 1, cell.width - 50, -1):
+                        if col_opaque_count(cell, bx) == 0:
+                            trim_at = bx + 1
+                            break
+                    if trim_at < cell.width:
+                        trimmed = cell.width - trim_at
+                        cell = cell.crop((0, 0, trim_at, cell_h))
+                        print(f"  [{kind}_{col}] 右を{trimmed}px削除 (次セルへのはみ出し除外)")
+
+            # alpha閾値ベースのバウンディングボックスでトリム
+            bbox = get_content_bbox(cell)
             if bbox:
                 cell = cell.crop(bbox)
+
             # ターゲットサイズにリサイズ（アスペクト比維持でフィット）
             cell.thumbnail((target_w, target_h), Image.LANCZOS)
             # 透明背景キャンバスに中央配置
@@ -49,6 +111,7 @@ def crop_sheet(sheet_path, kinds, col_names, prefix, target_w=TARGET_W, target_h
             out_path = os.path.join(SCRIPT_DIR, f"{prefix}_{kind}_{col}.png")
             canvas.save(out_path)
             print(f"  -> {out_path}")
+
 
 # --- 卵スプライト ---
 egg_sheet = os.path.join(SCRIPT_DIR, "egg_sheet.png")

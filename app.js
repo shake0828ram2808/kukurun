@@ -1100,6 +1100,10 @@ function debugClears(delta) {
   }
   updateCreature();
   eggWobble.restart();
+  // せいちょう画面が表示中なら画像とアニメを連動更新
+  if (document.getElementById('screen-growth').classList.contains('active')) {
+    _refreshGrowthScreen();
+  }
 }
 function debugShowClear() {
   if (!S.selectedEgg) { S.selectedEgg = 'green'; }
@@ -1122,6 +1126,22 @@ function debugGoHome() {
    GROWTH SCREEN — せいちょうをみる
 ════════════════════════════════ */
 let _growthRaf = null;
+
+function _refreshGrowthScreen() {
+  const n = S.renshuClears;
+  const kind = S.selectedEgg || 'green';
+  const charStage = getCharStage(n);
+  const img = document.getElementById('growth-char-img');
+  if (charStage) {
+    img.src = getCharSprite(kind, charStageIdx(n));
+    img.style.height = ({ newborn: 40, baby: 47, child: 57, adult: 67 }[charStage] || 47) + 'px';
+  } else if (S.selectedEgg) {
+    img.src = getEggSprite(kind, n);
+    img.style.height = (n >= 3 ? '65' : '53') + 'px';
+  }
+  stopGrowthAnim();
+  _startGrowthAnim(charStage);
+}
 
 function showGrowthScreen() {
   updateBottomBar('growth');

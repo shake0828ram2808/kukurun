@@ -1169,6 +1169,10 @@ function showGrowthScreen() {
     img.src = '';
   }
 
+  const medalCount = Object.values(S.medals).filter(v => v).length;
+  const el = document.getElementById('growth-medal-count');
+  if (el) el.textContent = medalCount + 'こ';
+
   showScreen('screen-growth');
   _startGrowthAnim(charStage);
 }

@@ -1126,6 +1126,7 @@ function debugGoHome() {
    GROWTH SCREEN — せいちょうをみる
 ════════════════════════════════ */
 let _growthRaf = null;
+let _growthTapCleanup = null;
 
 function _refreshGrowthScreen() {
   const n = S.renshuClears;
@@ -1276,6 +1277,23 @@ function _startGrowthAnim(charStage) {
 
   if (chars.length === 0 && !eggImg) return;
 
+  // タップエフェクト管理
+  const tapEffects = [];
+  function addTapEffect(x, y) {
+    tapEffects.push({ x, y, born: Date.now() });
+  }
+  function onTapArea(e) {
+    const rect = area.getBoundingClientRect();
+    const pt = e.touches ? e.touches[0] : e;
+    addTapEffect(pt.clientX - rect.left, pt.clientY - rect.top);
+  }
+  area.addEventListener('touchstart', onTapArea, { passive: true });
+  area.addEventListener('click', onTapArea);
+  _growthTapCleanup = () => {
+    area.removeEventListener('touchstart', onTapArea);
+    area.removeEventListener('click', onTapArea);
+  };
+
   // 草地の煌めき（下部の緑エリア）
   const grassSparkles = Array.from({length: 60}, () => ({
     px: Math.random(), py: 0.70 + Math.random() * 0.30,
@@ -1318,6 +1336,40 @@ function _startGrowthAnim(charStage) {
       sCtx.fillStyle = `rgba(210,255,220,${alpha.toFixed(2)})`;
       sCtx.fill();
     });
+
+    // タップエフェクト描画（リング＋小粒子）
+    const now = Date.now();
+    for (let i = tapEffects.length - 1; i >= 0; i--) {
+      const ef = tapEffects[i];
+      const age = now - ef.born;
+      const dur = 520;
+      if (age > dur) { tapEffects.splice(i, 1); continue; }
+      const p = age / dur;                      // 0→1
+      const ease = 1 - p * p;                  // 1→0 easeOut
+      // 外輪
+      sCtx.beginPath();
+      sCtx.arc(ef.x, ef.y, 6 + p * 28, 0, Math.PI * 2);
+      sCtx.strokeStyle = `rgba(255,240,200,${(ease * 0.55).toFixed(2)})`;
+      sCtx.lineWidth = 1.5;
+      sCtx.stroke();
+      // 内輪
+      sCtx.beginPath();
+      sCtx.arc(ef.x, ef.y, 4 + p * 14, 0, Math.PI * 2);
+      sCtx.strokeStyle = `rgba(255,255,255,${(ease * 0.45).toFixed(2)})`;
+      sCtx.lineWidth = 1;
+      sCtx.stroke();
+      // 小粒子6個
+      for (let k = 0; k < 6; k++) {
+        const angle = (k / 6) * Math.PI * 2;
+        const dist = 10 + p * 22;
+        const px = ef.x + Math.cos(angle) * dist;
+        const py = ef.y + Math.sin(angle) * dist;
+        sCtx.beginPath();
+        sCtx.arc(px, py, 1.2 * ease, 0, Math.PI * 2);
+        sCtx.fillStyle = `rgba(255,245,210,${(ease * 0.7).toFixed(2)})`;
+        sCtx.fill();
+      }
+    }
 
     // 卵のゆれ（ランダム間欠）
     if (eggImg) {
@@ -1415,6 +1467,7 @@ function _startGrowthAnim(charStage) {
 
 function stopGrowthAnim() {
   if (_growthRaf) { cancelAnimationFrame(_growthRaf); _growthRaf = null; }
+  if (_growthTapCleanup) { _growthTapCleanup(); _growthTapCleanup = null; }
 }
 
 function nextRenshu() {

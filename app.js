@@ -289,6 +289,8 @@ const S = {
   _pendingGraduation: false,  // 卒業遷移中フラグ
   isFirstAccess: true,  // 初回アクセスか
   speechEnabled: true,  // 音声読み上げon/off
+  renshuAnsTime: 10,    // れんしゅう自動回答まで秒数（0=まつ）
+  testAnsTime: 0,       // てすと自動回答まで秒数（0=まつ）
 };
 const fullName = () => S.name + S.suffix;
 
@@ -309,6 +311,8 @@ function saveState() {
       done: S.done,
       hanamaruCount: S.hanamaruCount,
       isFirstAccess: S.isFirstAccess,
+      renshuAnsTime: S.renshuAnsTime,
+      testAnsTime: S.testAnsTime,
     }));
   } catch(e) {}
 }
@@ -318,7 +322,8 @@ function loadState() {
     if (!raw) return;
     const d = JSON.parse(raw);
     ['name','suffix','speechEnabled','medals','adultCharacters',
-     'selectedEgg','_growthBase','renshuClears','done','hanamaruCount','isFirstAccess']
+     'selectedEgg','_growthBase','renshuClears','done','hanamaruCount','isFirstAccess',
+     'renshuAnsTime','testAnsTime']
       .forEach(k => { if (d[k] !== undefined) S[k] = d[k]; });
   } catch(e) {}
 }
@@ -1007,7 +1012,9 @@ function showProb() {
   // 式：２×３＝？
   document.getElementById('renshu-problem').innerHTML =
     `${KD.fw(p.dan)}×${KD.fw(p.multiplier)}＝<span class="q-mark" id="q-slot" style="display:inline-block;min-width:${p.answer >= 10 ? '2em' : '1.2em'};text-align:center;">？</span>`;
-  document.getElementById('renshu-hint').textContent = p.answer >= 10 ? '８びょう　たつと　こたえが　でるよ' : '５びょう　たつと　こたえが　でるよ';
+  { const t = S.renshuAnsTime;
+    document.getElementById('renshu-hint').textContent = t === 0 ? 'こたえは　じどうでは　でないよ'
+      : `${t === 5 ? '５' : t === 10 ? '１０' : '１５'}びょう　たつと　こたえが　でるよ`; }
   document.getElementById('renshu-next-btn').style.display = 'none';
   document.querySelectorAll('.ans-btn').forEach(b => { b.classList.remove('correct','wrong'); b.disabled = false; });
   S.ansShown = false; S.ansInput = '';
@@ -1015,8 +1022,7 @@ function showProb() {
   // 音声：「が」で終わる場合はそのまま「が？」、それ以外は読みだけ＋「？」
   const speechQ = kukuTts(p.questionRead) + '？';
   speak(speechQ);
-  const waitTime = p.answer >= 10 ? 8000 : 5000;
-  rT = setTimeout(showAns, waitTime);
+  if (S.renshuAnsTime > 0) rT = setTimeout(showAns, S.renshuAnsTime * 1000);
 }
 function showAnsEl(p) {
   // ？マークを答えで置き換え（赤・ポップイン、全角数字）
@@ -1604,6 +1610,19 @@ function showTestProb() {
   updateTestSlot();
   const speechQ = p.questionRead.endsWith('が') ? kukuTts(p.questionRead) + '？' : kukuTts(p.questionRead) + '\u3000わ？';
   speak(speechQ);
+  if (S.testAnsTime > 0) tT = setTimeout(testAutoReveal, S.testAnsTime * 1000);
+}
+
+function testAutoReveal() {
+  if (S._testShown) return;
+  S._testShown = true;
+  const p = S._testProbs[S._testIdx];
+  const slot = document.getElementById('tq-slot');
+  if (slot) { slot.textContent = KD.fw(p.answer); slot.className = 'ans-revealed'; }
+  document.getElementById('test-reading').textContent = fmtReading(p);
+  document.getElementById('test-hint').textContent = 'じかんぎれ　だよ';
+  speak(kukuTts(p.reading));
+  setTimeout(() => { S._testInput = ''; testNextProb(); }, 2000);
 }
 
 function updateTestSlot() {
@@ -1799,12 +1818,21 @@ function openSettings() {
   const nameLabel = document.getElementById('settings-name-label');
   if (nameLabel) nameLabel.textContent = fullName() || '（なし）';
   const toggle = document.getElementById('speech-toggle');
-  if (toggle) {
-    toggle.classList.toggle('on', S.speechEnabled !== false);
-  }
+  if (toggle) toggle.classList.toggle('on', S.speechEnabled !== false);
+  updateTimeSelUI('renshu-time-sel', S.renshuAnsTime);
+  updateTimeSelUI('test-time-sel', S.testAnsTime);
   updateBottomBar('settings');
   showScreen('screen-settings');
 }
+function updateTimeSelUI(id, val) {
+  const grp = document.getElementById(id);
+  if (!grp) return;
+  grp.querySelectorAll('button').forEach(b => {
+    b.classList.toggle('selected', parseInt(b.dataset.val, 10) === val);
+  });
+}
+function setRenshuTime(t) { tapSnd(); S.renshuAnsTime = t; saveState(); updateTimeSelUI('renshu-time-sel', t); }
+function setTestTime(t)   { tapSnd(); S.testAnsTime   = t; saveState(); updateTimeSelUI('test-time-sel',   t); }
 
 function toggleSpeech() {
   S.speechEnabled = !S.speechEnabled;

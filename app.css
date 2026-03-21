@@ -847,6 +847,14 @@ body {
 .settings-row .btn { width: auto; align-self: flex-start; padding: 8px 16px; font-size: 13px; }
 .settings-row-label { font-size: 15px; }
 .settings-row-sub { font-size: 12px; color: var(--text2); margin-top: 3px; }
+.settings-row-col { flex-direction: column; align-items: flex-start; }
+.time-sel-group { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+.time-sel-group button {
+  padding: 7px 12px; font-size: 13px; border-radius: 20px;
+  border: 1.5px solid var(--theme); background: #fff; color: var(--theme);
+  cursor: pointer; font-family: inherit; transition: background .15s, color .15s;
+}
+.time-sel-group button.selected { background: var(--theme); color: #fff; }
 
 /* トグルスイッチ */
 .toggle-switch {

@@ -636,6 +636,30 @@
       </div>
       <button class="btn btn-outline" onclick="tapSnd();goChangeName()">かえる</button>
     </div>
+    <div class="settings-row settings-row-col">
+      <div class="settings-row-text">
+        <div class="settings-row-label">れんしゅうの　こたえを　だす　じかん</div>
+        <div class="settings-row-sub">じどうで　こたえを　みせるまでの　じかん</div>
+      </div>
+      <div class="time-sel-group" id="renshu-time-sel">
+        <button data-val="5"  onclick="setRenshuTime(5)">５びょう</button>
+        <button data-val="10" onclick="setRenshuTime(10)">１０びょう</button>
+        <button data-val="15" onclick="setRenshuTime(15)">１５びょう</button>
+        <button data-val="0"  onclick="setRenshuTime(0)">まつ</button>
+      </div>
+    </div>
+    <div class="settings-row settings-row-col">
+      <div class="settings-row-text">
+        <div class="settings-row-label">てすとの　こたえを　だす　じかん</div>
+        <div class="settings-row-sub">じどうで　こたえを　みせるまでの　じかん</div>
+      </div>
+      <div class="time-sel-group" id="test-time-sel">
+        <button data-val="5"  onclick="setTestTime(5)">５びょう</button>
+        <button data-val="10" onclick="setTestTime(10)">１０びょう</button>
+        <button data-val="15" onclick="setTestTime(15)">１５びょう</button>
+        <button data-val="0"  onclick="setTestTime(0)">まつ</button>
+      </div>
+    </div>
     <div class="settings-row">
       <div class="settings-row-text">
         <div class="settings-row-label">メダルを　りせっとする</div>
@@ -650,7 +674,7 @@
       </div>
       <button class="btn" style="background:#FFE8E8;color:#E03030;border:none;" onclick="tapSnd();openConfirm('app')">りせっと</button>
     </div>
-    <div id="version-badge">ver.2026.0321.0022</div>
+    <div id="version-badge">ver.2026.0321.0023</div>
   </div>
 </div>
 

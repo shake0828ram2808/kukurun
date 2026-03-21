@@ -1950,25 +1950,33 @@ document.addEventListener('touchstart', () => Snd.unlock(), { once: true, passiv
       if (age > dur) { effects.splice(i, 1); continue; }
       const p = age / dur;
       const ease = 1 - p * p;
+      // 中心フラッシュ（序盤のみ）
+      if (p < 0.25) {
+        const fp = p / 0.25;
+        ctx.beginPath();
+        ctx.arc(ef.x, ef.y, 8 * (1 - fp), 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255,255,230,${((1 - fp) * 0.7).toFixed(2)})`;
+        ctx.fill();
+      }
       // 外輪
       ctx.beginPath();
-      ctx.arc(ef.x, ef.y, 6 + p * 28, 0, Math.PI * 2);
-      ctx.strokeStyle = `rgba(255,240,200,${(ease * 0.55).toFixed(2)})`;
-      ctx.lineWidth = 1.5;
+      ctx.arc(ef.x, ef.y, 6 + p * 34, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(255,235,140,${(ease * 0.85).toFixed(2)})`;
+      ctx.lineWidth = 2.5;
       ctx.stroke();
       // 内輪
       ctx.beginPath();
-      ctx.arc(ef.x, ef.y, 4 + p * 14, 0, Math.PI * 2);
-      ctx.strokeStyle = `rgba(255,255,255,${(ease * 0.45).toFixed(2)})`;
-      ctx.lineWidth = 1;
+      ctx.arc(ef.x, ef.y, 4 + p * 16, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(255,255,255,${(ease * 0.75).toFixed(2)})`;
+      ctx.lineWidth = 1.8;
       ctx.stroke();
       // 小粒子6個
       for (let k = 0; k < 6; k++) {
         const angle = (k / 6) * Math.PI * 2;
-        const dist = 10 + p * 22;
+        const dist = 12 + p * 26;
         ctx.beginPath();
-        ctx.arc(ef.x + Math.cos(angle) * dist, ef.y + Math.sin(angle) * dist, 1.2 * ease, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(255,245,210,${(ease * 0.7).toFixed(2)})`;
+        ctx.arc(ef.x + Math.cos(angle) * dist, ef.y + Math.sin(angle) * dist, 2.2 * ease, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255,245,180,${(ease * 0.9).toFixed(2)})`;
         ctx.fill();
       }
     }

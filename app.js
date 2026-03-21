@@ -1171,7 +1171,7 @@ function showGrowthScreen() {
 
   const medalCount = Object.values(S.medals).filter(v => v).length;
   const el = document.getElementById('growth-medal-count');
-  if (el) el.textContent = medalCount + 'こ';
+  if (el) el.textContent = medalCount;
 
   showScreen('screen-growth');
   _startGrowthAnim(charStage);

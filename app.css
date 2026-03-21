@@ -368,9 +368,8 @@ body {
 #growth-topbar {
   display: flex; align-items: center; justify-content: space-between;
   padding: 10px 14px; flex-shrink: 0; z-index: 2;
-  background: rgba(13,0,37,0.72);
 }
-#growth-medal-count-label { color: rgba(255,255,255,0.85); font-size: 13px; }
+#growth-medal-count-label { color: var(--text2); font-size: 13px; }
 
 /* ══════════════════
    BUTTONS

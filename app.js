@@ -1287,11 +1287,14 @@ function _startGrowthAnim(charStage) {
     const pt = e.touches ? e.touches[0] : e;
     addTapEffect(pt.clientX - rect.left, pt.clientY - rect.top);
   }
-  area.addEventListener('touchstart', onTapArea, { passive: true });
-  area.addEventListener('click', onTapArea);
+  let _lastTouch = 0;
+  function onTapTouch(e) { _lastTouch = Date.now(); onTapArea(e); }
+  function onTapClick(e) { if (Date.now() - _lastTouch > 400) onTapArea(e); }
+  area.addEventListener('touchstart', onTapTouch, { passive: true });
+  area.addEventListener('click', onTapClick);
   _growthTapCleanup = () => {
-    area.removeEventListener('touchstart', onTapArea);
-    area.removeEventListener('click', onTapArea);
+    area.removeEventListener('touchstart', onTapTouch);
+    area.removeEventListener('click', onTapClick);
   };
 
   // 草地の煌めき（下部の緑エリア）

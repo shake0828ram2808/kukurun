@@ -1966,19 +1966,10 @@ document.addEventListener('touchstart', () => Snd.unlock(), { once: true, passiv
       ctx.stroke();
       // 内輪
       ctx.beginPath();
-      ctx.arc(ef.x, ef.y, 4 + p * 16, 0, Math.PI * 2);
+      ctx.arc(ef.x, ef.y, 3 + p * 9, 0, Math.PI * 2);
       ctx.strokeStyle = `rgba(255,255,255,${(ease * 0.75).toFixed(2)})`;
-      ctx.lineWidth = 1.8;
+      ctx.lineWidth = 3;
       ctx.stroke();
-      // 小粒子6個
-      for (let k = 0; k < 6; k++) {
-        const angle = (k / 6) * Math.PI * 2;
-        const dist = 12 + p * 26;
-        ctx.beginPath();
-        ctx.arc(ef.x + Math.cos(angle) * dist, ef.y + Math.sin(angle) * dist, 2.2 * ease, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(255,245,180,${(ease * 0.9).toFixed(2)})`;
-        ctx.fill();
-      }
     }
     raf = effects.length ? requestAnimationFrame(loop) : null;
   }

@@ -365,11 +365,12 @@ body {
 /* scaleアニメを無効化（back-btnの位置ずれ防止） */
 #screen-growth.active { animation: growthFadeIn .22s ease; }
 @keyframes growthFadeIn { from { opacity: 0; } }
-#growth-medal-bar {
-  display: flex; align-items: center; justify-content: center; gap: 10px;
-  padding: 12px 16px; flex-shrink: 0;
-  background: rgba(255,255,255,0.1); color: #fff; font-size: 15px;
+#growth-topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 14px; flex-shrink: 0; z-index: 2;
+  background: rgba(13,0,37,0.72);
 }
+#growth-medal-count-label { color: rgba(255,255,255,0.85); font-size: 13px; }
 
 /* ══════════════════
    BUTTONS

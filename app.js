@@ -1329,8 +1329,11 @@ function showGrowthScreen() {
   _startGrowthAnim(charStage);
 }
 
+let _growthTouchAnim = null;
+
 function _startGrowthAnim(charStage) {
   stopGrowthAnim();
+  _growthTouchAnim = null;
   const area = document.getElementById('growth-area');
   if (!area) return;
 
@@ -1417,6 +1420,19 @@ function _startGrowthAnim(charStage) {
     eggImg = mainImg;
   }
 
+  // タッチ: 卵→ぐらぐら / キャラ→ぶるぶるぶるっ
+  if (mainImg) {
+    mainImg.onclick = (e) => {
+      e.stopPropagation();
+      tapSnd();
+      if (eggImg) {
+        _growthTouchAnim = { type: 'egg', born: Date.now() };
+      } else if (chars.length > 0) {
+        _growthTouchAnim = { type: 'char', born: Date.now(), charObj: chars[0] };
+      }
+    };
+  }
+
   // 以前に育てたadultキャラをうろうろ（なめらか飛行）
   S.adultCharacters.forEach(adultKind => {
     const adultImg = document.createElement('img');
@@ -1482,16 +1498,27 @@ function _startGrowthAnim(charStage) {
       sCtx.fill();
     });
 
-    // 卵のゆれ（ランダム間欠）
+    // 卵のゆれ（ランダム間欠 + タッチぐらぐら）
     if (eggImg) {
       const n = S.renshuClears;
       const wobbleAngle = [2, 5, 9, 14][Math.min(n, 3)];
       const period      = [6000, 4000, 2500, 1500][Math.min(n, 3)];
       const wobbleDur   = [600, 700, 800, 900][Math.min(n, 3)];
-      const phase = t % period;
-      const rot = phase < wobbleDur
-        ? Math.sin((phase / wobbleDur) * Math.PI * 2) * wobbleAngle
-        : 0;
+      let rot = 0;
+      if (_growthTouchAnim && _growthTouchAnim.type === 'egg') {
+        const age = Date.now() - _growthTouchAnim.born;
+        const shakeDur = 750;
+        if (age < shakeDur) {
+          rot = Math.sin((age / shakeDur) * Math.PI * 7) * 22 * (1 - age / shakeDur);
+        } else {
+          _growthTouchAnim = null;
+        }
+      } else {
+        const phase = t % period;
+        rot = phase < wobbleDur
+          ? Math.sin((phase / wobbleDur) * Math.PI * 2) * wobbleAngle
+          : 0;
+      }
       eggImg.style.transform = `translate(-50%,-60%) rotate(${rot.toFixed(2)}deg)`;
     }
 
@@ -1519,7 +1546,19 @@ function _startGrowthAnim(charStage) {
       c.facingLeft = c.vx < -0.1 ? true : c.vx > 0.1 ? false : c.facingLeft;
       const flipX = c.facingLeft ? -1 : 1;
       let tfm;
-      if (c.walk) {
+      if (_growthTouchAnim && _growthTouchAnim.type === 'char' && _growthTouchAnim.charObj === c) {
+        const age = Date.now() - _growthTouchAnim.born;
+        const shakeDur = 650;
+        if (age < shakeDur) {
+          const p = age / shakeDur;
+          const shakeRot = Math.sin(p * Math.PI * 9) * 18 * (1 - p);
+          const shakeX   = Math.sin(p * Math.PI * 11) * 6 * (1 - p);
+          tfm = `scaleX(${flipX}) translateX(${shakeX.toFixed(1)}px) rotate(${shakeRot.toFixed(2)}deg)`;
+        } else {
+          _growthTouchAnim = null;
+          tfm = `scaleX(${flipX})`;
+        }
+      } else if (c.walk) {
         // カタカタ歩き: 速度があるときだけ揺れる
         const moving = Math.abs(c.vx) > 0.2;
         const walkRot = moving ? Math.sin(t / c.walkPeriod) * c.walkAngle : 0;

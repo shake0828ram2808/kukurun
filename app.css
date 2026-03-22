@@ -662,6 +662,16 @@ body {
   transform: translateY(3px) !important;
   box-shadow: 0 1px 0 #C4DCF0 !important;
 }
+.ans-erase {
+  background: var(--red-lt); color: var(--red);
+  font-size: 15px; border-color: #F4AAAA;
+  box-shadow: 0 4px 0 #f0c4c4, 0 2px 8px rgba(27,38,64,.08);
+}
+.ans-erase:active {
+  background: var(--red); color: #fff;
+  transform: translateY(3px) !important;
+  box-shadow: 0 1px 0 #c44 !important;
+}
 .q-typing { color: var(--theme); animation: popIn .15s cubic-bezier(.34,1.56,.64,1); }
 @keyframes shake {
   0%,100% { transform: translateX(0); }

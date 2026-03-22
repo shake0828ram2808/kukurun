@@ -698,6 +698,9 @@ body {
   line-height: 1;
   animation: certSparkleFall linear forwards;
 }
+.cert-sparkle.colorful {
+  animation-name: certSparkleColorFall;
+}
 @keyframes certSparkleFall {
   0%   { transform: translateY(0)     rotate(0deg);   color: #fff;    text-shadow: 0 0 8px #fff, 0 0 18px #FFD700; opacity: 0; }
   8%   { opacity: 1; }
@@ -705,6 +708,17 @@ body {
   55%  { color: #fff;    text-shadow: 0 0 12px #fff,   0 0 24px #FFD700, 0 0 40px #FFD700; }
   80%  { color: #FFD700; text-shadow: 0 0 12px #FFD700, 0 0 24px #FF8F00; }
   92%  { opacity: 1; }
+  100% { transform: translateY(112vh) rotate(720deg); color: #fff; text-shadow: 0 0 8px #fff; opacity: 0; }
+}
+@keyframes certSparkleColorFall {
+  0%   { transform: translateY(0)      rotate(0deg);   color: #fff;    text-shadow: 0 0 10px #fff; opacity: 0; }
+  8%   { opacity: 1; }
+  20%  { color: #FF6B6B; text-shadow: 0 0 14px #FF6B6B, 0 0 28px #FF0000; }
+  35%  { color: #FFD700; text-shadow: 0 0 14px #FFD700, 0 0 28px #FF8F00; }
+  50%  { color: #66FF99; text-shadow: 0 0 14px #66FF99, 0 0 28px #00CC44; }
+  65%  { color: #66CCFF; text-shadow: 0 0 14px #66CCFF, 0 0 28px #0088FF; }
+  80%  { color: #FF88FF; text-shadow: 0 0 14px #FF88FF, 0 0 28px #CC00CC; }
+  92%  { color: #FF6B6B; opacity: 1; }
   100% { transform: translateY(112vh) rotate(720deg); color: #fff; text-shadow: 0 0 8px #fff; opacity: 0; }
 }
 

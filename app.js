@@ -683,7 +683,7 @@ function certSparkle(isKukuMaster) {
       const el    = document.createElement('span');
       const dur   = 2.4 + Math.random() * 2.6;
       const delay = wDelay + Math.random() * maxDly;
-      el.className = 'cert-sparkle';
+      el.className = isKukuMaster ? 'cert-sparkle colorful' : 'cert-sparkle';
       el.textContent = glyphs[~~(Math.random() * glyphs.length)];
       el.style.cssText = [
         `left:${Math.random()*100}vw`,

@@ -960,6 +960,7 @@ body {
   display: none; flex-wrap: nowrap; gap: 6px;
   width: 100%; flex-shrink: 0;
   padding: 6px 16px;
+  margin-bottom: 14px;
   box-sizing: border-box;
   max-width: 430px; align-self: center;
 }

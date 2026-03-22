@@ -572,12 +572,12 @@ const MEDAL_CLR = { bronze:'#CD7F32', silver:'#B8C0CC', gold:'#FFD700' };
 
 /* ── しょうじょう種別 ── */
 const CERT_TYPES = [
-  { id:'oboeru',  label:'おぼえる',  mLabel:'おぼえる　めだる',  icon:'🎖️', iconStyle:'filter:hue-rotate(300deg);', btnColor:'#7B68EE', btnShadow:'#5548CC', btnText:'#fff', check:(m)=>m&&m.oboeru },
-  { id:'renshu',  label:'れんしゅう', mLabel:'れんしゅう　めだる', icon:'🎖️', iconStyle:'filter:hue-rotate(120deg);', btnColor:'#4CAF7D', btnShadow:'#357A58', btnText:'#fff', check:(m)=>m&&m.renshu },
-  { id:'bronze',  label:'どう',      mLabel:'どう　めだる',      icon:'🥉', btnColor:'#CD7F32', btnShadow:'#9A5C1E', btnText:'#fff', check:(m)=>m&&m.test },
-  { id:'silver',  label:'ぎん',      mLabel:'ぎん　めだる',      icon:'🥈', btnColor:'#9E9E9E', btnShadow:'#6E6E6E', btnText:'#fff', check:(m)=>m&&(m.test==='silver'||m.test==='gold') },
-  { id:'gold',    label:'きん',      mLabel:'きん　めだる',      icon:'🥇', btnColor:'#FFB300', btnShadow:'#B87800', btnText:'#5a3a00', check:(m)=>m&&m.test==='gold' },
-  { id:'kukumaster', label:'くく', mLabel:'すべての　めだる',  icon:'👑', btnColor:'#9C27B0', btnShadow:'#6A1B9A', btnText:'#fff',
+  { id:'oboeru',  label:'おぼえる',  mLabel:'おぼえる　めだる',  icon:'🎖️', iconStyle:'filter:hue-rotate(105deg) saturate(1.1);', btnColor:'#c4e8d4', btnShadow:'#8ec4a8', btnText:'#1a4230', check:(m)=>m&&m.oboeru },
+  { id:'renshu',  label:'れんしゅう', mLabel:'れんしゅう　めだる', icon:'🎖️', iconStyle:'filter:hue-rotate(145deg);', btnColor:'#b8dff0', btnShadow:'#7cbad8', btnText:'#0e3a55', check:(m)=>m&&m.renshu },
+  { id:'bronze',  label:'どう',      mLabel:'どう　めだる',      icon:'🥉', btnColor:'#edd8b4', btnShadow:'#c09058', btnText:'#5a3210', check:(m)=>m&&m.test },
+  { id:'silver',  label:'ぎん',      mLabel:'ぎん　めだる',      icon:'🥈', btnColor:'#dde0e8', btnShadow:'#aab0bc', btnText:'#363c48', check:(m)=>m&&(m.test==='silver'||m.test==='gold') },
+  { id:'gold',    label:'きん',      mLabel:'きん　めだる',      icon:'🥇', btnColor:'#fce89a', btnShadow:'#d4a830', btnText:'#4a3200', check:(m)=>m&&m.test==='gold' },
+  { id:'kukumaster', label:'くく', mLabel:'すべての　めだる',  icon:'👑', btnColor:'#e8ccf5', btnShadow:'#c088e0', btnText:'#3a1050',
     check: null, // 専用チェック: 全段 oboeru+renshu+test=gold
     isKukuMaster: true },
 ];
@@ -646,7 +646,7 @@ function buildCertBtns() {
     const btn = document.createElement('button');
     btn.className = 'btn btn-sm cert-icon-btn';
     if (isEarned) {
-      btn.style.cssText = `background:#c4bcf7;color:#fff;border-color:#b0a7f0;box-shadow:0 4px 0 #8f84d4,var(--sh);flex:1;min-width:0;`;
+      btn.style.cssText = `background:${ct.btnColor};color:${ct.btnText};border-color:${ct.btnShadow};box-shadow:0 4px 0 ${ct.btnShadow},var(--sh);flex:1;min-width:0;`;
       btn.innerHTML = ct.iconStyle ? `<span style="${ct.iconStyle}">${ct.icon}</span>` : ct.icon;
       btn.onclick = () => { tapSnd(); showCertificate(ct.id); };
     } else {

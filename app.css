@@ -374,7 +374,7 @@ body {
 }
 .growth-heart {
   position: absolute;
-  font-size: 18px;
+  font-size: 13px;
   pointer-events: none;
   z-index: 20;
   animation: floatHeart 1.3s ease-out forwards;

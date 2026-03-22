@@ -255,6 +255,12 @@ function stopBalloonTimer(screen) {
   }
 }
 
+/** タイマーだけ5秒リセット（メッセージ・インデックスは変えない） */
+function _resetBalloonTimer(screen) {
+  stopBalloonTimer(screen);
+  _msgTimers[screen] = setInterval(() => _nextBalloonMsg(screen), 5000);
+}
+
 /* ── ホーム画面タップ ── */
 let HOME_KUKURUN_MESSAGES = []; // 後方互換のため残す
 
@@ -263,8 +269,9 @@ async function homeKukurunTalk() {
   kukurunState.isJumping = true;
   const svg = document.getElementById('home-kukurun-svg');
   playKukurunTapAnim(svg);
-  // タップで次のメッセージへ
+  // タップで次のメッセージへ、かつ5秒タイマーをリセット
   _nextBalloonMsg('home');
+  _resetBalloonTimer('home');
   Snd.tap();
   for (let m of ['O', 'A', 'I', 'U', 'O']) { setKukurunMouth(m); await new Promise(r => setTimeout(r, 120)); }
   setKukurunSmile(true);

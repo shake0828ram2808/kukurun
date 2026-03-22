@@ -567,12 +567,12 @@ const MEDAL_CLR = { bronze:'#CD7F32', silver:'#B8C0CC', gold:'#FFD700' };
 
 /* ── しょうじょう種別 ── */
 const CERT_TYPES = [
-  { id:'oboeru',  label:'おぼえる',  mLabel:'おぼえる　めだる',  btnColor:'#7B68EE', btnShadow:'#5548CC', btnText:'#fff', check:(m)=>m&&m.oboeru },
-  { id:'renshu',  label:'れんしゅう', mLabel:'れんしゅう　めだる', btnColor:'#4CAF7D', btnShadow:'#357A58', btnText:'#fff', check:(m)=>m&&m.renshu },
-  { id:'bronze',  label:'どう',      mLabel:'どう　めだる',      btnColor:'#CD7F32', btnShadow:'#9A5C1E', btnText:'#fff', check:(m)=>m&&m.test },
-  { id:'silver',  label:'ぎん',      mLabel:'ぎん　めだる',      btnColor:'#9E9E9E', btnShadow:'#6E6E6E', btnText:'#fff', check:(m)=>m&&(m.test==='silver'||m.test==='gold') },
-  { id:'gold',    label:'きん',      mLabel:'きん　めだる',      btnColor:'#FFB300', btnShadow:'#B87800', btnText:'#5a3a00', check:(m)=>m&&m.test==='gold' },
-  { id:'kukumaster', label:'くく', mLabel:'すべての　めだる',  btnColor:'#9C27B0', btnShadow:'#6A1B9A', btnText:'#fff',
+  { id:'oboeru',  label:'おぼえる',  mLabel:'おぼえる　めだる',  icon:'📖', btnColor:'#7B68EE', btnShadow:'#5548CC', btnText:'#fff', check:(m)=>m&&m.oboeru },
+  { id:'renshu',  label:'れんしゅう', mLabel:'れんしゅう　めだる', icon:'✏️', btnColor:'#4CAF7D', btnShadow:'#357A58', btnText:'#fff', check:(m)=>m&&m.renshu },
+  { id:'bronze',  label:'どう',      mLabel:'どう　めだる',      icon:'🥉', btnColor:'#CD7F32', btnShadow:'#9A5C1E', btnText:'#fff', check:(m)=>m&&m.test },
+  { id:'silver',  label:'ぎん',      mLabel:'ぎん　めだる',      icon:'🥈', btnColor:'#9E9E9E', btnShadow:'#6E6E6E', btnText:'#fff', check:(m)=>m&&(m.test==='silver'||m.test==='gold') },
+  { id:'gold',    label:'きん',      mLabel:'きん　めだる',      icon:'🥇', btnColor:'#FFB300', btnShadow:'#B87800', btnText:'#5a3a00', check:(m)=>m&&m.test==='gold' },
+  { id:'kukumaster', label:'くく', mLabel:'すべての　めだる',  icon:'👑', btnColor:'#9C27B0', btnShadow:'#6A1B9A', btnText:'#fff',
     check: null, // 専用チェック: 全段 oboeru+renshu+test=gold
     isKukuMaster: true },
 ];
@@ -636,16 +636,37 @@ function buildCertBtns() {
   const row = document.getElementById('cert-btn-row');
   if (!row) return;
   row.innerHTML = '';
-  const earned = CERT_TYPES.filter(ct => S.certificates[ct.id]);
-  row.style.display = earned.length ? 'flex' : 'none';
-  earned.forEach(ct => {
+  row.style.display = 'flex';
+  CERT_TYPES.forEach(ct => {
+    const isEarned = !!S.certificates[ct.id];
     const btn = document.createElement('button');
-    btn.className = 'btn btn-sm';
-    btn.style.cssText = `background:${ct.btnColor};color:${ct.btnText};border-color:${ct.btnColor};box-shadow:0 4px 0 ${ct.btnShadow},var(--sh);flex:1;min-width:0;`;
-    btn.textContent = ct.label + '\u00a0しょうじょう';
-    btn.onclick = () => { tapSnd(); showCertificate(ct.id); };
+    btn.className = 'btn btn-sm cert-icon-btn';
+    if (isEarned) {
+      btn.style.cssText = `background:${ct.btnColor};color:${ct.btnText};border-color:${ct.btnColor};box-shadow:0 4px 0 ${ct.btnShadow},var(--sh);flex:1;min-width:0;`;
+      btn.textContent = ct.icon;
+      btn.onclick = () => { tapSnd(); showCertificate(ct.id); };
+    } else {
+      btn.style.cssText = `background:#ccc;color:#888;border-color:#bbb;box-shadow:0 4px 0 #aaa,var(--sh);flex:1;min-width:0;`;
+      btn.textContent = '🔒';
+      btn.onclick = (e) => { tapSnd(); showCertTooltip(btn, ct.label + 'ますたーの\u3000しょうじょうを\u3000もらうと\u3000みられるようになるよ'); };
+    }
     row.appendChild(btn);
   });
+}
+let _certTooltipTimer = null;
+function showCertTooltip(anchorEl, msg) {
+  let tip = document.getElementById('cert-tooltip');
+  if (!tip) {
+    tip = document.createElement('div');
+    tip.id = 'cert-tooltip';
+    document.body.appendChild(tip);
+  }
+  tip.textContent = msg;
+  const rect = anchorEl.getBoundingClientRect();
+  tip.style.cssText = `position:fixed;left:50%;transform:translateX(-50%);top:${Math.max(rect.top - 70, 8)}px;background:rgba(40,40,60,.92);color:#fff;font-size:13px;padding:8px 14px;border-radius:12px;line-height:1.6;max-width:88vw;text-align:center;z-index:9999;pointer-events:none;white-space:pre-wrap;`;
+  tip.style.opacity = '1';
+  clearTimeout(_certTooltipTimer);
+  _certTooltipTimer = setTimeout(() => { if (tip) tip.style.opacity = '0'; }, 2800);
 }
 function showCertificate(id) {
   const ct = CERT_TYPES.find(c => c.id === id);

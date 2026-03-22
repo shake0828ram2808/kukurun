@@ -664,6 +664,25 @@ function showCertificate(id) {
     <div class="cert-deco bot">── ✦ ── ✦ ── ✦ ──</div>
   `;
   showScreen('screen-cert');
+  certSparkle();
+}
+function certSparkle() {
+  const glyphs = ['✦','★','◆','✸','⬟','✺'];
+  const golds  = ['#FFD700','#FFC107','#FFB300','#FFECB3','#FFF8DC','#E8C958'];
+  for (let i = 0; i < 55; i++) {
+    const el = document.createElement('span');
+    el.className = 'cert-sparkle';
+    el.textContent = glyphs[~~(Math.random() * glyphs.length)];
+    el.style.cssText = [
+      `left:${Math.random()*100}vw`,
+      `color:${golds[~~(Math.random()*golds.length)]}`,
+      `font-size:${10 + Math.random()*18}px`,
+      `animation-duration:${1.8 + Math.random()*2.5}s`,
+      `animation-delay:${Math.random()*1.2}s`,
+    ].join(';');
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 5000);
+  }
 }
 function checkGraduation() {
   if (!S.selectedEgg || S._pendingGraduation) return;

@@ -539,10 +539,15 @@ function goSuffix() {
   document.getElementById('suffix-preview').textContent = S.name;
   showScreen('screen-suffix');
 }
-// sufixから卵選択へ
+// sufixから卵選択へ（名前変更時は卵選択をスキップして設定へ戻る）
 function goEggSelect() {
   Snd.tap(); S.suffix = S.selSuffix;
   saveState();
+  if (_skipEggSelect) {
+    _skipEggSelect = false;
+    openSettings();
+    return;
+  }
   buildEggSelectGrid();
   showScreen('screen-egg-select');
 }
@@ -701,7 +706,7 @@ function showCertificate(id) {
     <div class="cert-title">しょうじょう</div>
     <div class="cert-master">${ct.label}　マスター</div>
     <div class="cert-name">${nameOnly}　どの</div>
-    <div class="cert-body">${nameOnly}どのは　${ct.mLabel}を　すべて　あつめることができました。そのえいよを　たたえるとともに　どりょくを　ここに　しょうします。これからも　くくを　たのしんで　おぼえてください。</div>
+    <div class="cert-body">${nameOnly}どのは　${ct.mLabel}を　すべて　あつめることが　できました。そのえいよを　たたえるとともに　どりょくを　ここに　しょうします。これからも　くくを　たのしんで　おぼえてください。</div>
     <div class="cert-date">${dateStr}</div>
     <div class="cert-issuer">くくるん</div>
     <div class="cert-deco bot">── ✦ ── ✦ ── ✦ ──</div>
@@ -1071,8 +1076,9 @@ function buildAnsGrid() {
   bDel.className = 'ans-btn ans-del'; bDel.textContent = 'けす';
   bDel.onclick = () => deleteDigit(); g.appendChild(bDel);
 
-  const bSp = document.createElement('div'); // spacer
-  bSp.style.cssText = 'visibility:hidden;'; g.appendChild(bSp);
+  const bHint = document.createElement('button');
+  bHint.className = 'ans-btn ans-del'; bHint.textContent = 'ヒント';
+  bHint.onclick = () => showFruitHint(); g.appendChild(bHint);
 
   // ── 2〜4行目: 1-9 ──
   for (let n = 1; n <= 9; n++) {
@@ -1080,6 +1086,33 @@ function buildAnsGrid() {
     b.className = 'ans-btn'; b.textContent = KD.fw(n); b.dataset.val = n;
     b.onclick = () => inputDigit(String(n)); g.appendChild(b);
   }
+}
+
+function showFruitHint() {
+  const p = S.probs[S.idx];
+  if (!p) return;
+  Snd.tap();
+  const fruits = ['🍎', '🍊', '🍋'];
+  const fruit = fruits[Math.floor(Math.random() * fruits.length)];
+  let rows = '';
+  for (let i = 0; i < p.dan; i++) {
+    rows += `<div style="margin:5px 0;font-size:22px;line-height:1.4;">🍽 ${fruit.repeat(p.multiplier)}</div>`;
+  }
+  // 既存のモーダルがあれば閉じる
+  document.getElementById('fruit-hint-overlay')?.remove();
+  const overlay = document.createElement('div');
+  overlay.id = 'fruit-hint-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:9999;';
+  overlay.innerHTML = `
+    <div style="background:#fff;border-radius:16px;padding:20px 24px 20px;min-width:220px;max-width:300px;position:relative;text-align:center;font-family:var(--font);">
+      <button onclick="document.getElementById('fruit-hint-overlay').remove()"
+              style="position:absolute;top:10px;right:10px;background:none;border:1px solid var(--border);border-radius:20px;font-size:12px;padding:3px 10px;cursor:pointer;color:var(--text2);font-family:var(--font);">とじる</button>
+      <div style="font-size:20px;margin-top:6px;margin-bottom:10px;color:var(--theme);">${KD.fw(p.dan)}×${KD.fw(p.multiplier)}</div>
+      ${rows}
+      <div style="font-size:12px;color:var(--text2);margin-top:10px;">${p.dan}さらに　${p.multiplier}こずつ</div>
+    </div>`;
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+  document.body.appendChild(overlay);
 }
 
 function deleteDigit() {
@@ -1460,7 +1493,8 @@ function _startGrowthAnim(charStage) {
       const cy = c.y + iH / 2;
       if (Math.hypot(clickX - cx, clickY - cy) < iH + 60) {
         tapSnd();
-        c.shakeStart = Date.now();
+        if (Math.random() < 0.5) { c.shakeStart = Date.now(); }
+        else                      { c.spinStart  = Date.now(); }
         _spawnHearts(cx, cy - iH * 0.4);
         return;
       }
@@ -1580,7 +1614,17 @@ function _startGrowthAnim(charStage) {
       c.facingLeft = c.vx < -0.1 ? true : c.vx > 0.1 ? false : c.facingLeft;
       const flipX = c.facingLeft ? -1 : 1;
       let tfm;
-      if (c.shakeStart) {
+      if (c.spinStart) {
+        const age = Date.now() - c.spinStart;
+        const dur = 560;
+        if (age < dur) {
+          const eased = 1 - Math.pow(1 - age / dur, 2);
+          tfm = `scaleX(${flipX}) rotate(${(eased * 360).toFixed(1)}deg)`;
+        } else {
+          c.spinStart = null;
+          tfm = `scaleX(${flipX})`;
+        }
+      } else if (c.shakeStart) {
         const age = Date.now() - c.shakeStart;
         if (age < 650) {
           const p = age / 650;
@@ -2072,6 +2116,7 @@ function toggleSpeech() {
 
 function goChangeName() {
   // 名前入力画面へ（現在の名前をクリア）
+  _skipEggSelect = true;
   const nd = document.getElementById('name-display');
   if (nd) nd.innerHTML = '<span class="name-placeholder">ここに　でるよ</span>';
   const ok = document.getElementById('name-ok-btn');
@@ -2080,6 +2125,7 @@ function goChangeName() {
   speak('あたらしい　なまえを　おしえてね');
 }
 
+let _skipEggSelect = false;
 let _confirmType = null;
 function openConfirm(type) {
   _confirmType = type;

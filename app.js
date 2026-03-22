@@ -1093,7 +1093,8 @@ function showFruitHint() {
   if (!p) return;
   Snd.tap();
   // 箱を p.multiplier 個、各箱に p.dan 個の🍬
-  const candy = '🍬';
+  const sweets = ['🍬', '🍩', '🍰'];
+  const candy = sweets[Math.floor(Math.random() * sweets.length)];
   let boxes = '';
   for (let i = 0; i < p.multiplier; i++) {
     const candies = `<span style="font-size:20px;letter-spacing:1px;">${candy.repeat(p.dan)}</span>`;

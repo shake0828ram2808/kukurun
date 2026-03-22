@@ -957,7 +957,7 @@ body {
    しょうじょう
 ══════════════════ */
 #cert-btn-row {
-  display: flex; flex-wrap: nowrap; gap: 6px;
+  display: none; flex-wrap: nowrap; gap: 6px;
   width: 100%; flex-shrink: 0;
   padding: 6px 16px;
   box-sizing: border-box;

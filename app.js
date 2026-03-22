@@ -338,6 +338,8 @@ function restoreSession() {
   const balloonText = document.getElementById('balloon-text');
   if (balloonText) balloonText.textContent = greetingText;
   buildDanGrid();
+  const cr = document.getElementById('cert-btn-row');
+  if (cr) cr.style.display = 'flex';
   updateCreature();
   eggWobble.start();
 }
@@ -372,7 +374,10 @@ function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   const bb = document.getElementById('bottom-bar');
-  if (bb) bb.style.display = ['screen-name', 'screen-suffix', 'screen-egg-select'].includes(id) ? 'none' : '';
+  const noChrome = ['screen-name', 'screen-suffix', 'screen-egg-select'].includes(id);
+  if (bb) bb.style.display = noChrome ? 'none' : '';
+  const cr = document.getElementById('cert-btn-row');
+  if (cr) cr.style.display = id === 'screen-home' ? 'flex' : 'none';
   window.scrollTo(0, 0);
 }
 

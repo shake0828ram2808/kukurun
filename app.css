@@ -919,3 +919,80 @@ body {
   margin-top: 6px;
 }
 .confirm-btns button { flex: 1; }
+
+/* ══════════════════
+   しょうじょう
+══════════════════ */
+#cert-btn-row { width: 100%; }
+.cert-paper {
+  background: #fffef5;
+  border: 5px solid #C9A227;
+  box-shadow:
+    0 0 0 2px #fef9d0,
+    0 0 0 4px #C9A227,
+    0 8px 24px rgba(0,0,0,.2);
+  border-radius: 4px;
+  padding: 30px 22px 26px;
+  position: relative;
+  font-family: var(--font);
+}
+.cert-paper::before {
+  content: '';
+  position: absolute;
+  inset: 9px;
+  border: 2px solid #C9A227;
+  border-radius: 2px;
+  pointer-events: none;
+  opacity: .55;
+}
+.cert-corner {
+  position: absolute;
+  font-size: 18px;
+  color: #B8860B;
+  line-height: 1;
+}
+.cert-corner.tl { top: 3px; left: 6px; }
+.cert-corner.tr { top: 3px; right: 6px; }
+.cert-corner.bl { bottom: 3px; left: 6px; }
+.cert-corner.br { bottom: 3px; right: 6px; }
+.cert-deco {
+  text-align: center;
+  color: #C9A227;
+  font-size: 12px;
+  letter-spacing: 2px;
+  margin-bottom: 12px;
+}
+.cert-deco.bot { margin-top: 16px; margin-bottom: 0; }
+.cert-title {
+  text-align: center;
+  font-size: 26px;
+  font-weight: bold;
+  letter-spacing: 8px;
+  margin-bottom: 18px;
+}
+.cert-master {
+  font-size: 15px;
+  margin-bottom: 6px;
+}
+.cert-name {
+  font-size: 20px;
+  text-align: right;
+  margin-bottom: 22px;
+}
+.cert-body {
+  font-size: 13px;
+  line-height: 2.2;
+  margin-bottom: 20px;
+}
+.cert-date {
+  font-size: 12px;
+  text-align: right;
+  color: var(--text2);
+  margin-bottom: 6px;
+}
+.cert-issuer {
+  font-size: 20px;
+  text-align: right;
+  font-weight: bold;
+  color: var(--theme);
+}

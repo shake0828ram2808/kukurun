@@ -27,6 +27,8 @@
 | `screen-test` | テストモード。メダル判定あり |
 | `screen-test-result` | テスト結果表示 |
 | `screen-clear` | 成長マイルストーン祝福画面 |
+| `screen-growth` | せいちょうをみる画面（キャラ・星空アニメ） |
+| `screen-cert` | しょうじょう画面（金縁賞状デザイン） |
 
 ---
 
@@ -43,7 +45,8 @@
 
 | 分類 | 主な変数・関数 |
 |---|---|
-| ゲーム状態 | `S`（グローバル状態オブジェクト）: `name` / `dan` / `renshuClears` / `medals` など |
+| ゲーム状態 | `S`（グローバル状態オブジェクト）: `name` / `dan` / `renshuClears` / `medals` / `certificates` など |
+| しょうじょう | `CERT_TYPES` / `checkCertificates()` / `buildCertBtns()` / `showCertificate(id)` |
 | スプライト制御 | `getEggSprite()` / `getCharSprite()` / `updateCreature()` |
 | たまご揺れ | `eggWobble`（IIFEモジュール）|
 | キャラ移動 | `charAnim`（IIFEモジュール・RAFループ） |

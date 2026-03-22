@@ -285,6 +285,7 @@ const S = {
   adultCharacters: [],  // 成人になったキャラリスト
   done: {},           // クリア済み段
   medals: {},         // メダル: null|'bronze'|'silver'|'gold'
+  certificates: {},   // しょうじょう取得日: { oboeru: 'YYYYねん...', renshu, bronze, silver, gold }
   _growthBase: 0,       // 現在のキャラの成長ベース（卒業ごとに加算）
   _pendingGraduation: false,  // 卒業遷移中フラグ
   isFirstAccess: true,  // 初回アクセスか
@@ -313,6 +314,7 @@ function saveState() {
       isFirstAccess: S.isFirstAccess,
       renshuAnsTime: S.renshuAnsTime,
       testAnsTime: S.testAnsTime,
+      certificates: S.certificates,
     }));
   } catch(e) {}
 }
@@ -323,7 +325,7 @@ function loadState() {
     const d = JSON.parse(raw);
     ['name','suffix','speechEnabled','medals','adultCharacters',
      'selectedEgg','_growthBase','renshuClears','done','hanamaruCount','isFirstAccess',
-     'renshuAnsTime','testAnsTime']
+     'renshuAnsTime','testAnsTime','certificates']
       .forEach(k => { if (d[k] !== undefined) S[k] = d[k]; });
   } catch(e) {}
 }
@@ -563,6 +565,15 @@ function goHomeFromEgg() {
 ════════════════════════════════ */
 const MEDAL_CLR = { bronze:'#CD7F32', silver:'#B8C0CC', gold:'#FFD700' };
 
+/* ── しょうじょう種別 ── */
+const CERT_TYPES = [
+  { id:'oboeru',  label:'おぼえる',  mLabel:'おぼえる　めだる',  btnColor:'#7B68EE', btnShadow:'#5548CC', btnText:'#fff', check:(m)=>m&&m.oboeru },
+  { id:'renshu',  label:'れんしゅう', mLabel:'れんしゅう　めだる', btnColor:'#4CAF7D', btnShadow:'#357A58', btnText:'#fff', check:(m)=>m&&m.renshu },
+  { id:'bronze',  label:'ブロンズ',  mLabel:'ブロンズ　めだる',  btnColor:'#CD7F32', btnShadow:'#9A5C1E', btnText:'#fff', check:(m)=>m&&m.test },
+  { id:'silver',  label:'ぎん',      mLabel:'ぎん　めだる',      btnColor:'#9E9E9E', btnShadow:'#6E6E6E', btnText:'#fff', check:(m)=>m&&(m.test==='silver'||m.test==='gold') },
+  { id:'gold',    label:'きん',      mLabel:'きん　めだる',      btnColor:'#FFB300', btnShadow:'#B87800', btnText:'#5a3a00', check:(m)=>m&&m.test==='gold' },
+];
+
 /* ── メダルヘルパー ──
    S.medals[dan] = { oboeru: bool, renshu: bool, test: null|'bronze'|'silver'|'gold' }
    growthLevel(): 全段のメダル合計（max 27）→ 成長ドライバー（1段スパム防止） */
@@ -604,6 +615,55 @@ function updateGrowthFromMedals() {
     eggWobble.restart();
   }
   checkGraduation();
+  checkCertificates();
+}
+function checkCertificates() {
+  const t = new Date();
+  const dateStr = `${t.getFullYear()}ねん${t.getMonth()+1}がつ${t.getDate()}にち`;
+  CERT_TYPES.forEach(ct => {
+    if (S.certificates[ct.id]) return;
+    if ([1,2,3,4,5,6,7,8,9].every(d => ct.check(S.medals[d]))) {
+      S.certificates[ct.id] = dateStr;
+      buildCertBtns();
+    }
+  });
+}
+function buildCertBtns() {
+  const row = document.getElementById('cert-btn-row');
+  if (!row) return;
+  row.innerHTML = '';
+  const earned = CERT_TYPES.filter(ct => S.certificates[ct.id]);
+  row.style.display = earned.length ? 'flex' : 'none';
+  earned.forEach(ct => {
+    const btn = document.createElement('button');
+    btn.className = 'btn btn-sm';
+    btn.style.cssText = `background:${ct.btnColor};color:${ct.btnText};border-color:${ct.btnColor};box-shadow:0 4px 0 ${ct.btnShadow},var(--sh);flex:1;min-width:0;`;
+    btn.textContent = ct.label + '\u00a0しょうじょう';
+    btn.onclick = () => { tapSnd(); showCertificate(ct.id); };
+    row.appendChild(btn);
+  });
+}
+function showCertificate(id) {
+  const ct = CERT_TYPES.find(c => c.id === id);
+  if (!ct) return;
+  const dateStr = S.certificates[id] || '';
+  const nameOnly = S.name;
+  const paper = document.getElementById('cert-paper');
+  paper.innerHTML = `
+    <span class="cert-corner tl">✦</span>
+    <span class="cert-corner tr">✦</span>
+    <span class="cert-corner bl">✦</span>
+    <span class="cert-corner br">✦</span>
+    <div class="cert-deco">── ✦ ── ✦ ── ✦ ──</div>
+    <div class="cert-title">しょうじょう</div>
+    <div class="cert-master">${ct.label}　ますたー</div>
+    <div class="cert-name">${nameOnly}　どの</div>
+    <div class="cert-body">${nameOnly}どのは　${ct.mLabel}を　すべて　あつめることができました。そのえいよを　たたえるとともに　どりょくを　ここに　しょうします。</div>
+    <div class="cert-date">${dateStr}</div>
+    <div class="cert-issuer">くくるん</div>
+    <div class="cert-deco bot">── ✦ ── ✦ ── ✦ ──</div>
+  `;
+  showScreen('screen-cert');
 }
 function checkGraduation() {
   if (!S.selectedEgg || S._pendingGraduation) return;
@@ -660,6 +720,7 @@ function buildDanGrid() {
     g.appendChild(b);
   }
   refreshDanBadge('random');
+  buildCertBtns();
 }
 function refreshDanBadge(dan) {
   const b = document.getElementById(dan === 'random' ? 'dan-btn-random' : `dan-btn-${dan}`);
@@ -1878,6 +1939,7 @@ function closeConfirm() {
 function executeConfirm() {
   if (_confirmType === 'medal') {
     S.medals = {};
+    S.certificates = {};
     S._growthBase = 0;
     S.adultCharacters = [];
     S.selectedEgg = null;

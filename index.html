@@ -622,7 +622,7 @@
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
       ホームに　もどる
     </button>
-    <div id="version-badge">ver.2026.0322.0071</div>
+    <div id="version-badge">ver.2026.0322.0072</div>
   </div>
   <div class="card">
     <div class="sec-lbl" style="margin-bottom:8px;">せってい</div>
@@ -637,7 +637,7 @@
         <div class="settings-row-label">なまえを　かえる</div>
         <div class="settings-row-sub" id="settings-name-label"></div>
       </div>
-      <button class="btn btn-outline" onclick="tapSnd();goChangeName()">かえる</button>
+      <button class="btn btn-outline" onclick="tapSnd();openConfirm('name')">かえる</button>
     </div>
     <div class="settings-row settings-row-col">
       <div class="settings-row-text">
@@ -757,7 +757,7 @@
     <div class="confirm-title" id="confirm-title"></div>
     <div class="confirm-msg" id="confirm-msg"></div>
     <div class="confirm-btns">
-      <button class="btn" onclick="closeConfirm()">やめる</button>
+      <button class="btn" id="confirm-cancel-btn" onclick="closeConfirm()">やめる</button>
       <button class="btn btn-primary" id="confirm-ok-btn" onclick="executeConfirm()">けす</button>
     </div>
   </div>

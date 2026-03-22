@@ -1294,16 +1294,17 @@ function debugBuildCertBtns() {
   row.innerHTML = '';
   CERT_TYPES.forEach(ct => {
     const btn = document.createElement('button');
-    btn.style.cssText = `font-family:var(--font);font-size:12px;padding:5px 8px;border:2px solid ${ct.btnColor};border-radius:8px;background:#fff;color:${ct.btnColor};cursor:pointer;`;
-    btn.textContent = '📜 ' + ct.label;
+    btn.className = 'btn btn-sm cert-icon-btn';
+    btn.style.cssText = `background:${ct.btnColor};color:${ct.btnText};border-color:${ct.btnShadow};box-shadow:0 4px 0 ${ct.btnShadow},var(--sh);flex:1;min-width:0;`;
+    btn.innerHTML = ct.iconStyle ? `<span style="${ct.iconStyle}">${ct.icon}</span>` : ct.icon;
     btn.onclick = () => {
-      // 仮の証明書データがなければデバッグ用に今日の日付でセット
+      tapSnd();
       const t = new Date();
       const tmp = `${t.getFullYear()}ねん${t.getMonth()+1}がつ${t.getDate()}にち`;
       const prev = S.certificates[ct.id];
       if (!prev) S.certificates[ct.id] = tmp;
       showCertificate(ct.id);
-      if (!prev) delete S.certificates[ct.id]; // 保存はしない
+      if (!prev) delete S.certificates[ct.id];
     };
     row.appendChild(btn);
   });
@@ -2126,15 +2127,26 @@ function openConfirm(type) {
   _confirmType = type;
   const title = document.getElementById('confirm-title');
   const msg = document.getElementById('confirm-msg');
-  if (type === 'medal') {
+  const okBtn = document.getElementById('confirm-ok-btn');
+  if (type === 'name') {
+    if (title) title.textContent = 'なまえを　かえる';
+    if (msg) msg.textContent = 'なまえを　かえると　はじめから\nいれなおすよ。\nほんとうに　かえる？';
+    if (okBtn) okBtn.textContent = 'かえる';
+  } else if (type === 'medal') {
     if (title) title.textContent = 'めだると　せいちょうを　けす';
     if (msg) msg.textContent = 'めだると　せいちょうきろくが　ぜんぶ　きえるよ。\nほんとうに　けす？';
+    if (okBtn) okBtn.textContent = 'けす';
   } else {
     if (title) title.textContent = 'ぜんぶ　けして　はじめから　やる';
     if (msg) msg.textContent = 'なまえや　めだるが　ぜんぶ　きえて\nはじめから　やりなおしになるよ。\nほんとうに　けす？';
+    if (okBtn) okBtn.textContent = 'けす';
   }
   const overlay = document.getElementById('confirm-overlay');
   if (overlay) overlay.style.display = 'flex';
+  requestAnimationFrame(() => {
+    const cancel = document.getElementById('confirm-cancel-btn');
+    if (cancel) cancel.focus();
+  });
 }
 function closeConfirm() {
   const overlay = document.getElementById('confirm-overlay');
@@ -2142,7 +2154,10 @@ function closeConfirm() {
   _confirmType = null;
 }
 function executeConfirm() {
-  if (_confirmType === 'medal') {
+  if (_confirmType === 'name') {
+    closeConfirm();
+    goChangeName();
+  } else if (_confirmType === 'medal') {
     S.medals = {};
     S.certificates = {};
     S._growthBase = 0;

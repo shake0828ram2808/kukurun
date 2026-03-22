@@ -572,12 +572,12 @@ const MEDAL_CLR = { bronze:'#CD7F32', silver:'#B8C0CC', gold:'#FFD700' };
 
 /* ── しょうじょう種別 ── */
 const CERT_TYPES = [
-  { id:'oboeru',  label:'おぼえる',  mLabel:'おぼえる　めだる',  icon:'🎖️', iconStyle:'filter:hue-rotate(105deg) saturate(1.1);', btnColor:'#c4e8d4', btnShadow:'#8ec4a8', btnText:'#1a4230', check:(m)=>m&&m.oboeru },
-  { id:'renshu',  label:'れんしゅう', mLabel:'れんしゅう　めだる', icon:'🎖️', iconStyle:'filter:hue-rotate(345deg) saturate(1.4) brightness(0.82);', btnColor:'#f5d4a8', btnShadow:'#c07830', btnText:'#4a2800', check:(m)=>m&&m.renshu },
-  { id:'bronze',  label:'どう',      mLabel:'どう　めだる',      icon:'🥉', btnColor:'#edd8b4', btnShadow:'#c09058', btnText:'#5a3210', check:(m)=>m&&m.test },
-  { id:'silver',  label:'ぎん',      mLabel:'ぎん　めだる',      icon:'🥈', btnColor:'#dde0e8', btnShadow:'#aab0bc', btnText:'#363c48', check:(m)=>m&&(m.test==='silver'||m.test==='gold') },
-  { id:'gold',    label:'きん',      mLabel:'きん　めだる',      icon:'🥇', btnColor:'#fce89a', btnShadow:'#d4a830', btnText:'#4a3200', check:(m)=>m&&m.test==='gold' },
-  { id:'kukumaster', label:'くく', mLabel:'すべての　めだる',  icon:'👑', btnColor:'#e8ccf5', btnShadow:'#c088e0', btnText:'#3a1050',
+  { id:'oboeru',  label:'おぼえる',  mLabel:'おぼえる　メダル',  icon:'🎖️', iconStyle:'filter:hue-rotate(105deg) saturate(1.1);', btnColor:'#c4e8d4', btnShadow:'#8ec4a8', btnText:'#1a4230', check:(m)=>m&&m.oboeru },
+  { id:'renshu',  label:'れんしゅう', mLabel:'れんしゅう　メダル', icon:'🎖️', iconStyle:'filter:hue-rotate(345deg) saturate(1.4) brightness(0.82);', btnColor:'#f5d4a8', btnShadow:'#c07830', btnText:'#4a2800', check:(m)=>m&&m.renshu },
+  { id:'bronze',  label:'どう',      mLabel:'どう　メダル',      icon:'🥉', btnColor:'#edd8b4', btnShadow:'#c09058', btnText:'#5a3210', check:(m)=>m&&m.test },
+  { id:'silver',  label:'ぎん',      mLabel:'ぎん　メダル',      icon:'🥈', btnColor:'#dde0e8', btnShadow:'#aab0bc', btnText:'#363c48', check:(m)=>m&&(m.test==='silver'||m.test==='gold') },
+  { id:'gold',    label:'きん',      mLabel:'きん　メダル',      icon:'🥇', btnColor:'#fce89a', btnShadow:'#d4a830', btnText:'#4a3200', check:(m)=>m&&m.test==='gold' },
+  { id:'kukumaster', label:'くく', mLabel:'すべての　メダル',  icon:'👑', btnColor:'#e8ccf5', btnShadow:'#c088e0', btnText:'#3a1050',
     check: null, // 専用チェック: 全段 oboeru+renshu+test=gold
     isKukuMaster: true },
 ];
@@ -699,7 +699,7 @@ function showCertificate(id) {
     <span class="cert-corner br">✦</span>
     <div class="cert-deco">── ✦ ── ✦ ── ✦ ──</div>
     <div class="cert-title">しょうじょう</div>
-    <div class="cert-master">${ct.label}　ますたー</div>
+    <div class="cert-master">${ct.label}　マスター</div>
     <div class="cert-name">${nameOnly}　どの</div>
     <div class="cert-body">${nameOnly}どのは　${ct.mLabel}を　すべて　あつめることができました。そのえいよを　たたえるとともに　どりょくを　ここに　しょうします。これからも　くくを　たのしんで　おぼえてください。</div>
     <div class="cert-date">${dateStr}</div>
@@ -714,7 +714,7 @@ function certSparkle(isKukuMaster) {
   const count  = isKukuMaster ? 100 : 50;
   const maxSz  = isKukuMaster ? 36  : 22;
   const maxDly = isKukuMaster ? 2.2 : 1.4;
-  // くくますたーは2波に分けて豪華に
+  // くくマスターは2波に分けて豪華に
   const waves  = isKukuMaster ? 2 : 1;
   for (let w = 0; w < waves; w++) {
     const wDelay = w * 1.6;
@@ -866,10 +866,10 @@ function showOboeruClear() {
   obMedalEl.textContent = '🎖️'; obMedalEl.style.filter = 'hue-rotate(300deg)';
   document.getElementById('oboeru-clear-title').textContent = danLabel + '　おぼえたね！';
   document.getElementById('oboeru-clear-msg').textContent =
-    alreadyHad ? 'めだるは　もう　もってるよ！' : 'めだるを　もらえたよ！';
+    alreadyHad ? 'メダルは　もう　もってるよ！' : 'メダルを　もらえたよ！';
   showScreen('screen-oboeru-clear');
   confetti();
-  speak(alreadyHad ? 'めだるは　もう　もってるよ！' : 'やったー！めだるを　もらえたよ！');
+  speak(alreadyHad ? 'メダルは　もう　もってるよ！' : 'やったー！メダルを　もらえたよ！');
 }
 function startOboeru() {
   S._oboeruClearShown = false;
@@ -1614,7 +1614,7 @@ function doneDan() {
   const medalMsgEl = document.getElementById('clear-medal-msg');
   if (medalMsgEl) {
     medalMsgEl.textContent = passedRenshu
-      ? (alreadyHadRenshu ? 'めだるは　もう　もってるよ！' : 'めだるを　もらえたよ！')
+      ? (alreadyHadRenshu ? 'メダルは　もう　もってるよ！' : 'メダルを　もらえたよ！')
       : '';
   }
   showScreen('screen-clear');
@@ -1878,7 +1878,7 @@ function doneTest() {
   const testMedalMsgEl = document.getElementById('test-medal-msg');
   if (testMedalMsgEl) {
     testMedalMsgEl.textContent = cleared
-      ? (preAwardMedal === 'gold' ? 'めだるは　もう　もってるよ！' : 'めだるを　もらえたよ！')
+      ? (preAwardMedal === 'gold' ? 'メダルは　もう　もってるよ！' : 'メダルを　もらえたよ！')
       : '';
   }
 
@@ -2014,11 +2014,11 @@ function openConfirm(type) {
   const title = document.getElementById('confirm-title');
   const msg = document.getElementById('confirm-msg');
   if (type === 'medal') {
-    if (title) title.textContent = 'めだるを　りせっと';
-    if (msg) msg.textContent = 'メダルと　せいちょうきろくが　ぜんぶ　きえるよ。\nほんとうに　りせっとする？';
+    if (title) title.textContent = 'メダルを　リセット';
+    if (msg) msg.textContent = 'メダルと　せいちょうきろくが　ぜんぶ　きえるよ。\nほんとうに　リセットする？';
   } else {
-    if (title) title.textContent = 'あぷりを　りせっと';
-    if (msg) msg.textContent = 'なまえや　メダルが　ぜんぶ　きえて\nはじめから　やりなおしになるよ。\nほんとうに　りせっとする？';
+    if (title) title.textContent = 'アプリを　リセット';
+    if (msg) msg.textContent = 'なまえや　メダルが　ぜんぶ　きえて\nはじめから　やりなおしになるよ。\nほんとうに　リセットする？';
   }
   const overlay = document.getElementById('confirm-overlay');
   if (overlay) overlay.style.display = 'flex';
@@ -2043,7 +2043,7 @@ function executeConfirm() {
     buildDanGrid();
     updateCreature();
     showScreen('screen-home');
-    speak('めだるを　りせっとしたよ');
+    speak('メダルを　リセットしたよ');
   } else if (_confirmType === 'app') {
     try { localStorage.removeItem(SAVE_KEY); } catch(e) {}
     location.reload();

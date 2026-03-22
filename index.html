@@ -481,7 +481,7 @@
   <div class="card" style="text-align:center;margin-top:16px;width:100%;">
     <div style="display:flex;flex-direction:column;gap:14px;">
       <button class="btn btn-primary"
-              onclick="tapSnd();speak('ほーむに　もどる');showScreen('screen-home')">ほーむに　もどる</button>
+              onclick="tapSnd();speak('ホームに　もどる');showScreen('screen-home')">ホームに　もどる</button>
       <button class="btn btn-fwd"
               onclick="tapSnd();speak('れんしゅうに　すすむ');startRenshu()">
         れんしゅうに　すすむ
@@ -620,9 +620,9 @@
   <div class="settings-toprow">
     <button class="back-btn" onclick="tapSnd();showScreen('screen-home')">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
-      ほーむに　もどる
+      ホームに　もどる
     </button>
-    <div id="version-badge">ver.2026.0322.0057</div>
+    <div id="version-badge">ver.2026.0322.0058</div>
   </div>
   <div class="card">
     <div class="sec-lbl" style="margin-bottom:8px;">せってい</div>
@@ -666,17 +666,17 @@
     </div>
     <div class="settings-row">
       <div class="settings-row-text">
-        <div class="settings-row-label">メダルを　りせっとする</div>
+        <div class="settings-row-label">メダルを　リセットする</div>
         <div class="settings-row-sub">メダルと　せいちょうが　きえるよ</div>
       </div>
-      <button class="btn" style="background:#E8E8FF;color:var(--theme);border:none;" onclick="tapSnd();openConfirm('medal')">りせっと</button>
+      <button class="btn" style="background:#E8E8FF;color:var(--theme);border:none;" onclick="tapSnd();openConfirm('medal')">リセット</button>
     </div>
     <div class="settings-row">
       <div class="settings-row-text">
-        <div class="settings-row-label">あぷりを　りせっとする</div>
+        <div class="settings-row-label">アプリを　リセットする</div>
         <div class="settings-row-sub">はじめから　やりなおすよ</div>
       </div>
-      <button class="btn" style="background:#FFE8E8;color:#E03030;border:none;" onclick="tapSnd();openConfirm('app')">りせっと</button>
+      <button class="btn" style="background:#FFE8E8;color:#E03030;border:none;" onclick="tapSnd();openConfirm('app')">リセット</button>
     </div>
   </div>
 </div>
@@ -687,9 +687,9 @@
     <button class="back-btn" style="position:static;"
             onclick="tapSnd();stopGrowthAnim();showScreen('screen-home')">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
-      ほーむに　もどる
+      ホームに　もどる
     </button>
-    <span id="growth-medal-count-label">もらった　めだる　<span id="growth-medal-count">０</span>こ</span>
+    <span id="growth-medal-count-label">もらった　メダル　<span id="growth-medal-count">０</span>こ</span>
   </div>
   <div id="growth-area" style="position:relative;width:100%;flex:1;background:linear-gradient(180deg,#0d0025 0%,#1e0850 25%,#3d1580 50%,#6b3a9a 68%,#a8e8b8 100%);overflow:hidden;border-radius:var(--r) var(--r) 0 0;">
     <img id="growth-char-img" src="" style="position:absolute;width:auto;image-rendering:pixelated;" alt="">
@@ -700,7 +700,7 @@
 <div class="screen" id="screen-cert">
   <button class="back-btn" onclick="tapSnd();showScreen('screen-home')">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
-    ほーむに　もどる
+    ホームに　もどる
   </button>
   <div id="cert-paper" class="cert-paper"></div>
 </div>
@@ -758,7 +758,7 @@
     <div class="confirm-msg" id="confirm-msg"></div>
     <div class="confirm-btns">
       <button class="btn" onclick="closeConfirm()">やめる</button>
-      <button class="btn btn-primary" id="confirm-ok-btn" onclick="executeConfirm()">りせっとする</button>
+      <button class="btn btn-primary" id="confirm-ok-btn" onclick="executeConfirm()">リセットする</button>
     </div>
   </div>
 </div>
@@ -770,7 +770,7 @@
       <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
       <polyline points="9 22 9 12 15 12 15 22"/>
     </svg>
-    ほーむ
+    ホーム
   </button>
   <button class="bottom-btn" id="bottom-btn-settings" onclick="tapSnd();openSettings()">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

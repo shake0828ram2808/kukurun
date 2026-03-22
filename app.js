@@ -2122,8 +2122,11 @@ document.addEventListener('touchstart', () => Snd.unlock(), { once: true, passiv
   window.addEventListener('resize', resize);
 
   function addEffect(x, y) {
-    effects.push({ x, y, born: Date.now() });
-    if (!raf) loop();
+    const r = cvs.getBoundingClientRect();
+    const sx = r.width  ? cvs.width  / r.width  : 1;
+    const sy = r.height ? cvs.height / r.height : 1;
+    effects.push({ x: x * sx, y: y * sy, born: Date.now() });
+    if (!raf) raf = requestAnimationFrame(loop);
   }
 
   function loop() {

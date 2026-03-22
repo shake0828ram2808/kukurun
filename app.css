@@ -446,6 +446,7 @@ body {
   cursor: pointer; border: 2px solid; white-space: nowrap;
   display: flex; align-items: center; justify-content: center;
   transition: background .1s, transform .1s cubic-bezier(.34,1.56,.64,1);
+  touch-action: manipulation;
 }
 .kana-del-btn:active { transform: scale(.92); }
 .kana-del-hoka {
@@ -534,6 +535,7 @@ body {
   cursor: pointer; color: var(--text); font-family: var(--font); line-height: 1;
   box-shadow: 0 3px 0 #BDD4EA;
   transition: border-color .1s, background .1s, transform .08s, box-shadow .08s;
+  touch-action: manipulation;
 }
 .kana-btn:hover  { border-color: var(--theme); }
 .kana-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #BDD4EA; background: var(--theme); color: #fff; border-color: var(--theme); }
@@ -952,6 +954,7 @@ body {
   padding: 30px 22px 26px;
   position: relative;
   font-family: 'Shippori Mincho', 'Noto Serif JP', 'Yu Mincho', serif;
+  font-weight: bold;
 }
 .cert-paper::before {
   content: '';

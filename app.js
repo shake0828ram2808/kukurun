@@ -672,7 +672,7 @@ function showCertificate(id) {
 }
 function certSparkle(isKukuMaster) {
   const glyphs = ['⭐︎','✦','✸','✺'];
-  const count  = isKukuMaster ? 140 : 70;
+  const count  = isKukuMaster ? 100 : 50;
   const maxSz  = isKukuMaster ? 36  : 22;
   const maxDly = isKukuMaster ? 2.2 : 1.4;
   // くくますたーは2波に分けて豪華に

@@ -755,7 +755,7 @@ function refreshModeMedals() {
   const ob = document.getElementById('mode-medal-oboeru');
   const rs = document.getElementById('mode-medal-renshu');
   const ts = document.getElementById('mode-medal-test');
-  if (ob) { ob.textContent = m.oboeru ? '🎖️' : ''; ob.style.filter = m.oboeru ? 'hue-rotate(300deg)' : ''; }
+  if (ob) { ob.textContent = m.oboeru ? '🎖️' : ''; ob.style.filter = m.oboeru ? 'hue-rotate(105deg) saturate(1.1)' : ''; }
   if (rs) { rs.textContent = m.renshu ? '🎖️' : ''; rs.style.filter = m.renshu ? 'hue-rotate(120deg)' : ''; }
   if (ts) ts.textContent = m.test === 'gold' ? '🥇' : m.test === 'silver' ? '🥈' : m.test === 'bronze' ? '🥉' : '';
 }
@@ -765,7 +765,7 @@ function medalBadge(dan) {
   const sh = 'filter:drop-shadow(0 1px 1px rgba(0,0,0,.35));';
   // テストメダルは累積表示
   const items = [
-    m.oboeru ? `<span style="${sh}filter:hue-rotate(300deg);">🎖️</span>` : '',
+    m.oboeru ? `<span style="${sh}filter:hue-rotate(105deg) saturate(1.1);">🎖️</span>` : '',
     m.renshu ? `<span style="${sh}filter:hue-rotate(120deg);">🎖️</span>` : '',
     (m.test === 'bronze' || m.test === 'silver' || m.test === 'gold') ? `<span style="${sh}">🥉</span>` : '',
     (m.test === 'silver' || m.test === 'gold') ? `<span style="${sh}">🥈</span>` : '',

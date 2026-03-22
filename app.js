@@ -573,7 +573,7 @@ const MEDAL_CLR = { bronze:'#CD7F32', silver:'#B8C0CC', gold:'#FFD700' };
 /* ── しょうじょう種別 ── */
 const CERT_TYPES = [
   { id:'oboeru',  label:'おぼえる',  mLabel:'おぼえる　めだる',  icon:'🎖️', iconStyle:'filter:hue-rotate(105deg) saturate(1.1);', btnColor:'#c4e8d4', btnShadow:'#8ec4a8', btnText:'#1a4230', check:(m)=>m&&m.oboeru },
-  { id:'renshu',  label:'れんしゅう', mLabel:'れんしゅう　めだる', icon:'🎖️', iconStyle:'filter:hue-rotate(145deg);', btnColor:'#b8dff0', btnShadow:'#7cbad8', btnText:'#0e3a55', check:(m)=>m&&m.renshu },
+  { id:'renshu',  label:'れんしゅう', mLabel:'れんしゅう　めだる', icon:'🎖️', iconStyle:'filter:hue-rotate(345deg) saturate(1.4) brightness(0.82);', btnColor:'#f5d4a8', btnShadow:'#c07830', btnText:'#4a2800', check:(m)=>m&&m.renshu },
   { id:'bronze',  label:'どう',      mLabel:'どう　めだる',      icon:'🥉', btnColor:'#edd8b4', btnShadow:'#c09058', btnText:'#5a3210', check:(m)=>m&&m.test },
   { id:'silver',  label:'ぎん',      mLabel:'ぎん　めだる',      icon:'🥈', btnColor:'#dde0e8', btnShadow:'#aab0bc', btnText:'#363c48', check:(m)=>m&&(m.test==='silver'||m.test==='gold') },
   { id:'gold',    label:'きん',      mLabel:'きん　めだる',      icon:'🥇', btnColor:'#fce89a', btnShadow:'#d4a830', btnText:'#4a3200', check:(m)=>m&&m.test==='gold' },
@@ -756,7 +756,7 @@ function refreshModeMedals() {
   const rs = document.getElementById('mode-medal-renshu');
   const ts = document.getElementById('mode-medal-test');
   if (ob) { ob.textContent = m.oboeru ? '🎖️' : ''; ob.style.filter = m.oboeru ? 'hue-rotate(105deg) saturate(1.1)' : ''; }
-  if (rs) { rs.textContent = m.renshu ? '🎖️' : ''; rs.style.filter = m.renshu ? 'hue-rotate(120deg)' : ''; }
+  if (rs) { rs.textContent = m.renshu ? '🎖️' : ''; rs.style.filter = m.renshu ? 'hue-rotate(345deg) saturate(1.4) brightness(0.82)' : ''; }
   if (ts) ts.textContent = m.test === 'gold' ? '🥇' : m.test === 'silver' ? '🥈' : m.test === 'bronze' ? '🥉' : '';
 }
 
@@ -766,7 +766,7 @@ function medalBadge(dan) {
   // テストメダルは累積表示
   const items = [
     m.oboeru ? `<span style="${sh}filter:hue-rotate(105deg) saturate(1.1);">🎖️</span>` : '',
-    m.renshu ? `<span style="${sh}filter:hue-rotate(120deg);">🎖️</span>` : '',
+    m.renshu ? `<span style="${sh}filter:hue-rotate(345deg) saturate(1.4) brightness(0.82);">🎖️</span>` : '',
     (m.test === 'bronze' || m.test === 'silver' || m.test === 'gold') ? `<span style="${sh}">🥉</span>` : '',
     (m.test === 'silver' || m.test === 'gold') ? `<span style="${sh}">🥈</span>` : '',
     m.test === 'gold' ? `<span style="${sh}">🥇</span>` : '',

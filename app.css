@@ -956,7 +956,13 @@ body {
 /* ══════════════════
    しょうじょう
 ══════════════════ */
-#cert-btn-row { width: 100%; flex-wrap: nowrap; }
+#cert-btn-row {
+  display: flex; flex-wrap: nowrap; gap: 6px;
+  width: 100%; flex-shrink: 0;
+  padding: 6px 16px;
+  box-sizing: border-box;
+  max-width: 430px; align-self: center;
+}
 .cert-icon-btn { font-size: 22px; padding: 6px 2px; line-height: 1; }
 #cert-tooltip { transition: opacity .5s; }
 .cert-paper {

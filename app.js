@@ -636,24 +636,33 @@ function buildCertBtns() {
   const row = document.getElementById('cert-btn-row');
   if (!row) return;
   row.innerHTML = '';
-  row.style.display = 'flex';
   CERT_TYPES.forEach(ct => {
     const isEarned = !!S.certificates[ct.id];
     const btn = document.createElement('button');
     btn.className = 'btn btn-sm cert-icon-btn';
     if (isEarned) {
-      btn.style.cssText = `background:${ct.btnColor};color:${ct.btnText};border-color:${ct.btnColor};box-shadow:0 4px 0 ${ct.btnShadow},var(--sh);flex:1;min-width:0;`;
+      btn.style.cssText = `background:#c4bcf7;color:#fff;border-color:#b0a7f0;box-shadow:0 4px 0 #8f84d4,var(--sh);flex:1;min-width:0;`;
       btn.innerHTML = ct.iconStyle ? `<span style="${ct.iconStyle}">${ct.icon}</span>` : ct.icon;
       btn.onclick = () => { tapSnd(); showCertificate(ct.id); };
     } else {
-      btn.style.cssText = `background:#ccc;color:#888;border-color:#bbb;box-shadow:0 4px 0 #aaa,var(--sh);flex:1;min-width:0;`;
+      btn.style.cssText = `background:#ddd;color:#999;border-color:#ccc;box-shadow:0 4px 0 #bbb,var(--sh);flex:1;min-width:0;`;
       btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2z"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
-      btn.onclick = (e) => { tapSnd(); showCertTooltip(btn, ct.label + 'ますたーの\u3000しょうじょうを\u3000もらうと\u3000みられるようになるよ'); };
+      btn.onclick = () => {
+        tapSnd();
+        if (_certTooltipAnchor === btn) { hideCertTooltip(); } else { showCertTooltip(btn, ct.label + 'ますたーの\u3000しょうじょうだよ'); }
+      };
     }
     row.appendChild(btn);
   });
 }
 let _certTooltipTimer = null;
+let _certTooltipAnchor = null;
+function hideCertTooltip() {
+  const tip = document.getElementById('cert-tooltip');
+  if (tip) tip.style.opacity = '0';
+  clearTimeout(_certTooltipTimer);
+  _certTooltipAnchor = null;
+}
 function showCertTooltip(anchorEl, msg) {
   let tip = document.getElementById('cert-tooltip');
   if (!tip) {
@@ -661,12 +670,13 @@ function showCertTooltip(anchorEl, msg) {
     tip.id = 'cert-tooltip';
     document.body.appendChild(tip);
   }
+  _certTooltipAnchor = anchorEl;
   tip.textContent = msg;
   const rect = anchorEl.getBoundingClientRect();
   tip.style.cssText = `position:fixed;left:50%;transform:translateX(-50%);top:${Math.max(rect.top - 70, 8)}px;background:rgba(40,40,60,.92);color:#fff;font-size:13px;padding:8px 14px;border-radius:12px;line-height:1.6;max-width:88vw;text-align:center;z-index:9999;pointer-events:none;white-space:pre-wrap;`;
   tip.style.opacity = '1';
   clearTimeout(_certTooltipTimer);
-  _certTooltipTimer = setTimeout(() => { if (tip) tip.style.opacity = '0'; }, 2800);
+  _certTooltipTimer = setTimeout(() => { hideCertTooltip(); }, 2800);
 }
 function showCertificate(id) {
   const ct = CERT_TYPES.find(c => c.id === id);

@@ -569,9 +569,12 @@ const MEDAL_CLR = { bronze:'#CD7F32', silver:'#B8C0CC', gold:'#FFD700' };
 const CERT_TYPES = [
   { id:'oboeru',  label:'おぼえる',  mLabel:'おぼえる　めだる',  btnColor:'#7B68EE', btnShadow:'#5548CC', btnText:'#fff', check:(m)=>m&&m.oboeru },
   { id:'renshu',  label:'れんしゅう', mLabel:'れんしゅう　めだる', btnColor:'#4CAF7D', btnShadow:'#357A58', btnText:'#fff', check:(m)=>m&&m.renshu },
-  { id:'bronze',  label:'ブロンズ',  mLabel:'ブロンズ　めだる',  btnColor:'#CD7F32', btnShadow:'#9A5C1E', btnText:'#fff', check:(m)=>m&&m.test },
+  { id:'bronze',  label:'どう',      mLabel:'どう　めだる',      btnColor:'#CD7F32', btnShadow:'#9A5C1E', btnText:'#fff', check:(m)=>m&&m.test },
   { id:'silver',  label:'ぎん',      mLabel:'ぎん　めだる',      btnColor:'#9E9E9E', btnShadow:'#6E6E6E', btnText:'#fff', check:(m)=>m&&(m.test==='silver'||m.test==='gold') },
   { id:'gold',    label:'きん',      mLabel:'きん　めだる',      btnColor:'#FFB300', btnShadow:'#B87800', btnText:'#5a3a00', check:(m)=>m&&m.test==='gold' },
+  { id:'kukumaster', label:'くく', mLabel:'すべての　めだる',  btnColor:'#9C27B0', btnShadow:'#6A1B9A', btnText:'#fff',
+    check: null, // 専用チェック: 全段 oboeru+renshu+test=gold
+    isKukuMaster: true },
 ];
 
 /* ── メダルヘルパー ──
@@ -620,12 +623,13 @@ function updateGrowthFromMedals() {
 function checkCertificates() {
   const t = new Date();
   const dateStr = `${t.getFullYear()}ねん${t.getMonth()+1}がつ${t.getDate()}にち`;
+  const dans = [1,2,3,4,5,6,7,8,9];
   CERT_TYPES.forEach(ct => {
     if (S.certificates[ct.id]) return;
-    if ([1,2,3,4,5,6,7,8,9].every(d => ct.check(S.medals[d]))) {
-      S.certificates[ct.id] = dateStr;
-      buildCertBtns();
-    }
+    const earned = ct.isKukuMaster
+      ? dans.every(d => { const m = S.medals[d]; return m && m.oboeru && m.renshu && m.test === 'gold'; })
+      : dans.every(d => ct.check(S.medals[d]));
+    if (earned) { S.certificates[ct.id] = dateStr; buildCertBtns(); }
   });
 }
 function buildCertBtns() {
@@ -658,30 +662,38 @@ function showCertificate(id) {
     <div class="cert-title">しょうじょう</div>
     <div class="cert-master">${ct.label}　ますたー</div>
     <div class="cert-name">${nameOnly}　どの</div>
-    <div class="cert-body">${nameOnly}どのは　${ct.mLabel}を　すべて　あつめることができました。そのえいよを　たたえるとともに　どりょくを　ここに　しょうします。</div>
+    <div class="cert-body">${nameOnly}どのは　${ct.mLabel}を　すべて　あつめることができました。そのえいよを　たたえるとともに　どりょくを　ここに　しょうします。これからも　くくを　たのしんで　おぼえてください。</div>
     <div class="cert-date">${dateStr}</div>
     <div class="cert-issuer">くくるん</div>
     <div class="cert-deco bot">── ✦ ── ✦ ── ✦ ──</div>
   `;
   showScreen('screen-cert');
-  certSparkle();
+  certSparkle(ct.isKukuMaster);
 }
-function certSparkle() {
-  const glyphs = ['✳','✴','⭐︎','✦','✸','✺'];
-  for (let i = 0; i < 70; i++) {
-    const el    = document.createElement('span');
-    const dur   = 2.4 + Math.random() * 2.6;
-    const delay = Math.random() * 1.4;
-    el.className = 'cert-sparkle';
-    el.textContent = glyphs[~~(Math.random() * glyphs.length)];
-    el.style.cssText = [
-      `left:${Math.random()*100}vw`,
-      `font-size:${10 + Math.random()*22}px`,
-      `animation-duration:${dur}s`,
-      `animation-delay:${delay}s`,
-    ].join(';');
-    document.body.appendChild(el);
-    setTimeout(() => el.remove(), (dur + delay + 0.3) * 1000);
+function certSparkle(isKukuMaster) {
+  const glyphs = ['⭐︎','✦','✸','✺'];
+  const count  = isKukuMaster ? 140 : 70;
+  const maxSz  = isKukuMaster ? 36  : 22;
+  const maxDly = isKukuMaster ? 2.2 : 1.4;
+  // くくますたーは2波に分けて豪華に
+  const waves  = isKukuMaster ? 2 : 1;
+  for (let w = 0; w < waves; w++) {
+    const wDelay = w * 1.6;
+    for (let i = 0; i < count / waves; i++) {
+      const el    = document.createElement('span');
+      const dur   = 2.4 + Math.random() * 2.6;
+      const delay = wDelay + Math.random() * maxDly;
+      el.className = 'cert-sparkle';
+      el.textContent = glyphs[~~(Math.random() * glyphs.length)];
+      el.style.cssText = [
+        `left:${Math.random()*100}vw`,
+        `font-size:${10 + Math.random()*maxSz}px`,
+        `animation-duration:${dur}s`,
+        `animation-delay:${delay}s`,
+      ].join(';');
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), (dur + delay + 0.3) * 1000);
+    }
   }
 }
 function checkGraduation() {
@@ -1834,7 +1846,7 @@ function doneTest() {
   if (cleared) { confetti(); speak(grew ? 'せいちょうしたよ！メダルゲット！' : 'やったー！メダルゲット！'); }
   else { speak('もう　いちど　ちゃれんじして　ね！'); }
 }
-const MEDAL_NAMES = { bronze:'ブロンズ', silver:'ぎん', gold:'きん' };
+const MEDAL_NAMES = { bronze:'どう', silver:'ぎん', gold:'きん' };
 
 
 /* ════════════════════════════════

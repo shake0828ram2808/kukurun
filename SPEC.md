@@ -40,13 +40,14 @@
 | `kukurun.js` | くくるんキャラのアニメーション・口パク・フキダシメッセージ |
 | `questions.js` | 九九の問題データ・日本語読み・段ラベルなどのデータ生成ロジック |
 | `sprites.js` | スプライト画像のパス定義（たまご3色×4段階、キャラ3色×4段階） |
+| `medals.js` | メダル・しょうじょう静的データ（`CERT_TYPES` / `MEDAL_CLR` / `MEDAL_NAMES` / `NEXT_MEDAL`） |
 
 #### app.js の主要な責務
 
 | 分類 | 主な変数・関数 |
 |---|---|
 | ゲーム状態 | `S`（グローバル状態オブジェクト）: `name` / `dan` / `renshuClears` / `medals` / `certificates` など |
-| しょうじょう | `CERT_TYPES` / `checkCertificates()` / `buildCertBtns()` / `showCertificate(id)` |
+| しょうじょう | `CERT_TYPES`（medals.js）/ `checkCertificates()` / `buildCertBtns()` / `showCertificate(id)` |
 | スプライト制御 | `getEggSprite()` / `getCharSprite()` / `updateCreature()` |
 | たまご揺れ | `eggWobble`（IIFEモジュール）|
 | キャラ移動 | `charAnim`（IIFEモジュール・RAFループ） |

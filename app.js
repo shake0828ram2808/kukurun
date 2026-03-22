@@ -573,19 +573,7 @@ function goHomeFromEgg() {
 /* ════════════════════════════════
    DAN GRID
 ════════════════════════════════ */
-const MEDAL_CLR = { bronze:'#CD7F32', silver:'#B8C0CC', gold:'#FFD700' };
-
-/* ── しょうじょう種別 ── */
-const CERT_TYPES = [
-  { id:'oboeru',  label:'おぼえる',  mLabel:'おぼえる　メダル',  icon:'🎖️', iconStyle:'filter:grayscale(100%) sepia(100%) hue-rotate(190deg) brightness(0.68) saturate(1.0);', btnColor:'#c4e8d4', btnShadow:'#8ec4a8', btnText:'#1a4230', check:(m)=>m&&m.oboeru },
-  { id:'renshu',  label:'れんしゅう', mLabel:'れんしゅう　メダル', icon:'🎖️', iconStyle:'filter:grayscale(100%) sepia(100%) hue-rotate(80deg) brightness(0.72) saturate(0.9);', btnColor:'#f5d4a8', btnShadow:'#c07830', btnText:'#4a2800', check:(m)=>m&&m.renshu },
-  { id:'bronze',  label:'どう',      mLabel:'どう　メダル',      icon:'🥉', btnColor:'#edd8b4', btnShadow:'#c09058', btnText:'#5a3210', check:(m)=>m&&m.test },
-  { id:'silver',  label:'ぎん',      mLabel:'ぎん　メダル',      icon:'🥈', btnColor:'#dde0e8', btnShadow:'#aab0bc', btnText:'#363c48', check:(m)=>m&&(m.test==='silver'||m.test==='gold') },
-  { id:'gold',    label:'きん',      mLabel:'きん　メダル',      icon:'🥇', btnColor:'#fce89a', btnShadow:'#d4a830', btnText:'#4a3200', check:(m)=>m&&m.test==='gold' },
-  { id:'kukumaster', label:'くく', mLabel:'すべての　メダル',  icon:'👑', btnColor:'#e8ccf5', btnShadow:'#c088e0', btnText:'#3a1050',
-    check: null, // 専用チェック: 全段 oboeru+renshu+test=gold
-    isKukuMaster: true },
-];
+/* MEDAL_CLR / CERT_TYPES / MEDAL_NAMES / NEXT_MEDAL は medals.js で定義 */
 
 /* ── メダルヘルパー ──
    S.medals[dan] = { oboeru: bool, renshu: bool, test: null|'bronze'|'silver'|'gold' }
@@ -760,24 +748,29 @@ function checkGraduation() {
 }
 function refreshModeMedals() {
   const m = getMedals(S.dan);
+  const obType = CERT_TYPES.find(t => t.id === 'oboeru');
+  const rsType = CERT_TYPES.find(t => t.id === 'renshu');
   const ob = document.getElementById('mode-medal-oboeru');
   const rs = document.getElementById('mode-medal-renshu');
   const ts = document.getElementById('mode-medal-test');
-  if (ob) { ob.textContent = m.oboeru ? '🎖️' : ''; ob.style.filter = m.oboeru ? 'hue-rotate(105deg) saturate(1.1)' : ''; }
-  if (rs) { rs.textContent = m.renshu ? '🎖️' : ''; rs.style.filter = m.renshu ? 'hue-rotate(345deg) saturate(1.4) brightness(0.82)' : ''; }
+  if (ob) ob.innerHTML = m.oboeru ? `<span style="${obType.iconStyle}">${obType.icon}</span>` : '';
+  if (rs) rs.innerHTML = m.renshu ? `<span style="${rsType.iconStyle}">${rsType.icon}</span>` : '';
   if (ts) ts.textContent = m.test === 'gold' ? '🥇' : m.test === 'silver' ? '🥈' : m.test === 'bronze' ? '🥉' : '';
 }
 
 function medalBadge(dan) {
   const m = (S.medals[dan] && typeof S.medals[dan] === 'object') ? S.medals[dan] : {};
-  const sh = 'filter:drop-shadow(0 1px 1px rgba(0,0,0,.35));';
+  const shadow = 'drop-shadow(0 1px 1px rgba(0,0,0,.35))';
+  const obType = CERT_TYPES.find(t => t.id === 'oboeru');
+  const rsType = CERT_TYPES.find(t => t.id === 'renshu');
+  const withShadow = (style) => style.replace(/;\s*$/, ` ${shadow};`);
   // テストメダルは累積表示
   const items = [
-    m.oboeru ? `<span style="${sh}filter:hue-rotate(105deg) saturate(1.1);">🎖️</span>` : '',
-    m.renshu ? `<span style="${sh}filter:hue-rotate(345deg) saturate(1.4) brightness(0.82);">🎖️</span>` : '',
-    (m.test === 'bronze' || m.test === 'silver' || m.test === 'gold') ? `<span style="${sh}">🥉</span>` : '',
-    (m.test === 'silver' || m.test === 'gold') ? `<span style="${sh}">🥈</span>` : '',
-    m.test === 'gold' ? `<span style="${sh}">🥇</span>` : '',
+    m.oboeru ? `<span style="${withShadow(obType.iconStyle)}">${obType.icon}</span>` : '',
+    m.renshu ? `<span style="${withShadow(rsType.iconStyle)}">${rsType.icon}</span>` : '',
+    (m.test === 'bronze' || m.test === 'silver' || m.test === 'gold') ? `<span style="filter:${shadow}">🥉</span>` : '',
+    (m.test === 'silver' || m.test === 'gold') ? `<span style="filter:${shadow}">🥈</span>` : '',
+    m.test === 'gold' ? `<span style="filter:${shadow}">🥇</span>` : '',
   ].filter(s => s).join('');
   if (!items) return '';
   return `<div class="dan-medal-row">${items}</div>`;
@@ -1812,7 +1805,6 @@ function confetti() {
    ・メダル：初回=ブロンズ、2回目=銀、3回目以降=金
 ════════════════════════════════ */
 
-const NEXT_MEDAL = { null: 'bronze', bronze: 'silver', silver: 'gold', gold: 'gold' };
 
 function startTest() {
   let all;
@@ -2005,7 +1997,7 @@ function doneTest() {
   if (cleared) { confetti(); speak(grew ? 'せいちょうしたよ！メダルゲット！' : 'やったー！メダルゲット！'); }
   else { speak('もう　いちど　ちゃれんじして　ね！'); }
 }
-const MEDAL_NAMES = { bronze:'どう', silver:'ぎん', gold:'きん' };
+
 
 
 /* ════════════════════════════════

@@ -2135,11 +2135,11 @@ function openConfirm(type) {
   const title = document.getElementById('confirm-title');
   const msg = document.getElementById('confirm-msg');
   if (type === 'medal') {
-    if (title) title.textContent = 'メダルを　リセット';
-    if (msg) msg.textContent = 'メダルと　せいちょうきろくが　ぜんぶ　きえるよ。\nほんとうに　リセットする？';
+    if (title) title.textContent = 'めだると　せいちょうを　けす';
+    if (msg) msg.textContent = 'めだると　せいちょうきろくが　ぜんぶ　きえるよ。\nほんとうに　けす？';
   } else {
-    if (title) title.textContent = 'アプリを　リセット';
-    if (msg) msg.textContent = 'なまえや　メダルが　ぜんぶ　きえて\nはじめから　やりなおしになるよ。\nほんとうに　リセットする？';
+    if (title) title.textContent = 'ぜんぶ　けして　はじめから　やる';
+    if (msg) msg.textContent = 'なまえや　めだるが　ぜんぶ　きえて\nはじめから　やりなおしになるよ。\nほんとうに　けす？';
   }
   const overlay = document.getElementById('confirm-overlay');
   if (overlay) overlay.style.display = 'flex';

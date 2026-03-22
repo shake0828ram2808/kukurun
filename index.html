@@ -622,14 +622,13 @@
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
       ホームに　もどる
     </button>
-    <div id="version-badge">ver.2026.0322.0067</div>
+    <div id="version-badge">ver.2026.0322.0068</div>
   </div>
   <div class="card">
     <div class="sec-lbl" style="margin-bottom:8px;">せってい</div>
     <div class="settings-row">
       <div class="settings-row-text">
-        <div class="settings-row-label">ことばを　よみあげる</div>
-        <div class="settings-row-sub">オンにすると　こえで　よむよ</div>
+        <div class="settings-row-label">ことばを　こえで　よみあげる</div>
       </div>
       <button class="toggle-switch on" id="speech-toggle" onclick="toggleSpeech()"></button>
     </div>
@@ -642,39 +641,38 @@
     </div>
     <div class="settings-row settings-row-col">
       <div class="settings-row-text">
-        <div class="settings-row-label">れんしゅうの　こたえを　だす　じかん</div>
-        <div class="settings-row-sub">じどうで　こたえを　みせるまでの　じかん</div>
+        <div class="settings-row-label">こたえを　じどうで　だす　じかん</div>
       </div>
-      <div class="time-sel-group" id="renshu-time-sel">
-        <button data-val="5"  onclick="setRenshuTime(5)">５びょう</button>
-        <button data-val="10" onclick="setRenshuTime(10)">１０びょう</button>
-        <button data-val="15" onclick="setRenshuTime(15)">１５びょう</button>
-        <button data-val="0"  onclick="setRenshuTime(0)">まつ</button>
-      </div>
-    </div>
-    <div class="settings-row settings-row-col">
-      <div class="settings-row-text">
-        <div class="settings-row-label">てすとの　こたえを　だす　じかん</div>
-        <div class="settings-row-sub">じどうで　こたえを　みせるまでの　じかん</div>
-      </div>
-      <div class="time-sel-group" id="test-time-sel">
-        <button data-val="5"  onclick="setTestTime(5)">５びょう</button>
-        <button data-val="10" onclick="setTestTime(10)">１０びょう</button>
-        <button data-val="15" onclick="setTestTime(15)">１５びょう</button>
-        <button data-val="0"  onclick="setTestTime(0)">まつ</button>
+      <div style="display:flex;flex-direction:column;gap:6px;width:100%;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:12px;color:var(--text2);min-width:3.5em;">れんしゅう</span>
+          <div class="time-sel-group" id="renshu-time-sel" style="flex:1;">
+            <button data-val="5"  onclick="setRenshuTime(5)">５びょう</button>
+            <button data-val="10" onclick="setRenshuTime(10)">１０びょう</button>
+            <button data-val="15" onclick="setRenshuTime(15)">１５びょう</button>
+            <button data-val="0"  onclick="setRenshuTime(0)">まつ</button>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:12px;color:var(--text2);min-width:3.5em;">テスト</span>
+          <div class="time-sel-group" id="test-time-sel" style="flex:1;">
+            <button data-val="5"  onclick="setTestTime(5)">５びょう</button>
+            <button data-val="10" onclick="setTestTime(10)">１０びょう</button>
+            <button data-val="15" onclick="setTestTime(15)">１５びょう</button>
+            <button data-val="0"  onclick="setTestTime(0)">まつ</button>
+          </div>
+        </div>
       </div>
     </div>
     <div class="settings-row">
       <div class="settings-row-text">
-        <div class="settings-row-label">メダルを　リセットする</div>
-        <div class="settings-row-sub">メダルと　せいちょうが　きえるよ</div>
+        <div class="settings-row-label">メダルと　せいちょうを　はじめからやる</div>
       </div>
       <button class="btn" style="background:#E8E8FF;color:var(--theme);border:none;" onclick="tapSnd();openConfirm('medal')">リセット</button>
     </div>
     <div class="settings-row">
       <div class="settings-row-text">
-        <div class="settings-row-label">アプリを　リセットする</div>
-        <div class="settings-row-sub">はじめから　やりなおすよ</div>
+        <div class="settings-row-label">ぜんぶ　はじめから　やる</div>
       </div>
       <button class="btn" style="background:#FFE8E8;color:#E03030;border:none;" onclick="tapSnd();openConfirm('app')">リセット</button>
     </div>

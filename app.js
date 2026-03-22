@@ -1072,13 +1072,13 @@ function buildAnsGrid() {
   b0.className = 'ans-btn'; b0.textContent = KD.fw(0); b0.dataset.val = 0;
   b0.onclick = () => inputDigit('0'); g.appendChild(b0);
 
-  const bDel = document.createElement('button');
-  bDel.className = 'ans-btn ans-erase'; bDel.textContent = 'けす';
-  bDel.onclick = () => deleteDigit(); g.appendChild(bDel);
-
   const bHint = document.createElement('button');
   bHint.className = 'ans-btn ans-del'; bHint.textContent = 'ヒント';
   bHint.onclick = () => showFruitHint(); g.appendChild(bHint);
+
+  const bDel = document.createElement('button');
+  bDel.className = 'ans-btn ans-erase'; bDel.textContent = 'けす';
+  bDel.onclick = () => deleteDigit(); g.appendChild(bDel);
 
   // ── 2〜4行目: 1-9 ──
   for (let n = 1; n <= 9; n++) {
@@ -1112,7 +1112,7 @@ function showFruitHint() {
               style="position:absolute;top:10px;right:10px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;font-size:14px;padding:6px 14px;cursor:pointer;color:var(--text2);font-family:var(--font);">とじる</button>
       <div style="font-size:20px;margin-bottom:12px;color:var(--theme);">${KD.fw(p.dan)}×${KD.fw(p.multiplier)}</div>
       <div style="display:flex;flex-wrap:wrap;justify-content:center;">${boxes}</div>
-      <div style="font-size:12px;color:var(--text2);margin-top:10px;">${KD.fw(p.multiplier)}こが　${KD.fw(p.dan)}こずつ</div>
+      <div style="font-size:12px;color:var(--text2);margin-top:10px;">${KD.fw(p.dan)}こずつが　${KD.fw(p.multiplier)}こ</div>
     </div>`;
   overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
   document.body.appendChild(overlay);

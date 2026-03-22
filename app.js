@@ -1420,18 +1420,18 @@ function _startGrowthAnim(charStage) {
     eggImg = mainImg;
   }
 
-  // タッチ: growth-area全体でクリック判定
+  // タッチ判定とハート
   function _spawnHearts(x, y) {
-    for (let i = 0; i < 2; i++) {
+    const offsets = [[-10, -8], [8, -4]];
+    offsets.forEach(([dx, dy]) => {
       const el = document.createElement('span');
       el.className = 'growth-heart';
       el.textContent = '💕';
-      el.style.left = (x - 7 + (Math.random() - 0.5) * 24) + 'px';
-      el.style.top  = (y - 12 + (Math.random() - 0.5) * 12) + 'px';
-      el.style.animationDelay = (i * 120) + 'ms';
+      el.style.left = (x + dx) + 'px';
+      el.style.top  = (y + dy) + 'px';
       area.appendChild(el);
       setTimeout(() => el.remove(), 1600);
-    }
+    });
   }
 
   area.addEventListener('click', (e) => {
@@ -1446,12 +1446,18 @@ function _startGrowthAnim(charStage) {
       return;
     }
 
-    // キャラがいればエリア全体どこでも反応（距離判定なし）
-    if (chars.length > 0) {
-      tapSnd();
-      const c = chars[0];
-      _growthTouchAnim = { type: 'char', born: Date.now(), charObj: c };
-      _spawnHearts(clickX, clickY);
+    // キャラに近い場合のみ反応（キャラの高さ+60px 以内）
+    for (const c of chars) {
+      const iW = c.img.offsetWidth || 50;
+      const iH = c.img.offsetHeight || 50;
+      const cx = c.x + iW / 2;
+      const cy = c.y + iH / 2;
+      if (Math.hypot(clickX - cx, clickY - cy) < iH + 60) {
+        tapSnd();
+        c.shakeStart = Date.now();
+        _spawnHearts(cx, cy - iH * 0.4);
+        return;
+      }
     }
   });
 
@@ -1568,16 +1574,15 @@ function _startGrowthAnim(charStage) {
       c.facingLeft = c.vx < -0.1 ? true : c.vx > 0.1 ? false : c.facingLeft;
       const flipX = c.facingLeft ? -1 : 1;
       let tfm;
-      if (_growthTouchAnim && _growthTouchAnim.type === 'char' && _growthTouchAnim.charObj === c) {
-        const age = Date.now() - _growthTouchAnim.born;
-        const shakeDur = 650;
-        if (age < shakeDur) {
-          const p = age / shakeDur;
+      if (c.shakeStart) {
+        const age = Date.now() - c.shakeStart;
+        if (age < 650) {
+          const p = age / 650;
           const shakeRot = Math.sin(p * Math.PI * 9) * 18 * (1 - p);
-          const shakeX   = Math.sin(p * Math.PI * 11) * 6 * (1 - p);
-          tfm = `scaleX(${flipX}) translateX(${shakeX.toFixed(1)}px) rotate(${shakeRot.toFixed(2)}deg)`;
+          const shakeX   = Math.sin(p * Math.PI * 11) * 5 * (1 - p);
+          tfm = `scaleX(${flipX}) rotate(${shakeRot.toFixed(2)}deg) translateX(${shakeX.toFixed(1)}px)`;
         } else {
-          _growthTouchAnim = null;
+          c.shakeStart = null;
           tfm = `scaleX(${flipX})`;
         }
       } else if (c.walk) {

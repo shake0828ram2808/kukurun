@@ -654,7 +654,7 @@ function buildCertBtns() {
       btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2z"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
       btn.onclick = () => {
         tapSnd();
-        if (_certTooltipAnchor === btn) { hideCertTooltip(); } else { showCertTooltip(btn, ct.label + 'ますたーの\u3000しょうじょうだよ'); }
+        if (_certTooltipAnchor === btn) { hideCertTooltip(); } else { showCertTooltip(btn, ct.label + 'マスターの\nしょうじょうだよ'); }
       };
     }
     row.appendChild(btn);
@@ -668,6 +668,9 @@ function hideCertTooltip() {
   clearTimeout(_certTooltipTimer);
   _certTooltipAnchor = null;
 }
+document.addEventListener('click', (e) => {
+  if (_certTooltipAnchor && e.target !== _certTooltipAnchor) hideCertTooltip();
+}, true);
 function showCertTooltip(anchorEl, msg) {
   let tip = document.getElementById('cert-tooltip');
   if (!tip) {

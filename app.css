@@ -317,7 +317,7 @@ body {
   border-radius: var(--r);
   cursor: pointer;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
-  padding: 10px 4px;
+  padding: 14px 4px;
   font-family: var(--font);
   box-shadow: 0 5px 0 rgba(0,0,0,.22), var(--sh);
   transition: transform .1s cubic-bezier(.34,1.56,.64,1), box-shadow .08s, border-color .1s;

@@ -366,6 +366,20 @@ body {
 /* ══ せいちょうをみる画面 ══ */
 #screen-growth { height: calc(100dvh - 100px); min-height: 300px; border-radius: var(--r); overflow: hidden; }
 #screen-settings { height: calc(100dvh - 100px); min-height: 300px; }
+/* ハートアニメ */
+@keyframes floatHeart {
+  0%   { opacity: 1; transform: translateY(0) scale(1); }
+  80%  { opacity: .8; }
+  100% { opacity: 0; transform: translateY(-64px) scale(.65); }
+}
+.growth-heart {
+  position: absolute;
+  font-size: 18px;
+  pointer-events: none;
+  z-index: 20;
+  animation: floatHeart 1.3s ease-out forwards;
+  will-change: transform, opacity;
+}
 /* scaleアニメを無効化（back-btnの位置ずれ防止） */
 #screen-growth.active { animation: growthFadeIn .22s ease; }
 @keyframes growthFadeIn { from { opacity: 0; } }
@@ -960,6 +974,7 @@ body {
 /* ══════════════════
    しょうじょう
 ══════════════════ */
+#screen-cert { height: calc(100dvh - 100px); min-height: 300px; }
 #cert-btn-row {
   display: none; flex-wrap: nowrap; gap: 6px;
   width: 100%; flex-shrink: 0;
@@ -971,6 +986,8 @@ body {
 .cert-icon-btn { font-size: 22px; padding: 6px 2px; line-height: 1; }
 #cert-tooltip { transition: opacity .5s; }
 .cert-paper {
+  flex: 1;
+  overflow-y: auto;
   background: #fffef5;
   border: 5px solid #C9A227;
   box-shadow:
@@ -978,7 +995,7 @@ body {
     0 0 0 4px #C9A227,
     0 8px 24px rgba(0,0,0,.2);
   border-radius: 4px;
-  padding: 30px 22px 26px;
+  padding: 24px 20px 20px;
   position: relative;
   font-family: 'Shippori Mincho', 'Noto Serif JP', 'Yu Mincho', serif;
   font-weight: bold;
@@ -1005,40 +1022,40 @@ body {
 .cert-deco {
   text-align: center;
   color: #C9A227;
-  font-size: 12px;
+  font-size: 14px;
   letter-spacing: 2px;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
-.cert-deco.bot { margin-top: 16px; margin-bottom: 0; }
+.cert-deco.bot { margin-top: 12px; margin-bottom: 0; }
 .cert-title {
   text-align: center;
-  font-size: 26px;
+  font-size: 30px;
   font-weight: bold;
   letter-spacing: 8px;
-  margin-bottom: 18px;
+  margin-bottom: 14px;
 }
 .cert-master {
-  font-size: 15px;
+  font-size: 18px;
   margin-bottom: 6px;
 }
 .cert-name {
-  font-size: 20px;
+  font-size: 24px;
   text-align: right;
-  margin-bottom: 22px;
+  margin-bottom: 16px;
 }
 .cert-body {
-  font-size: 13px;
-  line-height: 2.2;
-  margin-bottom: 20px;
+  font-size: 16px;
+  line-height: 1.9;
+  margin-bottom: 16px;
 }
 .cert-date {
-  font-size: 12px;
+  font-size: 15px;
   text-align: right;
   color: var(--text2);
   margin-bottom: 6px;
 }
 .cert-issuer {
-  font-size: 20px;
+  font-size: 24px;
   text-align: right;
   font-weight: bold;
   color: var(--theme);

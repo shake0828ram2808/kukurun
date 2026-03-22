@@ -1420,18 +1420,47 @@ function _startGrowthAnim(charStage) {
     eggImg = mainImg;
   }
 
-  // タッチ: 卵→ぐらぐら / キャラ→ぶるぶるぶるっ
-  if (mainImg) {
-    mainImg.onclick = (e) => {
-      e.stopPropagation();
-      tapSnd();
-      if (eggImg) {
-        _growthTouchAnim = { type: 'egg', born: Date.now() };
-      } else if (chars.length > 0) {
-        _growthTouchAnim = { type: 'char', born: Date.now(), charObj: chars[0] };
-      }
-    };
+  // タッチ: growth-area全体でクリック判定（キャラが小さいため位置ベースで検知）
+  function _spawnHearts(x, y) {
+    const count = 3 + Math.floor(Math.random() * 2);
+    for (let i = 0; i < count; i++) {
+      const el = document.createElement('span');
+      el.className = 'growth-heart';
+      el.textContent = '💕';
+      el.style.left = (x - 10 + (Math.random() - 0.5) * 36) + 'px';
+      el.style.top  = (y - 16 + (Math.random() - 0.5) * 16) + 'px';
+      el.style.animationDelay = (i * 90) + 'ms';
+      area.appendChild(el);
+      setTimeout(() => el.remove(), 1600);
+    }
   }
+
+  area.addEventListener('click', (e) => {
+    const rect = area.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const clickY = e.clientY - rect.top;
+
+    if (eggImg) {
+      tapSnd();
+      _growthTouchAnim = { type: 'egg', born: Date.now() };
+      _spawnHearts(clickX, clickY);
+      return;
+    }
+
+    // キャラに近い位置をタップしたか判定（中心から50px以内）
+    for (const c of chars) {
+      const iW = c.img.offsetWidth || 50;
+      const iH = c.img.offsetHeight || 50;
+      const cx = c.x + iW / 2;
+      const cy = c.y + iH / 2;
+      if (Math.hypot(clickX - cx, clickY - cy) < Math.max(iW, iH) + 30) {
+        tapSnd();
+        _growthTouchAnim = { type: 'char', born: Date.now(), charObj: c };
+        _spawnHearts(cx, cy - iH * 0.3);
+        return;
+      }
+    }
+  });
 
   // 以前に育てたadultキャラをうろうろ（なめらか飛行）
   S.adultCharacters.forEach(adultKind => {

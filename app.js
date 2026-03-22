@@ -1435,18 +1435,24 @@ function _startGrowthAnim(charStage) {
   }
 
   area.addEventListener('click', (e) => {
-    const rect = area.getBoundingClientRect();
-    const clickX = e.clientX - rect.left;
-    const clickY = e.clientY - rect.top;
+    const areaRect = area.getBoundingClientRect();
+    const clickX = e.clientX - areaRect.left;
+    const clickY = e.clientY - areaRect.top;
 
+    // 卵の近接判定（getBoundingClientRectで実際の描画位置を取得）
     if (eggImg) {
-      tapSnd();
-      _growthTouchAnim = { type: 'egg', born: Date.now() };
-      _spawnHearts(clickX, clickY);
-      return;
+      const er = eggImg.getBoundingClientRect();
+      const ex = er.left - areaRect.left + er.width  / 2;
+      const ey = er.top  - areaRect.top  + er.height / 2;
+      if (Math.hypot(clickX - ex, clickY - ey) < er.height / 2 + 50) {
+        tapSnd();
+        _growthTouchAnim = { type: 'egg', born: Date.now() };
+        _spawnHearts(ex, ey - er.height * 0.4);
+        return;
+      }
     }
 
-    // キャラに近い場合のみ反応（キャラの高さ+60px 以内）
+    // キャラの近接判定（c.x / c.y はフレームループで更新される実座標）
     for (const c of chars) {
       const iW = c.img.offsetWidth || 50;
       const iH = c.img.offsetHeight || 50;

@@ -567,8 +567,8 @@ const MEDAL_CLR = { bronze:'#CD7F32', silver:'#B8C0CC', gold:'#FFD700' };
 
 /* ── しょうじょう種別 ── */
 const CERT_TYPES = [
-  { id:'oboeru',  label:'おぼえる',  mLabel:'おぼえる　めだる',  icon:'📖', btnColor:'#7B68EE', btnShadow:'#5548CC', btnText:'#fff', check:(m)=>m&&m.oboeru },
-  { id:'renshu',  label:'れんしゅう', mLabel:'れんしゅう　めだる', icon:'✏️', btnColor:'#4CAF7D', btnShadow:'#357A58', btnText:'#fff', check:(m)=>m&&m.renshu },
+  { id:'oboeru',  label:'おぼえる',  mLabel:'おぼえる　めだる',  icon:'🎖️', btnColor:'#7B68EE', btnShadow:'#5548CC', btnText:'#fff', check:(m)=>m&&m.oboeru },
+  { id:'renshu',  label:'れんしゅう', mLabel:'れんしゅう　めだる', icon:'🏅', btnColor:'#4CAF7D', btnShadow:'#357A58', btnText:'#fff', check:(m)=>m&&m.renshu },
   { id:'bronze',  label:'どう',      mLabel:'どう　めだる',      icon:'🥉', btnColor:'#CD7F32', btnShadow:'#9A5C1E', btnText:'#fff', check:(m)=>m&&m.test },
   { id:'silver',  label:'ぎん',      mLabel:'ぎん　めだる',      icon:'🥈', btnColor:'#9E9E9E', btnShadow:'#6E6E6E', btnText:'#fff', check:(m)=>m&&(m.test==='silver'||m.test==='gold') },
   { id:'gold',    label:'きん',      mLabel:'きん　めだる',      icon:'🥇', btnColor:'#FFB300', btnShadow:'#B87800', btnText:'#5a3a00', check:(m)=>m&&m.test==='gold' },
@@ -647,7 +647,7 @@ function buildCertBtns() {
       btn.onclick = () => { tapSnd(); showCertificate(ct.id); };
     } else {
       btn.style.cssText = `background:#ccc;color:#888;border-color:#bbb;box-shadow:0 4px 0 #aaa,var(--sh);flex:1;min-width:0;`;
-      btn.textContent = '🔒';
+      btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2z"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
       btn.onclick = (e) => { tapSnd(); showCertTooltip(btn, ct.label + 'ますたーの\u3000しょうじょうを\u3000もらうと\u3000みられるようになるよ'); };
     }
     row.appendChild(btn);

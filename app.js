@@ -667,21 +667,32 @@ function showCertificate(id) {
   certSparkle();
 }
 function certSparkle() {
-  const glyphs = ['✦','★','◆','✸','⬟','✺'];
-  const golds  = ['#FFD700','#FFC107','#FFB300','#FFECB3','#FFF8DC','#E8C958'];
-  for (let i = 0; i < 55; i++) {
-    const el = document.createElement('span');
-    el.className = 'cert-sparkle';
+  const glyphs = ['✦','★','◆','✸','✵','✺','❋','⬟'];
+  const golds  = ['#FFD700','#FFC107','#FFB300','#FFECB3','#FFF176','#F9A825','#E8C958'];
+  const total  = 80;
+  for (let i = 0; i < total; i++) {
+    const el   = document.createElement('span');
+    const sway = Math.random() < 0.45; // 45%は横揺れタイプ
+    const size = 9 + Math.random() * 22;
+    const dur  = 2.0 + Math.random() * 2.8;
+    const delay= Math.random() * 1.5;
+    const color= golds[~~(Math.random() * golds.length)];
+    const glow = `0 0 ${4 + ~~(Math.random()*6)}px ${color}`;
+    el.className = `cert-sparkle ${sway ? 'sway' : 'fall'}`;
     el.textContent = glyphs[~~(Math.random() * glyphs.length)];
     el.style.cssText = [
       `left:${Math.random()*100}vw`,
-      `color:${golds[~~(Math.random()*golds.length)]}`,
-      `font-size:${10 + Math.random()*18}px`,
-      `animation-duration:${1.8 + Math.random()*2.5}s`,
-      `animation-delay:${Math.random()*1.2}s`,
+      `color:${color}`,
+      `font-size:${size}px`,
+      `text-shadow:${glow}`,
+      `animation-duration:${dur}s`,
+      `animation-delay:${delay}s`,
+      `opacity:0`,
     ].join(';');
+    // delay後に opacity 解除（delay中に見えないようにする）
+    setTimeout(() => { if (el.parentNode) el.style.opacity = ''; }, delay * 1000);
     document.body.appendChild(el);
-    setTimeout(() => el.remove(), 5000);
+    setTimeout(() => el.remove(), (dur + delay + 0.5) * 1000);
   }
 }
 function checkGraduation() {

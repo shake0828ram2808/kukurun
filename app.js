@@ -1092,11 +1092,11 @@ function showFruitHint() {
   const p = S.probs[S.idx];
   if (!p) return;
   Snd.tap();
-  // 箱を p.dan 個、各箱に p.multiplier 個の🍬
+  // 箱を p.multiplier 個、各箱に p.dan 個の🍬
   const candy = '🍬';
   let boxes = '';
-  for (let i = 0; i < p.dan; i++) {
-    const candies = `<span style="font-size:20px;letter-spacing:1px;">${candy.repeat(p.multiplier)}</span>`;
+  for (let i = 0; i < p.multiplier; i++) {
+    const candies = `<span style="font-size:20px;letter-spacing:1px;">${candy.repeat(p.dan)}</span>`;
     boxes += `<div style="display:inline-flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:2px;
                            border:2px solid #aac;border-radius:8px;padding:6px 8px;margin:4px;
                            min-width:40px;background:#f4f0ff;">${candies}</div>`;
@@ -1111,7 +1111,7 @@ function showFruitHint() {
               style="position:absolute;top:10px;right:10px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;font-size:14px;padding:6px 14px;cursor:pointer;color:var(--text2);font-family:var(--font);">とじる</button>
       <div style="font-size:20px;margin-bottom:12px;color:var(--theme);">${KD.fw(p.dan)}×${KD.fw(p.multiplier)}</div>
       <div style="display:flex;flex-wrap:wrap;justify-content:center;">${boxes}</div>
-      <div style="font-size:12px;color:var(--text2);margin-top:10px;">${p.dan}はこに　${p.multiplier}こずつ</div>
+      <div style="font-size:12px;color:var(--text2);margin-top:10px;">${KD.fw(p.multiplier)}こが　${KD.fw(p.dan)}こずつ</div>
     </div>`;
   overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
   document.body.appendChild(overlay);

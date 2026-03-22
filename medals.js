@@ -10,10 +10,10 @@ const NEXT_MEDAL = { null: 'bronze', bronze: 'silver', silver: 'gold', gold: 'go
 const CERT_TYPES = [
   { id:'oboeru',  label:'おぼえる',  mLabel:'おぼえる　メダル',  icon:'🎖️',
     iconStyle:'filter:grayscale(100%) sepia(100%) hue-rotate(190deg) saturate(300%) brightness(0.8);',
-    btnColor:'#cceedd', btnShadow:'#7bbfa0', btnText:'#1a4230', check:(m)=>m&&m.oboeru },
+    btnColor:'#c4d8f0', btnShadow:'#7aaad0', btnText:'#1a3050', check:(m)=>m&&m.oboeru },
   { id:'renshu',  label:'れんしゅう', mLabel:'れんしゅう　メダル', icon:'🎖️',
     iconStyle:'filter:grayscale(100%) sepia(100%) hue-rotate(80deg) saturate(200%) brightness(0.7);',
-    btnColor:'#c4d8f0', btnShadow:'#7aaad0', btnText:'#1a3050', check:(m)=>m&&m.renshu },
+    btnColor:'#cceedd', btnShadow:'#7bbfa0', btnText:'#1a4230', check:(m)=>m&&m.renshu },
   { id:'bronze',  label:'どう',      mLabel:'どう　メダル',      icon:'🥉',
     btnColor:'#edd8b4', btnShadow:'#c09058', btnText:'#5a3210', check:(m)=>m&&m.test },
   { id:'silver',  label:'ぎん',      mLabel:'ぎん　メダル',      icon:'🥈',

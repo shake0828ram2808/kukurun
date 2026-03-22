@@ -719,7 +719,7 @@ function refreshModeMedals() {
   const ob = document.getElementById('mode-medal-oboeru');
   const rs = document.getElementById('mode-medal-renshu');
   const ts = document.getElementById('mode-medal-test');
-  if (ob) ob.textContent = m.oboeru ? '🎖️' : '';
+  if (ob) { ob.textContent = m.oboeru ? '🎖️' : ''; ob.style.filter = m.oboeru ? 'hue-rotate(220deg)' : ''; }
   if (rs) rs.textContent = m.renshu ? '🎖️' : '';
   if (ts) ts.textContent = m.test === 'gold' ? '🥇' : m.test === 'silver' ? '🥈' : m.test === 'bronze' ? '🥉' : '';
 }
@@ -729,7 +729,7 @@ function medalBadge(dan) {
   const sh = 'filter:drop-shadow(0 1px 1px rgba(0,0,0,.35));';
   // テストメダルは累積表示
   const items = [
-    m.oboeru ? `<span style="${sh}">🎖️</span>` : '',
+    m.oboeru ? `<span style="${sh}filter:hue-rotate(220deg);">🎖️</span>` : '',
     m.renshu ? `<span style="${sh}">🎖️</span>` : '',
     (m.test === 'bronze' || m.test === 'silver' || m.test === 'gold') ? `<span style="${sh}">🥉</span>` : '',
     (m.test === 'silver' || m.test === 'gold') ? `<span style="${sh}">🥈</span>` : '',
@@ -823,7 +823,8 @@ function showOboeruClear() {
   const alreadyHad = getMedals(S.dan).oboeru;
   awardOboeruMedal();
   const danLabel = S.dan === 'random' ? 'ばらばらのだん' : KD.fw(S.dan) + 'のだん';
-  document.getElementById('oboeru-clear-medal').textContent = '🎖️';
+  const obMedalEl = document.getElementById('oboeru-clear-medal');
+  obMedalEl.textContent = '🎖️'; obMedalEl.style.filter = 'hue-rotate(220deg)';
   document.getElementById('oboeru-clear-title').textContent = danLabel + '　おぼえたね！';
   document.getElementById('oboeru-clear-msg').textContent =
     alreadyHad ? 'めだるは　もう　もってるよ！' : 'めだるを　もらえたよ！';

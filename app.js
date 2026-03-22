@@ -1188,6 +1188,26 @@ function debugGoHome() {
   showScreen('screen-home');
   updateCreature();
 }
+function debugBuildCertBtns() {
+  const row = document.getElementById('debug-cert-btns');
+  if (!row) return;
+  row.innerHTML = '';
+  CERT_TYPES.forEach(ct => {
+    const btn = document.createElement('button');
+    btn.style.cssText = `font-family:var(--font);font-size:12px;padding:5px 8px;border:2px solid ${ct.btnColor};border-radius:8px;background:#fff;color:${ct.btnColor};cursor:pointer;`;
+    btn.textContent = '📜 ' + ct.label;
+    btn.onclick = () => {
+      // 仮の証明書データがなければデバッグ用に今日の日付でセット
+      const t = new Date();
+      const tmp = `${t.getFullYear()}ねん${t.getMonth()+1}がつ${t.getDate()}にち`;
+      const prev = S.certificates[ct.id];
+      if (!prev) S.certificates[ct.id] = tmp;
+      showCertificate(ct.id);
+      if (!prev) delete S.certificates[ct.id]; // 保存はしない
+    };
+    row.appendChild(btn);
+  });
+}
 
 /* ════════════════════════════════
    GROWTH SCREEN — せいちょうをみる
@@ -1867,6 +1887,7 @@ function handleZenbukesus() {
   if (debugTapCount === 3) {
     const debugPanel = document.getElementById('debug-panel');
     debugPanel.classList.toggle('visible');
+    if (debugPanel.classList.contains('visible')) debugBuildCertBtns();
     debugTapCount = 0; // リセット
   } else {
     // 2秒以内に次のタップがなければリセット

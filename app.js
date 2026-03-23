@@ -1084,26 +1084,31 @@ function showFruitHint() {
   const p = S.probs[S.idx];
   if (!p) return;
   Snd.tap();
-  // 箱を p.multiplier 個、各箱に p.dan 個の🍬
   const sweets = ['🍬', '🍩', '🍰'];
   const candy = sweets[Math.floor(Math.random() * sweets.length)];
-  let boxes = '';
-  for (let i = 0; i < p.multiplier; i++) {
-    const candies = `<span style="font-size:20px;letter-spacing:1px;">${candy.repeat(p.dan)}</span>`;
-    boxes += `<div style="display:inline-flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:2px;
-                           border:2px solid #aac;border-radius:8px;padding:6px 8px;margin:4px;
-                           min-width:40px;background:#f4f0ff;">${candies}</div>`;
+  // 各行: 10スロット固定、5つ目以降に余白、空きは破線円
+  const emptySlot = `<span style="display:inline-block;width:22px;height:22px;border-radius:50%;border:2px dashed #ccc;box-sizing:border-box;flex-shrink:0;"></span>`;
+  let rows = '';
+  for (let row = 0; row < p.multiplier; row++) {
+    let slots = '';
+    for (let i = 0; i < 10; i++) {
+      const gap = i === 5 ? 'margin-left:7px;' : '';
+      slots += i < p.dan
+        ? `<span style="font-size:22px;line-height:1;${gap}flex-shrink:0;">${candy}</span>`
+        : `<span style="display:inline-block;width:22px;height:22px;border-radius:50%;border:2px dashed #ccc;box-sizing:border-box;flex-shrink:0;${gap}"></span>`;
+    }
+    rows += `<div style="display:flex;align-items:center;gap:2px;border:1.5px solid #aac;border-radius:10px;padding:7px 10px;margin-bottom:6px;background:#f4f0ff;">${slots}</div>`;
   }
   document.getElementById('fruit-hint-overlay')?.remove();
   const overlay = document.createElement('div');
   overlay.id = 'fruit-hint-overlay';
-  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:9999;';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:9999;padding:16px;box-sizing:border-box;';
   overlay.innerHTML = `
-    <div style="background:#fff;border-radius:16px;padding:24px 20px 20px;min-width:220px;max-width:320px;position:relative;text-align:center;font-family:var(--font);">
+    <div style="background:#fff;border-radius:16px;padding:24px 16px 20px;width:min(100%,380px);position:relative;text-align:center;font-family:var(--font);">
       <button onclick="document.getElementById('fruit-hint-overlay').remove()"
               style="position:absolute;top:10px;right:10px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;font-size:14px;padding:6px 14px;cursor:pointer;color:var(--text2);font-family:var(--font);">とじる</button>
       <div style="font-size:20px;margin-bottom:12px;color:var(--theme);">${KD.fw(p.dan)}×${KD.fw(p.multiplier)}</div>
-      <div style="display:flex;flex-wrap:wrap;justify-content:center;">${boxes}</div>
+      <div style="overflow-x:auto;">${rows}</div>
       <div style="font-size:12px;color:var(--text2);margin-top:10px;">${KD.fw(p.dan)}こずつが　${KD.fw(p.multiplier)}こ</div>
     </div>`;
   overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });

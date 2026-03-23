@@ -2135,7 +2135,7 @@ function openConfirm(type) {
     if (okBtn) okBtn.textContent = 'かえる';
   } else if (type === 'medal') {
     if (title) title.textContent = 'めだると　せいちょうを　けす';
-    if (msg) msg.textContent = 'めだると　せいちょうきろくが　ぜんぶ　きえるよ。\nほんとうに　けす？';
+    if (msg) msg.textContent = 'めだると　せいちょうが　ぜんぶ　きえるよ。\nほんとうに　けす？';
     if (okBtn) okBtn.textContent = 'けす';
   } else {
     if (title) title.textContent = 'ぜんぶ　けして　はじめから　やる';

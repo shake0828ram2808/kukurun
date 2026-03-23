@@ -1828,7 +1828,7 @@ function startTest() {
   S._testCorrect = 0;
   S._testShown   = false;
   S._testInput   = '';
-  const testLabel = S.dan === 'random' ? 'ばらばらのだん　テスト' : KD.danLabel(S.dan) + '　テスト';
+  const testLabel = S.dan === 'random' ? 'ばらばらのだん　テスト' : KD.fw(S.dan) + 'のだん　テスト';
   document.getElementById('test-dan-label').textContent = testLabel;
   buildTestGrid();
   showScreen('screen-test');
@@ -2085,7 +2085,7 @@ function openSettings() {
   const nameLabel = document.getElementById('settings-name-label');
   if (nameLabel) nameLabel.textContent = fullName() || '（なし）';
   const toggle = document.getElementById('speech-toggle');
-  if (toggle) toggle.classList.toggle('on', S.speechEnabled !== false);
+  if (toggle) toggle.textContent = S.speechEnabled !== false ? 'よむ' : 'よまない';
   updateTimeSelUI('renshu-time-sel', S.renshuAnsTime);
   updateTimeSelUI('test-time-sel', S.testAnsTime);
   updateBottomBar('settings');
@@ -2104,7 +2104,7 @@ function setTestTime(t)   { tapSnd(); S.testAnsTime   = t; saveState(); updateTi
 function toggleSpeech() {
   S.speechEnabled = !S.speechEnabled;
   const toggle = document.getElementById('speech-toggle');
-  if (toggle) toggle.classList.toggle('on', S.speechEnabled);
+  if (toggle) toggle.textContent = S.speechEnabled ? 'よむ' : 'よまない';
   saveState();
 }
 

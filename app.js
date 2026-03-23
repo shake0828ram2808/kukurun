@@ -862,7 +862,7 @@ function showOboeruClear() {
   awardOboeruMedal();
   const danLabel = S.dan === 'random' ? 'ばらばらのだん' : KD.fw(S.dan) + 'のだん';
   const obMedalEl = document.getElementById('oboeru-clear-medal');
-  obMedalEl.textContent = '🎖️'; obMedalEl.style.filter = 'hue-rotate(300deg)';
+  obMedalEl.innerHTML = ctIcon('oboeru');
   document.getElementById('oboeru-clear-title').textContent = danLabel + '　おぼえたね！';
   document.getElementById('oboeru-clear-msg').textContent =
     alreadyHad ? 'メダルは　もう　もってるよ！' : 'メダルを　もらえたよ！';
@@ -1968,8 +1968,7 @@ function doneTest() {
   const grew = getGrowthClears() > growthBefore;
   // 結果画面
   const medal = getMedals(dan).test;
-  const medalEm = medal === 'gold' ? '🥇' : medal === 'silver' ? '🥈' : medal === 'bronze' ? '🥉' : '';
-  document.getElementById('test-result-medal').textContent = cleared ? medalEm || '⭐' : '😢';
+  document.getElementById('test-result-medal').innerHTML = cleared ? (medal ? ctIcon(medal) : '⭐') : '😢';
   document.getElementById('test-result-label').textContent =
     cleared ? (medal ? MEDAL_NAMES[medal] + (preAwardMedal === 'gold' ? 'メダル' : 'メダル　ゲット！') : 'クリア！') : 'もう　いちど！';
   const titleText = dan === 'random'

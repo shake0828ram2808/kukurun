@@ -6,7 +6,14 @@ const MEDAL_CLR = { bronze:'#CD7F32', silver:'#B8C0CC', gold:'#FFD700' };
 const MEDAL_NAMES = { bronze:'どう', silver:'ぎん', gold:'きん' };
 const NEXT_MEDAL = { null: 'bronze', bronze: 'silver', silver: 'gold', gold: 'gold' };
 
-/* ── しょうじょう種別 ── */
+/* ── メダルアイコンHTML生成ヘルパー ──
+   id: CERT_TYPES の id (oboeru, renshu, bronze, silver, gold)
+   styledHTML: iconStyle がある場合は span でラップして返す */
+function ctIcon(id) {
+  const ct = CERT_TYPES.find(t => t.id === id);
+  if (!ct) return '';
+  return ct.iconStyle ? `<span style="${ct.iconStyle}">${ct.icon}</span>` : ct.icon;
+}
 const CERT_TYPES = [
   { id:'oboeru',  label:'おぼえる',  mLabel:'おぼえる　メダル',  icon:'🎖️',
     iconStyle:'filter:grayscale(100%) sepia(100%) hue-rotate(190deg) saturate(300%) brightness(0.8);',

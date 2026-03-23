@@ -752,9 +752,17 @@ function refreshModeMedals() {
   const ob = document.getElementById('mode-medal-oboeru');
   const rs = document.getElementById('mode-medal-renshu');
   const ts = document.getElementById('mode-medal-test');
-  if (ob) ob.innerHTML = m.oboeru ? ctIcon('oboeru') : '';
-  if (rs) rs.innerHTML = m.renshu ? ctIcon('renshu') : '';
-  if (ts) ts.innerHTML = m.test ? ctIcon(m.test) : '';
+  const ghost = 'filter:grayscale(1) brightness(1.1) opacity(0.3);';
+  const ghostIcon = (id) => { const ct = CERT_TYPES.find(t => t.id === id); return `<span style="${ghost}">${ct.icon}</span>`; };
+  if (ob) ob.innerHTML = m.oboeru ? ctIcon('oboeru') : ghostIcon('oboeru');
+  if (rs) rs.innerHTML = m.renshu ? ctIcon('renshu') : ghostIcon('renshu');
+  if (ts) {
+    const medals = ['bronze', 'silver', 'gold'].map(id => {
+      const ct = CERT_TYPES.find(t => t.id === id);
+      return ct.check(m) ? ctIcon(id) : `<span style="${ghost}">${ct.icon}</span>`;
+    }).join('');
+    ts.innerHTML = `<span style="display:inline-flex;gap:1px;font-size:18px;">${medals}</span>`;
+  }
 }
 
 function medalBadge(dan) {
@@ -1086,9 +1094,9 @@ function showFruitHint() {
   Snd.tap();
   const sweets = ['🍬', '🍩', '🍰'];
   const candy = sweets[Math.floor(Math.random() * sweets.length)];
-  // dan>=6のときのみ10スロット固定＋破線円で補数表示、それ以外はdan個のみ
+  // dan>=6: 10スロット固定＋破線円、それ以外: 5スロット固定＋透明スペーサー
   const showEmpty = p.dan >= 6;
-  const totalSlots = showEmpty ? 10 : p.dan;
+  const totalSlots = showEmpty ? 10 : 5;
   let rows = '';
   for (let row = 0; row < p.multiplier; row++) {
     let slots = '';
@@ -1096,7 +1104,9 @@ function showFruitHint() {
       const gap = i === 5 ? 'margin-left:7px;' : '';
       slots += i < p.dan
         ? `<span style="font-size:22px;line-height:1;${gap}flex-shrink:0;">${candy}</span>`
-        : `<span style="display:inline-block;width:22px;height:22px;border-radius:50%;border:2px dashed #ccc;box-sizing:border-box;flex-shrink:0;${gap}"></span>`;
+        : showEmpty
+          ? `<span style="display:inline-block;width:22px;height:22px;border-radius:50%;border:2px dashed #ccc;box-sizing:border-box;flex-shrink:0;${gap}"></span>`
+          : `<span style="display:inline-block;width:22px;height:22px;flex-shrink:0;${gap}"></span>`;
     }
     rows += `<div style="display:flex;align-items:center;gap:2px;border:1.5px solid #aac;border-radius:10px;padding:7px 10px;margin-bottom:6px;background:#f4f0ff;">${slots}</div>`;
   }

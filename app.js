@@ -749,29 +749,31 @@ function checkGraduation() {
 }
 function refreshModeMedals() {
   const m = getMedals(S.dan);
-  const obType = CERT_TYPES.find(t => t.id === 'oboeru');
-  const rsType = CERT_TYPES.find(t => t.id === 'renshu');
   const ob = document.getElementById('mode-medal-oboeru');
   const rs = document.getElementById('mode-medal-renshu');
   const ts = document.getElementById('mode-medal-test');
-  if (ob) ob.innerHTML = m.oboeru ? `<span style="${obType.iconStyle}">${obType.icon}</span>` : '';
-  if (rs) rs.innerHTML = m.renshu ? `<span style="${rsType.iconStyle}">${rsType.icon}</span>` : '';
-  if (ts) ts.textContent = m.test === 'gold' ? '🥇' : m.test === 'silver' ? '🥈' : m.test === 'bronze' ? '🥉' : '';
+  if (ob) ob.innerHTML = m.oboeru ? ctIcon('oboeru') : '';
+  if (rs) rs.innerHTML = m.renshu ? ctIcon('renshu') : '';
+  if (ts) ts.innerHTML = m.test ? ctIcon(m.test) : '';
 }
 
 function medalBadge(dan) {
   const m = (S.medals[dan] && typeof S.medals[dan] === 'object') ? S.medals[dan] : {};
   const shadow = 'drop-shadow(0 1px 1px rgba(0,0,0,.35))';
-  const obType = CERT_TYPES.find(t => t.id === 'oboeru');
-  const rsType = CERT_TYPES.find(t => t.id === 'renshu');
-  const withShadow = (style) => style.replace(/;\s*$/, ` ${shadow};`);
-  // テストメダルは累積表示
+  const withShadow = (style) => style
+    ? style.replace(/;\s*$/, ` ${shadow};`)
+    : `filter:${shadow};`;
+  // テストメダルは累積表示（bronze以上→🥉, silver以上→🥈, gold→🥇）
   const items = [
-    m.oboeru ? `<span style="${withShadow(obType.iconStyle)}">${obType.icon}</span>` : '',
-    m.renshu ? `<span style="${withShadow(rsType.iconStyle)}">${rsType.icon}</span>` : '',
-    (m.test === 'bronze' || m.test === 'silver' || m.test === 'gold') ? `<span style="filter:${shadow}">🥉</span>` : '',
-    (m.test === 'silver' || m.test === 'gold') ? `<span style="filter:${shadow}">🥈</span>` : '',
-    m.test === 'gold' ? `<span style="filter:${shadow}">🥇</span>` : '',
+    ...['oboeru', 'renshu'].map(id => {
+      const ct = CERT_TYPES.find(t => t.id === id);
+      return (id === 'oboeru' ? m.oboeru : m.renshu)
+        ? `<span style="${withShadow(ct.iconStyle)}">${ct.icon}</span>` : '';
+    }),
+    ...['bronze', 'silver', 'gold'].map(id => {
+      const ct = CERT_TYPES.find(t => t.id === id);
+      return ct.check(m) ? `<span style="${withShadow(ct.iconStyle)}">${ct.icon}</span>` : '';
+    }),
   ].filter(s => s).join('');
   if (!items) return '';
   return `<div class="dan-medal-row">${items}</div>`;

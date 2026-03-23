@@ -1086,12 +1086,13 @@ function showFruitHint() {
   Snd.tap();
   const sweets = ['🍬', '🍩', '🍰'];
   const candy = sweets[Math.floor(Math.random() * sweets.length)];
-  // 各行: 10スロット固定、5つ目以降に余白、空きは破線円
-  const emptySlot = `<span style="display:inline-block;width:22px;height:22px;border-radius:50%;border:2px dashed #ccc;box-sizing:border-box;flex-shrink:0;"></span>`;
+  // dan>=6のときのみ10スロット固定＋破線円で補数表示、それ以外はdan個のみ
+  const showEmpty = p.dan >= 6;
+  const totalSlots = showEmpty ? 10 : p.dan;
   let rows = '';
   for (let row = 0; row < p.multiplier; row++) {
     let slots = '';
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < totalSlots; i++) {
       const gap = i === 5 ? 'margin-left:7px;' : '';
       slots += i < p.dan
         ? `<span style="font-size:22px;line-height:1;${gap}flex-shrink:0;">${candy}</span>`

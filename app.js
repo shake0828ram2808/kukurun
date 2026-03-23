@@ -2084,8 +2084,7 @@ function handleZenbukesus() {
 function openSettings() {
   const nameLabel = document.getElementById('settings-name-label');
   if (nameLabel) nameLabel.textContent = fullName() || '（なし）';
-  const toggle = document.getElementById('speech-toggle');
-  if (toggle) toggle.textContent = S.speechEnabled !== false ? 'よむ' : 'よまない';
+  refreshSpeechUI();
   updateTimeSelUI('renshu-time-sel', S.renshuAnsTime);
   updateTimeSelUI('test-time-sel', S.testAnsTime);
   updateBottomBar('settings');
@@ -2101,12 +2100,19 @@ function updateTimeSelUI(id, val) {
 function setRenshuTime(t) { tapSnd(); S.renshuAnsTime = t; saveState(); updateTimeSelUI('renshu-time-sel', t); }
 function setTestTime(t)   { tapSnd(); S.testAnsTime   = t; saveState(); updateTimeSelUI('test-time-sel',   t); }
 
-function toggleSpeech() {
-  S.speechEnabled = !S.speechEnabled;
-  const toggle = document.getElementById('speech-toggle');
-  if (toggle) toggle.textContent = S.speechEnabled ? 'よむ' : 'よまない';
+function refreshSpeechUI() {
+  const on = S.speechEnabled !== false;
+  const yomu = document.getElementById('speech-yomu-btn');
+  const yomanai = document.getElementById('speech-yomanai-btn');
+  if (yomu)    { yomu.style.background = on ? 'var(--theme)' : 'transparent'; yomu.style.color = on ? '#fff' : 'var(--text2)'; }
+  if (yomanai) { yomanai.style.background = on ? 'transparent' : 'var(--theme)'; yomanai.style.color = on ? 'var(--text2)' : '#fff'; }
+}
+function setSpeech(val) {
+  S.speechEnabled = val;
+  refreshSpeechUI();
   saveState();
 }
+function toggleSpeech() { setSpeech(!S.speechEnabled); }
 
 function goChangeName() {
   // 名前入力画面へ（現在の名前をクリア）

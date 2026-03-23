@@ -644,8 +644,11 @@ function buildCertBtns() {
       btn.innerHTML = ct.iconStyle ? `<span style="${ct.iconStyle}">${ct.icon}</span>` : ct.icon;
       btn.onclick = () => { tapSnd(); showCertificate(ct.id); };
     } else {
-      btn.style.cssText = `background:#ddd;color:#999;border-color:#ccc;box-shadow:0 4px 0 #bbb,var(--sh);flex:1;min-width:0;`;
-      btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2z"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
+      const ghostIcon = ct.iconStyle
+        ? `<span style="${ct.iconStyle}filter:grayscale(1) brightness(1.1) opacity(0.35);">${ct.icon}</span>`
+        : `<span style="filter:grayscale(1) brightness(1.1) opacity(0.35);">${ct.icon}</span>`;
+      btn.style.cssText = `background:#e8e8f0;color:#aaa;border-color:#d0d0dc;box-shadow:0 4px 0 #c0c0cc,var(--sh);flex:1;min-width:0;`;
+      btn.innerHTML = ghostIcon;
       btn.onclick = () => {
         tapSnd();
         if (_certTooltipAnchor === btn) { hideCertTooltip(); } else { showCertTooltip(btn, ct.label + 'マスターの\nしょうじょうだよ'); }

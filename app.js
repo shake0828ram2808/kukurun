@@ -577,15 +577,14 @@ function goHomeFromEgg() {
 
 /* ── メダルヘルパー ──
    S.medals[dan] = { oboeru: bool, renshu: bool, test: null|'bronze'|'silver'|'gold' }
-   growthLevel(): 全段のメダル合計（max 45）→ 成長ドライバー（1段スパム防止）
-   テストメダル: bronze=1, silver=2, gold=3 */
+   growthLevel(): 全段のメダル合計（max 30）→ 成長ドライバー（1段スパム防止）
+   メダル種類に関わらず1つにつき+1 */
 function getMedals(dan) {
   if (!S.medals[dan] || typeof S.medals[dan] !== 'object') {
     S.medals[dan] = { oboeru: false, renshu: false, test: null };
   }
   return S.medals[dan];
 }
-const TEST_MEDAL_SCORE = { bronze: 1, silver: 2, gold: 3 };
 function growthLevel() {
   let score = 0;
   for (let d = 1; d <= 9; d++) {
@@ -593,16 +592,16 @@ function growthLevel() {
     if (!m || typeof m !== 'object') continue;
     if (m.oboeru) score++;
     if (m.renshu) score++;
-    if (m.test) score += TEST_MEDAL_SCORE[m.test] || 0;
+    if (m.test) score++;
   }
   // ばらばらのだんのメダルも加算
   const rm = S.medals['random'];
   if (rm && typeof rm === 'object') {
     if (rm.oboeru) score++;
     if (rm.renshu) score++;
-    if (rm.test) score += TEST_MEDAL_SCORE[rm.test] || 0;
+    if (rm.test) score++;
   }
-  return score; // 0-48（9段+ばらばら各: oboeru1+renshu1+gold3）
+  return score; // 0-30（9段+ばらばら各: oboeru1+renshu1+test1）
 }
 function getGrowthClears() {
   // たまご: 1点/ステージ（0=intact, 1=crack1, 2=crack2, 3=hatch）
@@ -1249,7 +1248,7 @@ function debugClears(delta) {
     previewImg.style.display = 'block';
   }
   const label = document.getElementById('debug-clears-label');
-  if (label) label.textContent = 'スコア:' + growthLevel() + '/48\n' + n + 'clears';
+  if (label) label.textContent = 'スコア:' + growthLevel() + '/30\n' + n + 'clears';
   const stageLabel = document.getElementById('debug-stage-label');
   if (stageLabel) stageLabel.textContent = stage ? stageNames[stage] : 'たまご (' + n + '/10)';
   // adult到達 かつ 卒業前 → 卒業フローへ

@@ -881,8 +881,6 @@ function startOboeru() {
   S._oboeruProblems = problems;
   S._oboeruMode = S._oboeruMode || 'auto';  // 初期値: じどうで　ぜんぶ
   S._oboeruSelected = [];  // manualモードの選択状態リセット
-  const label = S.dan === 'random' ? 'ばらばらのだん' : KD.danLabel(S.dan);
-  document.getElementById('oboeru-dan-label').textContent = label;
   // スイッチ表示を現在のモードに合わせる
   _updateOboeruSwitch();
   const list = document.getElementById('kuku-list'); list.innerHTML = '';
@@ -956,12 +954,10 @@ function setOboeruMode(mode) {
   S._oboeruMode = mode;
   S._oboeruSelected = [];  // 選択リセット
   _updateOboeruSwitch();
-  // 全行の選択状態をリセット
   document.querySelectorAll('.kuku-row').forEach(r => {
     r.classList.remove('selected');
     r.classList.remove('current');
   });
-  document.querySelectorAll('.kuku-check').forEach(el => el.textContent = '');
   _updateOboeruReadSelectedBtn();
   if (mode === 'auto') {
     // autoに切り替えたら先頭から再生

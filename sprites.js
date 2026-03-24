@@ -20,6 +20,24 @@ const SPRITES = {
       crack2: "./sprites/egg_blue_crack2.png",
       hatch:  "./sprites/egg_blue_hatch.png",
     },
+    purple: {
+      intact: "./sprites/egg_purple_intact.png",
+      crack1: "./sprites/egg_purple_crack1.png",
+      crack2: "./sprites/egg_purple_crack2.png",
+      hatch:  "./sprites/egg_purple_hatch.png",
+    },
+    orange: {
+      intact: "./sprites/egg_orange_intact.png",
+      crack1: "./sprites/egg_orange_crack1.png",
+      crack2: "./sprites/egg_orange_crack2.png",
+      hatch:  "./sprites/egg_orange_hatch.png",
+    },
+    silver: {
+      intact: "./sprites/egg_silver_intact.png",
+      crack1: "./sprites/egg_silver_crack1.png",
+      crack2: "./sprites/egg_silver_crack2.png",
+      hatch:  "./sprites/egg_silver_hatch.png",
+    },
   },
   char: {
     green: {
@@ -39,6 +57,24 @@ const SPRITES = {
       baby:    "./sprites/char_blue_baby.png",
       child:   "./sprites/char_blue_child.png",
       adult:   "./sprites/char_blue_adult.png",
+    },
+    purple: {
+      newborn: "./sprites/char_purple_newborn.png",
+      baby:    "./sprites/char_purple_baby.png",
+      child:   "./sprites/char_purple_child.png",
+      adult:   "./sprites/char_purple_adult.png",
+    },
+    orange: {
+      newborn: "./sprites/char_orange_newborn.png",
+      baby:    "./sprites/char_orange_baby.png",
+      child:   "./sprites/char_orange_child.png",
+      adult:   "./sprites/char_orange_adult.png",
+    },
+    silver: {
+      newborn: "./sprites/char_silver_newborn.png",
+      baby:    "./sprites/char_silver_baby.png",
+      child:   "./sprites/char_silver_child.png",
+      adult:   "./sprites/char_silver_adult.png",
     },
   },
 };

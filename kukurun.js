@@ -211,25 +211,21 @@ const _msgIdx = { name: 0, suffix: 0, egg: 0, home: 0 };
 // 各画面のタイマー
 const _msgTimers = {};
 
-/** 指定画面の吹き出しテキストを次のメッセージに切り替え */
+/** 指定画面の吹き出しテキストを次のメッセージに切り替え（読み上げなし） */
 function _nextBalloonMsg(screen) {
   const msgs = _buildMsgs(screen);
   _msgIdx[screen] = (_msgIdx[screen] + 1) % msgs.length;
-  _setBalloon(screen, msgs[_msgIdx[screen]]);
+  _setBalloon(screen, msgs[_msgIdx[screen]], false);
 }
 
 /** ユーザー名込みのメッセージリストを返す */
 function _buildMsgs(screen) {
-  if (screen === 'home') {
-    const name = (typeof fullName === 'function') ? fullName() : '';
-    const greeting = name ? 'どれを　やる？' + name + '！' : 'どれを　やる？';
-    return [greeting, ...SCREEN_MESSAGES.home];
-  }
-  return SCREEN_MESSAGES[screen] || [];
+  const name = (typeof fullName === 'function') ? fullName() : '';
+  return (SCREEN_MESSAGES[screen] || []).map(m => m.replace(/\{name\}/g, name));
 }
 
-/** 指定画面の吹き出し要素にテキストをセット */
-function _setBalloon(screen, text) {
+/** 指定画面の吹き出し要素にテキストをセット。doSpeak=true なら読み上げ */
+function _setBalloon(screen, text, doSpeak) {
   const idMap = {
     name:   'name-balloon-text',
     suffix: 'suffix-balloon-text',
@@ -238,14 +234,15 @@ function _setBalloon(screen, text) {
   };
   const el = document.getElementById(idMap[screen]);
   if (el) el.textContent = text;
+  if (doSpeak && typeof speak === 'function') speak(text);
 }
 
 /** 5秒タイマーを開始（画面遷移時に呼ぶ） */
 function startBalloonTimer(screen) {
   stopBalloonTimer(screen);
-  // まず最初のメッセージを表示
+  // まず最初のメッセージを表示・読み上げ
   _msgIdx[screen] = 0;
-  _setBalloon(screen, _buildMsgs(screen)[0]);
+  _setBalloon(screen, _buildMsgs(screen)[0], true);
   // 5秒ごとに切り替え
   _msgTimers[screen] = setInterval(() => _nextBalloonMsg(screen), 5000);
 }
@@ -258,6 +255,12 @@ function stopBalloonTimer(screen) {
   }
 }
 
+/** タイマーだけ5秒リセット（メッセージ・インデックスは変えない） */
+function _resetBalloonTimer(screen) {
+  stopBalloonTimer(screen);
+  _msgTimers[screen] = setInterval(() => _nextBalloonMsg(screen), 5000);
+}
+
 /* ── ホーム画面タップ ── */
 let HOME_KUKURUN_MESSAGES = []; // 後方互換のため残す
 
@@ -266,8 +269,9 @@ async function homeKukurunTalk() {
   kukurunState.isJumping = true;
   const svg = document.getElementById('home-kukurun-svg');
   playKukurunTapAnim(svg);
-  // タップで次のメッセージへ
+  // タップで次のメッセージへ、かつ5秒タイマーをリセット
   _nextBalloonMsg('home');
+  _resetBalloonTimer('home');
   Snd.tap();
   for (let m of ['O', 'A', 'I', 'U', 'O']) { setKukurunMouth(m); await new Promise(r => setTimeout(r, 120)); }
   setKukurunSmile(true);
@@ -386,10 +390,17 @@ async function kukurunTalkSmall() {
 /* ── イントロモーダル ── */
 function closeIntroModal(e) {
   const modal = document.getElementById('intro-modal');
-  if (modal) {
-    modal.style.animation = 'fadeOut 0.3s ease forwards';
-    setTimeout(() => { modal.style.display = 'none'; showScreen('screen-name'); }, 300);
-  }
+  if (!modal || modal.style.display === 'none') return;
+  modal.style.animation = 'fadeOut 0.3s ease forwards';
+  setTimeout(() => {
+    modal.style.display = 'none';
+    // 名前登録済みならホーム、未登録なら名前入力へ
+    if (typeof S !== 'undefined' && S.name) {
+      showScreen('screen-home');
+    } else {
+      showScreen('screen-name');
+    }
+  }, 300);
 }
 
 function setIntroKukurunMouth(state) {
@@ -410,6 +421,8 @@ function playIntroAnimation() {
     for (let m of ['O', 'I', 'A', 'U', 'O']) { setIntroKukurunMouth(m); await new Promise(r => setTimeout(r, 120)); }
     setIntroKukurunMouth('munyu');
   })();
+  // 3秒後に自動で閉じる
+  setTimeout(() => closeIntroModal(), 3000);
 }
 
 

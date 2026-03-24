@@ -1,11 +1,10 @@
-
 /* ════════════════════════════════
-   SPRITE SYSTEM
+   SPRITE SYSTEM — スプライト管理
    卵: green/pink/blue × intact/crack1/crack2/hatch
    キャラ: green/pink/blue × newborn/baby/child/adult
    ステージ決定: renshuClears（6割クリア回数）
-     0→intact, 1→crack1, 2→crack2, 3→hatch→newborn,
-     4→baby, 5→child, 6→adult
+     0→intact, 1→crack1, 2→crack2, 3→hatch（卵3/3）,
+     4,5→newborn, 6,7→baby, 8,9→child, 10+→adult（各2クリア）
 ════════════════════════════════ */
 
 // ステージ番号からスプライトを取得
@@ -15,75 +14,41 @@ function getEggSprite(kind, n) {
   if (n === 2) return SPRITES.egg[kind].crack2;
   return SPRITES.egg[kind].hatch; // 孵化直前（3）
 }
-function getCharSprite(kind, n) {
-  // n = renshuClears - 3 (孵化後のステップ数)
-  if (n <= 0) return SPRITES.char[kind].newborn;
-  if (n === 1) return SPRITES.char[kind].baby;
-  if (n === 2) return SPRITES.char[kind].child;
+function getCharSprite(kind, idx) {
+  // idx = charStageIdx(renshuClears)  0:newborn 1:baby 2:child 3:adult
+  if (idx <= 0) return SPRITES.char[kind].newborn;
+  if (idx === 1) return SPRITES.char[kind].baby;
+  if (idx === 2) return SPRITES.char[kind].child;
   return SPRITES.char[kind].adult;
 }
-function isHatched(n) { return n >= 3; } // renshuClears >= 3 で孵化済み
+function isHatched(n) { return n >= 4; } // renshuClears >= 4 で孵化済み（3はhatch卵）
 
-// charStage: null=卵, 'newborn','baby','child','adult'
+// charStageIdx: null=卵, 0=newborn, 1=baby, 2=child, 3=adult（各ステージ2クリア）
+function charStageIdx(n) {
+  if (n < 4) return null;
+  return Math.min(3, Math.floor((n - 4) / 2));
+}
+// charStage: null=卵（hatch含む）, 'newborn','baby','child','adult'
 function getCharStage(n) {
-  if (n < 3) return null;
-  const after = n - 3;
-  if (after === 0) return 'newborn';
-  if (after === 1) return 'baby';
-  if (after === 2) return 'child';
-  return 'adult';
+  const idx = charStageIdx(n);
+  return idx === null ? null : ['newborn','baby','child','adult'][idx];
 }
 
 // ホーム画面・クリア画面の表示を更新
 function updateCreature() {
   if (!S.selectedEgg && S.adultCharacters.length === 0) return;
   
-  // 表示対象を決定：成人キャラがあればそれを表示、なければ現在の卵を表示
-  let displayKind = S.selectedEgg;
-  let displayClears = S.renshuClears;
-  
-  // 成人キャラがあれば、最後の成人キャラを表示
-  if (S.adultCharacters.length > 0) {
-    displayKind = S.adultCharacters[S.adultCharacters.length - 1];
-    displayClears = S.charClears[displayKind] || 0;
-  }
-  
-  const n = displayClears;
-  const kind = displayKind;
+  // 成長レベルはメダル合計から計算（1段スパム防止）
+  const n = S.renshuClears;
+  const kind = S.selectedEgg || (S.adultCharacters.length > 0 ? S.adultCharacters[S.adultCharacters.length - 1] : 'green');
   const charStage = getCharStage(n);
-  const homeWrap = document.getElementById('home-creature-wrap');
-  if (homeWrap) homeWrap.style.display = 'flex';
-
-  const homeEgg = document.getElementById('home-egg-img');
-  if (homeEgg) {
-    if (charStage) {
-      homeEgg.src = getCharSprite(kind, n - 3);
-      homeEgg.style.height = charStage === 'newborn' ? '45px'
-                           : charStage === 'baby'    ? '50px'
-                           : charStage === 'child'   ? '55px' : '60px';
-    } else {
-      homeEgg.src = getEggSprite(kind, n);
-      homeEgg.style.height = '50px';
-    }
-  }
-  // ヒビSVGオーバーレイは使わない（画像差し替えで表現）
-  const homeCrackSvg = document.getElementById('home-crack-svg');
-  if (homeCrackSvg) homeCrackSvg.style.display = 'none';
-
-  const stageNames = {newborn:'うまれたて',baby:'あかちゃん',child:'こども',adult:'おとな'};
-  const homeLabel = document.getElementById('home-stage-label');
-  if (homeLabel) {
-    if (charStage) homeLabel.textContent = stageNames[charStage] + 'になったよ！';
-    else homeLabel.textContent = 'はなまる ' + KD.fw(S.hanamaruCount) + ' こ';
-  }
-
   // アニメ制御
   charAnim.updateStage(charStage, n);
 
   // suffix画面
   const dinSufEl = document.getElementById('dino-suffix');
   if (dinSufEl) dinSufEl.src = charStage
-    ? getCharSprite(kind, n - 3)
+    ? getCharSprite(kind, charStageIdx(n))
     : getEggSprite(kind, n);
 }
 
@@ -100,18 +65,18 @@ const eggWobble = (() => {
   let running = false;
 
   function wobbleParams(n) {
-    // n = renshuClears
-    if (n <= 0) return null; // 揺れなし
+    // n = growthClears（成長スコア）
+    // 卵ステージ（0-3）は全てゆれる。段階が進むほど頻度・角度が大きくなる
+    if (n <= 0) return { interval: [8000, 16000], deg: 2, dur: 500 };
     if (n === 1) return { interval: [4000, 8000], deg: 5, dur: 600 };
     if (n === 2) return { interval: [2000, 5000], deg: 9, dur: 700 };
-    return           { interval: [800, 2000],  deg: 14, dur: 800 }; // 孵化直前
+    return              { interval: [800, 2000],  deg: 14, dur: 800 }; // 孵化直前
   }
 
   function wobble() {
     const wrap = document.getElementById('home-egg-wrap');
     if (!wrap || isHatched(S.renshuClears)) { timer = null; return; }
     const params = wobbleParams(S.renshuClears);
-    if (!params) { timer = setTimeout(wobble, 2000); return; }
 
     wrap.classList.remove('egg-wobble');
     wrap.style.setProperty('--wobble-deg', params.deg + 'deg');
@@ -132,8 +97,8 @@ const eggWobble = (() => {
     restart() {
       // ステージ変更時に周期を再設定
       if (timer) clearTimeout(timer);
+      if (isHatched(S.renshuClears)) return;
       const params = wobbleParams(S.renshuClears);
-      if (!params || isHatched(S.renshuClears)) return;
       const next = params.interval[0] * 0.3;
       timer = setTimeout(wobble, next);
     }
@@ -239,32 +204,45 @@ function initDinos() {
 ════════════════════════════════ */
 const Snd = (() => {
   let _ctx = null;
-  function ac() {
+  function getCtx() {
     if (!_ctx) _ctx = new (window.AudioContext || window.webkitAudioContext)();
     return _ctx;
   }
-  function run(fn) {
-    const c = ac();
-    (c.state === 'suspended' ? c.resume() : Promise.resolve()).then(fn).catch(() => {});
+  // iOS Safari: サイレントバッファ再生でAudioContextをアンロック
+  function unlock() {
+    const ctx = getCtx();
+    const buf = ctx.createBuffer(1, 1, 22050);
+    const src = ctx.createBufferSource();
+    src.buffer = buf; src.connect(ctx.destination); src.start(0);
+    ctx.resume();
   }
-  function beep(freq, t, dur, vol = 0.3, type = 'sine', c = null) {
-    const ctx = c || ac();
-    const o = ctx.createOscillator(), g = ctx.createGain();
-    o.connect(g); g.connect(ctx.destination);
-    o.type = type; o.frequency.setValueAtTime(freq, t);
-    g.gain.setValueAtTime(0, t);
-    g.gain.linearRampToValueAtTime(vol, t + 0.01);
-    g.gain.exponentialRampToValueAtTime(0.001, t + dur);
-    o.start(t); o.stop(t + dur + 0.02);
+  function beep(freq, dur, vol, type = 'sine') {
+    try {
+      const ctx = getCtx();
+      const t = ctx.currentTime + 0.04; // 40ms先にスケジュール（resume遅延対策）
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.type = type; o.frequency.setValueAtTime(freq, t);
+      g.gain.setValueAtTime(vol, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+      o.start(t); o.stop(t + dur + 0.01);
+    } catch(e) {}
   }
   return {
-    tap()      { run(() => beep(600, ac().currentTime, 0.06, 0.1)); },
-    click()    { run(() => beep(1200, ac().currentTime, 0.025, 0.055, 'square')); },
-    pingpong() { run(() => { const c = ac(), now = c.currentTime; beep(880, now, .24, .34, 'sine', c); beep(1047, now + .3, .24, .34, 'sine', c); }); },
-    miss()     { run(() => { const c = ac(), now = c.currentTime; beep(440, now, .17, .12, 'sine', c); beep(370, now + .1, .17, .08, 'sine', c); }); }
+    unlock,
+    tap()      { beep(660, 0.07, 0.22); },
+    click()    { beep(880, 0.06, 0.30); },
+    pingpong() { beep(880, .24, .34); setTimeout(() => beep(1047, .24, .34), 300); },
+    miss()     { beep(440, .17, .15); setTimeout(() => beep(370, .17, .10), 100); }
   };
 })();
 function tapSnd() { Snd.click(); }
+
+// 読み表示用フォーマット：問題部分と答えの間に全角スペースを入れる
+function fmtReading(p) {
+  if (p.reading.includes('が')) return p.reading.replace('が', '\u3000が\u3000');
+  return (p.questionRead || '') + '\u3000' + KD.numYomi(p.answer);
+}
 
 /* ════════════════════════════════
    SPEECH
@@ -276,7 +254,7 @@ const Spk = (() => {
       if (!window.speechSynthesis) { if (onend) setTimeout(onend, 800); return; }
       speechSynthesis.cancel();
       const u = new SpeechSynthesisUtterance(text);
-      u.lang = 'ja-JP'; u.rate = rate; u.pitch = 1.2;
+      u.lang = 'ja-JP'; u.rate = rate; u.pitch = 1.3;
       const v = speechSynthesis.getVoices().find(x => x.lang.startsWith('ja'));
       if (v) u.voice = v;
       if (onend) u.onend = onend;
@@ -284,8 +262,15 @@ const Spk = (() => {
     }
   };
 })();
-function speak(t, r) { Spk.say(t, r); }
-function speakThen(t, r, cb) { Spk.say(t, r, cb); }
+function speak(t, r) { if (S.speechEnabled !== false) Spk.say(t, r); }
+function speakThen(t, r, cb) {
+  if (S.speechEnabled !== false) { Spk.say(t, r, cb); }
+  else if (cb) setTimeout(cb, 50);
+}
+// 九九の読みをTTSに渡す前に「は」を「ハ」へ変換する。
+// 日本語TTSは助詞の「は」を「わ」と読むため、カタカナのハ（常に「は」）で回避する。
+// ただし「はち」の一部である「は」（後ろに「ち」が続く）は対象外。
+function kukuTts(t) { return t.replace(/は(?!ち)/g, 'ハ'); }
 
 /* ════════════════════════════════
    STATE
@@ -300,25 +285,107 @@ const S = {
   adultCharacters: [],  // 成人になったキャラリスト
   done: {},           // クリア済み段
   medals: {},         // メダル: null|'bronze'|'silver'|'gold'
-  _isAdultEggSelected: false,  // 成人後に卵を再選択したか
-  isFirstAccess: true  // 初回アクセスか
+  certificates: {},   // しょうじょう取得日: { oboeru: 'YYYYねん...', renshu, bronze, silver, gold }
+  _growthBase: 0,       // 現在のキャラの成長ベース（卒業ごとに加算）
+  _pendingGraduation: false,  // 卒業遷移中フラグ
+  isFirstAccess: true,  // 初回アクセスか
+  speechEnabled: true,  // 音声読み上げon/off
+  renshuAnsTime: 10,    // れんしゅう自動回答まで秒数（0=まつ）
+  testAnsTime: 0,       // てすと自動回答まで秒数（0=まつ）
 };
 const fullName = () => S.name + S.suffix;
 
 /* ════════════════════════════════
+   PERSISTENCE — LocalStorage
+════════════════════════════════ */
+const SAVE_KEY = 'kukurun_state';
+function saveState() {
+  try {
+    localStorage.setItem(SAVE_KEY, JSON.stringify({
+      name: S.name, suffix: S.suffix,
+      speechEnabled: S.speechEnabled,
+      medals: S.medals,
+      adultCharacters: S.adultCharacters,
+      selectedEgg: S.selectedEgg,
+      _growthBase: S._growthBase,
+      renshuClears: S.renshuClears,
+      done: S.done,
+      hanamaruCount: S.hanamaruCount,
+      isFirstAccess: S.isFirstAccess,
+      renshuAnsTime: S.renshuAnsTime,
+      testAnsTime: S.testAnsTime,
+      certificates: S.certificates,
+    }));
+  } catch(e) {}
+}
+function loadState() {
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (!raw) return;
+    const d = JSON.parse(raw);
+    ['name','suffix','speechEnabled','medals','adultCharacters',
+     'selectedEgg','_growthBase','renshuClears','done','hanamaruCount','isFirstAccess',
+     'renshuAnsTime','testAnsTime','certificates']
+      .forEach(k => { if (d[k] !== undefined) S[k] = d[k]; });
+  } catch(e) {}
+}
+function restoreSession() {
+  if (S.isFirstAccess || !S.name) return;
+  // イントロ表示中もバックグラウンドでホーム状態を準備
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-home').classList.add('active');
+  const greetingText = '　' + fullName() + '、おかえり♪';
+  const balloonText = document.getElementById('balloon-text');
+  if (balloonText) balloonText.textContent = greetingText;
+  buildDanGrid();
+  const cr = document.getElementById('cert-btn-row');
+  if (cr) cr.style.display = 'flex';
+  updateCreature();
+  eggWobble.start();
+}
+
+/* ════════════════════════════════
    SCREEN NAV
 ════════════════════════════════ */
+// 直前の画面IDを記録（せってい・せいちょうの「もどる」に使用）
+let _prevScreenId = 'screen-home';
+
+function updateBottomBar(which) {
+  ['home', 'settings', 'growth'].forEach(k => {
+    document.getElementById('bottom-btn-' + k)
+      ?.classList.toggle('bottom-btn--active', k === which);
+  });
+}
+
 function showScreen(id) {
+  // 画面が切り替わるたびに読み上げを止める
+  if (window.speechSynthesis) speechSynthesis.cancel();
   if (id === 'screen-home') {
     const label = document.getElementById('debug-clears-label');
     if (label) label.textContent = S.renshuClears + 'かい';
+    updateBottomBar('home');
   }
   if (id === 'screen-oboeru') {
     _updateOboeruReadSelectedBtn();
   }
+  // 遷移前の画面を記録（settings/growthへ行くときのみ意味を持つ）
+  const cur = document.querySelector('.screen.active');
+  if (cur && cur.id !== id) _prevScreenId = cur.id;
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
+  const bb = document.getElementById('bottom-bar');
+  const noChrome = ['screen-name', 'screen-suffix', 'screen-egg-select'].includes(id);
+  if (bb) bb.style.display = noChrome ? 'none' : '';
+  const cr = document.getElementById('cert-btn-row');
+  if (cr) cr.style.display = id === 'screen-home' ? 'flex' : 'none';
   window.scrollTo(0, 0);
+}
+
+function goBack() {
+  // せってい・せいちょうから直前画面へ戻る
+  const target = _prevScreenId || 'screen-home';
+  if (target === 'screen-growth') stopGrowthAnim();
+  showScreen(target);
 }
 
 /* ════════════════════════════════
@@ -327,6 +394,7 @@ function showScreen(id) {
    → 右端があ行、左へかきくけこ…
 ════════════════════════════════ */
 let KANA_ROWS = [];
+let HOKA_SECTIONS = [];
 function buildKanaGrid() {
   const g = document.getElementById('kana-grid');
   KANA_ROWS.forEach(row =>
@@ -376,6 +444,73 @@ function delKana() {
 }
 
 /* ════════════════════════════════
+   HOKA MODAL (ほかのもじ)
+════════════════════════════════ */
+let hokaBuilt = false;
+function buildHokaModal() {
+  if (hokaBuilt) return;
+  hokaBuilt = true;
+  const body = document.getElementById('hoka-modal-body');
+
+  const allRows = [];
+  HOKA_SECTIONS.forEach((sec, si) => {
+    if (si > 0) allRows.push(null); // スペーサー列
+    sec.rows.forEach(col => allRows.push(col));
+  });
+
+  const colCount = allRows.length;
+  const grid = document.createElement('div');
+  grid.className = 'hoka-grid';
+  grid.style.gridTemplateColumns = `repeat(${colCount}, 1fr)`;
+  grid.style.gridTemplateRows = 'repeat(5, auto)';
+  grid.style.gridAutoFlow = 'column';
+  grid.style.direction = 'rtl';
+
+  allRows.forEach(col => {
+    if (col === null) {
+      for (let r = 0; r < 5; r++) {
+        const sp = document.createElement('div');
+        sp.className = 'hoka-col-spacer';
+        grid.appendChild(sp);
+      }
+    } else {
+      col.forEach(k => {
+        const b = document.createElement('button');
+        b.className = 'hoka-kana-btn';
+        b.textContent = k;
+        b.onclick = () => { Snd.tap(); speak(k, 1.1); addKana(k); };
+        grid.appendChild(b);
+      });
+    }
+  });
+
+  body.appendChild(grid);
+}
+
+function openHokaModal() {
+  buildHokaModal();
+  const overlay = document.getElementById('hoka-overlay');
+  const modal   = document.getElementById('hoka-modal');
+  overlay.style.display = 'block';
+  modal.style.display   = 'flex';
+  requestAnimationFrame(() => {
+    overlay.classList.add('visible');
+    modal.classList.add('visible');
+  });
+}
+
+function closeHokaModal() {
+  const overlay = document.getElementById('hoka-overlay');
+  const modal   = document.getElementById('hoka-modal');
+  overlay.classList.remove('visible');
+  modal.classList.remove('visible');
+  setTimeout(() => {
+    overlay.style.display = 'none';
+    modal.style.display   = 'none';
+  }, 220);
+}
+
+/* ════════════════════════════════
    SUFFIX SELECT
 ════════════════════════════════ */
 let SUFFIXES = [];
@@ -403,81 +538,301 @@ function goSuffix() {
   buildSuffixGrid(); S.selSuffix = '';
   document.getElementById('suffix-preview').textContent = S.name;
   showScreen('screen-suffix');
-  speak(S.name + '、よびかたをえらんでね');
 }
-// sufixから卵選択へ
+// sufixから卵選択へ（名前変更時は卵選択をスキップして設定へ戻る）
 function goEggSelect() {
   Snd.tap(); S.suffix = S.selSuffix;
+  saveState();
+  if (_skipEggSelect) {
+    _skipEggSelect = false;
+    openSettings();
+    return;
+  }
   buildEggSelectGrid();
-  // dino-egg-sel は現状なし（まだ卵未選択）
   showScreen('screen-egg-select');
-  speak('すきなたまごをえらんでね！');
 }
 function goHome() {
   Snd.tap();
   const nm = fullName();
-  const greetingText = nm + '、こんにちは！';
-  document.getElementById('greeting-text').textContent = greetingText;
-  // くくるんの吹き出しにも反映
-  const balloonText = document.getElementById('balloon-text');
-  if (balloonText) balloonText.textContent = greetingText;
+  document.getElementById('greeting-text').textContent = '　' + nm + '、こんにちは♪';
+  S.isFirstAccess = false;
+  saveState();
   updateCreature();
   buildDanGrid(); showScreen('screen-home');
-  speak(nm + '、くくるんへようこそ！');
 }
 function goHomeFromEgg() {
-  Snd.tap();
-  updateCreature();
-  eggWobble.start();
-  goHome();
+  try { Snd.tap(); } catch(e) {}
+  S.isFirstAccess = false;
+  try { saveState(); } catch(e) {}
+  try { updateCreature(); } catch(e) {}
+  try { eggWobble.start(); } catch(e) {}
+  try { buildDanGrid(); } catch(e) {}
+  showScreen('screen-home');
 }
 
 /* ════════════════════════════════
    DAN GRID
 ════════════════════════════════ */
-const MEDAL_CLR = { bronze:'#CD7F32', silver:'#B8C0CC', gold:'#FFD700' };
-function medalBadge(dan) {
-  const m = S.medals[dan];
-  const medals = ['bronze', 'silver', 'gold'];
-  const medalEmojis = { bronze: '🥉', silver: '🥈', gold: '🥇' };
-  
-  let html = '<div style="position:absolute;top:4px;right:3px;display:flex;flex-direction:column;gap:1px;font-size:14px;line-height:1;">';
-  
-  medals.forEach(level => {
-    const hasMedal = m && medals.indexOf(m) >= medals.indexOf(level);
-    html += `<span style="filter:drop-shadow(0 1px 1px rgba(0,0,0,.35));">${hasMedal ? medalEmojis[level] : '　'}</span>`;
+/* MEDAL_CLR / CERT_TYPES / MEDAL_NAMES / NEXT_MEDAL は medals.js で定義 */
+
+/* ── メダルヘルパー ──
+   S.medals[dan] = { oboeru: bool, renshu: bool, test: null|'bronze'|'silver'|'gold' }
+   growthLevel(): 全段のメダル合計（max 30）→ 成長ドライバー（1段スパム防止）
+   メダル種類に関わらず1つにつき+1 */
+function getMedals(dan) {
+  if (!S.medals[dan] || typeof S.medals[dan] !== 'object') {
+    S.medals[dan] = { oboeru: false, renshu: false, test: null };
+  }
+  return S.medals[dan];
+}
+function growthLevel() {
+  let score = 0;
+  for (let d = 1; d <= 9; d++) {
+    const m = S.medals[d];
+    if (!m || typeof m !== 'object') continue;
+    if (m.oboeru) score++;
+    if (m.renshu) score++;
+    if (m.test) score++;
+  }
+  // ばらばらのだんのメダルも加算
+  const rm = S.medals['random'];
+  if (rm && typeof rm === 'object') {
+    if (rm.oboeru) score++;
+    if (rm.renshu) score++;
+    if (rm.test) score++;
+  }
+  return score; // 0-30（9段+ばらばら各: oboeru1+renshu1+test1）
+}
+function getGrowthClears() {
+  // たまご: 1点/ステージ（0=intact, 1=crack1, 2=crack2, 3=hatch）
+  // キャラ: 2点/ステージ（4-5=newborn, 6-7=baby, 8-9=child, 10-11=adult）
+  // 12点以上でadult卒業 → 新卵選択
+  return growthLevel() - S._growthBase;
+}
+function updateGrowthFromMedals() {
+  const newClears = getGrowthClears();
+  if (newClears !== S.renshuClears) {
+    S.renshuClears = newClears;
+    S.charClears[S.selectedEgg || 'green'] = newClears;
+    eggWobble.restart();
+  }
+  checkGraduation();
+  checkCertificates();
+}
+function checkCertificates() {
+  const t = new Date();
+  const dateStr = `${t.getFullYear()}ねん${t.getMonth()+1}がつ${t.getDate()}にち`;
+  const dans = [1,2,3,4,5,6,7,8,9];
+  CERT_TYPES.forEach(ct => {
+    if (S.certificates[ct.id]) return;
+    const earned = ct.isKukuMaster
+      ? dans.every(d => { const m = S.medals[d]; return m && m.oboeru && m.renshu && m.test === 'gold'; })
+      : dans.every(d => ct.check(S.medals[d]));
+    if (earned) { S.certificates[ct.id] = dateStr; buildCertBtns(); }
   });
-  
-  html += '</div>';
-  return html;
+}
+function buildCertBtns() {
+  const row = document.getElementById('cert-btn-row');
+  if (!row) return;
+  row.innerHTML = '';
+  CERT_TYPES.forEach(ct => {
+    const isEarned = !!S.certificates[ct.id];
+    const btn = document.createElement('button');
+    btn.className = 'btn btn-sm cert-icon-btn';
+    if (isEarned) {
+      btn.style.cssText = `background:${ct.btnColor};color:${ct.btnText};border-color:${ct.btnShadow};box-shadow:0 4px 0 ${ct.btnShadow},var(--sh);flex:1;min-width:0;`;
+      btn.innerHTML = ct.iconStyle ? `<span style="${ct.iconStyle}">${ct.icon}</span>` : ct.icon;
+      btn.onclick = () => { tapSnd(); showCertificate(ct.id); };
+    } else {
+      const ghostIcon = ct.iconStyle
+        ? `<span style="${ct.iconStyle}filter:grayscale(1) brightness(1.1) opacity(0.35);">${ct.icon}</span>`
+        : `<span style="filter:grayscale(1) brightness(1.1) opacity(0.35);">${ct.icon}</span>`;
+      btn.style.cssText = `background:#e8e8f0;color:#aaa;border-color:#d0d0dc;box-shadow:0 4px 0 #c0c0cc,var(--sh);flex:1;min-width:0;`;
+      btn.innerHTML = ghostIcon;
+      btn.onclick = () => {
+        tapSnd();
+        if (_certTooltipAnchor === btn) { hideCertTooltip(); } else { showCertTooltip(btn, ct.label + 'マスターの\nしょうじょうだよ'); }
+      };
+    }
+    row.appendChild(btn);
+  });
+}
+let _certTooltipTimer = null;
+let _certTooltipAnchor = null;
+function hideCertTooltip() {
+  const tip = document.getElementById('cert-tooltip');
+  if (tip) tip.style.opacity = '0';
+  clearTimeout(_certTooltipTimer);
+  _certTooltipAnchor = null;
+}
+document.addEventListener('click', (e) => {
+  if (_certTooltipAnchor && e.target !== _certTooltipAnchor) hideCertTooltip();
+}, true);
+function showCertTooltip(anchorEl, msg) {
+  let tip = document.getElementById('cert-tooltip');
+  if (!tip) {
+    tip = document.createElement('div');
+    tip.id = 'cert-tooltip';
+    document.body.appendChild(tip);
+  }
+  _certTooltipAnchor = anchorEl;
+  tip.textContent = msg;
+  const rect = anchorEl.getBoundingClientRect();
+  tip.style.cssText = `position:fixed;left:50%;transform:translateX(-50%);top:${Math.max(rect.top - 70, 8)}px;background:rgba(40,40,60,.92);color:#fff;font-size:13px;padding:8px 14px;border-radius:12px;line-height:1.6;max-width:88vw;text-align:center;z-index:9999;pointer-events:none;white-space:pre-wrap;`;
+  tip.style.opacity = '1';
+  clearTimeout(_certTooltipTimer);
+  _certTooltipTimer = setTimeout(() => { hideCertTooltip(); }, 2800);
+}
+function showCertificate(id) {
+  const ct = CERT_TYPES.find(c => c.id === id);
+  if (!ct) return;
+  const dateStr = S.certificates[id] || '';
+  const nameOnly = S.name;
+  const paper = document.getElementById('cert-paper');
+  paper.innerHTML = `
+    <span class="cert-corner tl">✦</span>
+    <span class="cert-corner tr">✦</span>
+    <span class="cert-corner bl">✦</span>
+    <span class="cert-corner br">✦</span>
+    <div class="cert-deco">── ✦ ── ✦ ── ✦ ──</div>
+    <div class="cert-title">しょうじょう</div>
+    <div class="cert-master">${ct.label}　マスター</div>
+    <div class="cert-name">${nameOnly}　どの</div>
+    <div class="cert-body">${nameOnly}どのは　${ct.mLabel}を　すべて　あつめることが　できました。そのえいよを　たたえるとともに　どりょくを　ここに　しょうします。これからも　くくを　たのしんで　おぼえてください。</div>
+    <div class="cert-date">${dateStr}</div>
+    <div class="cert-issuer">くくるん</div>
+    <div class="cert-deco bot">── ✦ ── ✦ ── ✦ ──</div>
+  `;
+  showScreen('screen-cert');
+  certSparkle(ct.isKukuMaster);
+}
+function certSparkle(isKukuMaster) {
+  const glyphs = ['⭐︎','✦','✸','✺'];
+  const count  = isKukuMaster ? 100 : 50;
+  const maxSz  = isKukuMaster ? 36  : 22;
+  const maxDly = isKukuMaster ? 2.2 : 1.4;
+  // くくマスターは2波に分けて豪華に
+  const waves  = isKukuMaster ? 2 : 1;
+  for (let w = 0; w < waves; w++) {
+    const wDelay = w * 1.6;
+    for (let i = 0; i < count / waves; i++) {
+      const el    = document.createElement('span');
+      const dur   = 2.4 + Math.random() * 2.6;
+      const delay = wDelay + Math.random() * maxDly;
+      el.className = isKukuMaster ? 'cert-sparkle colorful' : 'cert-sparkle';
+      el.textContent = glyphs[~~(Math.random() * glyphs.length)];
+      el.style.cssText = [
+        `left:${Math.random()*100}vw`,
+        `font-size:${10 + Math.random()*maxSz}px`,
+        `animation-duration:${dur}s`,
+        `animation-delay:${delay}s`,
+      ].join(';');
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), (dur + delay + 0.3) * 1000);
+    }
+  }
+}
+function checkGraduation() {
+  if (!S.selectedEgg || S._pendingGraduation) return;
+  if (getGrowthClears() < 12) return;
+  S._pendingGraduation = true;
+  if (!S.adultCharacters.includes(S.selectedEgg)) {
+    S.adultCharacters.push(S.selectedEgg);
+  }
+  S._growthBase = growthLevel(); // 次のキャラはここから
+  saveState();
+  updateCreature();
+  setTimeout(() => {
+    S._pendingGraduation = false;
+    S.selectedEgg = null;
+    saveState();
+    buildEggSelectGrid();
+    showScreen('screen-egg-select');
+  }, 1500);
+}
+function refreshModeMedals() {
+  const m = getMedals(S.dan);
+  const ob = document.getElementById('mode-medal-oboeru');
+  const rs = document.getElementById('mode-medal-renshu');
+  const ts = document.getElementById('mode-medal-test');
+  const ghost = 'filter:grayscale(1) brightness(1.1) opacity(0.3);';
+  const ghostIcon = (id) => { const ct = CERT_TYPES.find(t => t.id === id); return `<span style="${ghost}">${ct.icon}</span>`; };
+  if (ob) ob.innerHTML = m.oboeru ? ctIcon('oboeru') : ghostIcon('oboeru');
+  if (rs) rs.innerHTML = m.renshu ? ctIcon('renshu') : ghostIcon('renshu');
+  if (ts) {
+    const medals = ['bronze', 'silver', 'gold'].map(id => {
+      const ct = CERT_TYPES.find(t => t.id === id);
+      return ct.check(m) ? ctIcon(id) : `<span style="${ghost}">${ct.icon}</span>`;
+    }).join('');
+    ts.innerHTML = `<span style="display:inline-flex;gap:1px;font-size:18px;">${medals}</span>`;
+  }
+}
+
+function medalBadge(dan) {
+  const m = (S.medals[dan] && typeof S.medals[dan] === 'object') ? S.medals[dan] : {};
+  const shadow = 'drop-shadow(0 1px 1px rgba(0,0,0,.35))';
+  const withShadow = (style) => style
+    ? style.replace(/;\s*$/, ` ${shadow};`)
+    : `filter:${shadow};`;
+  // テストメダルは累積表示（bronze以上→🥉, silver以上→🥈, gold→🥇）
+  const items = [
+    ...['oboeru', 'renshu'].map(id => {
+      const ct = CERT_TYPES.find(t => t.id === id);
+      return (id === 'oboeru' ? m.oboeru : m.renshu)
+        ? `<span style="${withShadow(ct.iconStyle)}">${ct.icon}</span>` : '';
+    }),
+    ...['bronze', 'silver', 'gold'].map(id => {
+      const ct = CERT_TYPES.find(t => t.id === id);
+      return ct.check(m) ? `<span style="${withShadow(ct.iconStyle)}">${ct.icon}</span>` : '';
+    }),
+  ].filter(s => s).join('');
+  if (!items) return '';
+  return `<div class="dan-medal-row">${items}</div>`;
 }
 function buildDanGrid() {
   const g = document.getElementById('dan-grid'); g.innerHTML = '';
   for (let d = 1; d <= 9; d++) {
     const b = document.createElement('button'); b.className = `dan-btn d${d}`;
     b.style.position = 'relative';
-    b.innerHTML = `<span class="dn">${KD.fw(d)}</span><span class="dl">のだん</span>${medalBadge(d)}`;
+    const badge = medalBadge(d);
+    b.innerHTML = `${badge}<div class="dan-main"><span class="dn">${KD.fw(d)}</span><span class="dl">のだん</span></div>`;
+    b.classList.toggle('has-medals', !!badge);
     b.id = `dan-btn-${d}`;
     b.onclick = () => { Snd.tap(); selDan(d); };
     g.appendChild(b);
   }
+  refreshDanBadge('random');
+  buildCertBtns();
 }
 function refreshDanBadge(dan) {
-  const b = document.getElementById(`dan-btn-${dan}`);
+  const b = document.getElementById(dan === 'random' ? 'dan-btn-random' : `dan-btn-${dan}`);
   if (!b) return;
   // メダルバッジだけ更新（古いバッジを削除）
-  const existing = b.querySelector('div[style*="position:absolute"]');
+  const existing = b.querySelector('.dan-medal-row');
   if (existing) existing.remove();
-  
-  // 新しいバッジを追加
+
+  // 新しいバッジを先頭に挿入（メダルがある場合のみ）
   const badgeHtml = medalBadge(dan);
-  const temp = document.createElement('div');
-  temp.innerHTML = badgeHtml;
-  b.appendChild(temp.firstChild);
+  if (badgeHtml) {
+    const temp = document.createElement('div');
+    temp.innerHTML = badgeHtml;
+    b.insertBefore(temp.firstChild, b.firstChild);
+  }
+  b.classList.toggle('has-medals', !!badgeHtml);
 }
 function selDan(dan) {
   S.dan = dan;
-  const lbl = dan === 'random' ? 'らんだむ' : KD.fw(dan) + 'のだん';
+  if (dan === 'random') {
+    // ここで問題を生成・固定し、おぼえる／れんしゅうで同じ問題を使う
+    let probs = [];
+    for (let d = 1; d <= 9; d++) probs = probs.concat(KD.problems(d));
+    for (let i = probs.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [probs[i], probs[j]] = [probs[j], probs[i]];
+    }
+    S._oboeruProblems = probs.slice(0, 10);
+  }
+  const lbl = dan === 'random' ? 'ばらばらのだん' : KD.fw(dan) + 'のだん';
   document.getElementById('mode-dan-label').textContent = lbl;
   // テストボタン ロック/解除
   const testRow = document.getElementById('mode-test-row');
@@ -488,33 +843,57 @@ function selDan(dan) {
     if (testLocked) testLocked.style.display = unlocked ? 'none' : 'flex';
     if (testOpen)   testOpen.style.display   = unlocked ? 'flex' : 'none';
   }
-  showScreen('screen-mode'); speak(lbl + 'をえらんだね！');
+  showScreen('screen-mode');
+  refreshModeMedals();
+  speak(lbl + 'をえらんだね！');
 }
 
 /* ════════════════════════════════
    OBOERU
 ════════════════════════════════ */
+function awardOboeruMedal() {
+  const m = getMedals(S.dan);
+  if (!m.oboeru) {
+    m.oboeru = true;
+    updateGrowthFromMedals();
+    refreshDanBadge(S.dan);
+    refreshModeMedals();
+    saveState();
+  }
+}
+function showOboeruClear() {
+  if (S._oboeruClearShown) return;
+  S._oboeruClearShown = true;
+  const checks = document.querySelectorAll('.kuku-check');
+  const allChecked = checks.length > 0 && Array.from(checks).every(el => el.textContent === '✓');
+  if (!allChecked) {
+    // 全部見ていなくてもれんしゅうには進める
+    startRenshu();
+    return;
+  }
+  const alreadyHad = getMedals(S.dan).oboeru;
+  awardOboeruMedal();
+  const danLabel = S.dan === 'random' ? 'ばらばらのだん' : KD.fw(S.dan) + 'のだん';
+  const obMedalEl = document.getElementById('oboeru-clear-medal');
+  obMedalEl.innerHTML = ctIcon('oboeru');
+  document.getElementById('oboeru-clear-title').textContent = danLabel + '　おぼえたね！';
+  document.getElementById('oboeru-clear-msg').textContent =
+    alreadyHad ? 'メダルは　もう　もってるよ！' : 'メダルを　もらえたよ！';
+  showScreen('screen-oboeru-clear');
+  confetti();
+  speak(alreadyHad ? 'メダルは　もう　もってるよ！' : 'やったー！メダルを　もらえたよ！');
+}
 function startOboeru() {
+  S._oboeruClearShown = false;
   let problems;
   if (S.dan === 'random') {
-    // 全9段から問題を集める
-    problems = [];
-    for (let d = 1; d <= 9; d++) {
-      problems = problems.concat(KD.problems(d));
-    }
-    // Fisher-Yatesシャッフル
-    for (let i = problems.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [problems[i], problems[j]] = [problems[j], problems[i]];
-    }
+    problems = S._oboeruProblems;  // selDanで固定済みの問題を使う
   } else {
     problems = KD.problems(S.dan);
   }
-  S._oboeruProblems = problems;  // 問題リストを保存
+  S._oboeruProblems = problems;
   S._oboeruMode = S._oboeruMode || 'auto';  // 初期値: じどうで　ぜんぶ
   S._oboeruSelected = [];  // manualモードの選択状態リセット
-  const label = S.dan === 'random' ? 'らんだむ' : KD.danLabel(S.dan);
-  document.getElementById('oboeru-dan-label').textContent = label;
   // スイッチ表示を現在のモードに合わせる
   _updateOboeruSwitch();
   const list = document.getElementById('kuku-list'); list.innerHTML = '';
@@ -534,7 +913,7 @@ function startOboeru() {
       </button>
       <span class="kuku-eq">${eq}</span>
       <span class="kuku-ans">${KD.fw(p.answer)}</span>
-      <span class="kuku-read">${p.reading.includes('が') ? p.reading.replace('が', '\u3000が\u3000') : p.reading}</span>
+      <span class="kuku-read">${fmtReading(p)}</span>
       <span class="kuku-check" id="kc-${i}"></span>`;
     row.onclick = () => {
       Snd.tap();
@@ -560,9 +939,18 @@ function hlRow(i, p) {
   if (!row) return;
   row.classList.add('current');
   row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  document.getElementById(`kc-${i}`).textContent = '✓'; // タップ直後につける
+  // 全チェック済みならメダル付与 → クリア画面へ
+  const total = S._oboeruProblems ? S._oboeruProblems.length : 0;
+  const checked = document.querySelectorAll('.kuku-check').length > 0
+    ? Array.from(document.querySelectorAll('.kuku-check')).filter(el => el.textContent === '✓').length
+    : 0;
+  if (total > 0 && checked === total) {
+    setTimeout(() => showOboeruClear(), (S._oboeruMode || 'auto') === 'auto' ? 800 : 300);
+    return;
+  }
   // autoモードのみ自動進行; manualモードは読み上げのみ
-  speakThen(p.reading, 0.86, () => {
-    document.getElementById(`kc-${i}`).textContent = '✓';
+  speakThen(kukuTts(p.reading), 0.86, () => {
     if ((S._oboeruMode || 'auto') === 'auto') {
       const waitMs = Math.max(1200, p.reading.length * 130);
       const probs = S._oboeruProblems;
@@ -572,19 +960,17 @@ function hlRow(i, p) {
     }
   });
 }
-function speakRow(i) { speak(S._oboeruProblems[i].reading); }
+function speakRow(i) { speak(kukuTts(S._oboeruProblems[i].reading)); }
 
 // ── おぼえるモード切り替え ──
 function setOboeruMode(mode) {
   S._oboeruMode = mode;
   S._oboeruSelected = [];  // 選択リセット
   _updateOboeruSwitch();
-  // 全行の選択状態をリセット
   document.querySelectorAll('.kuku-row').forEach(r => {
     r.classList.remove('selected');
     r.classList.remove('current');
   });
-  document.querySelectorAll('.kuku-check').forEach(el => el.textContent = '');
   _updateOboeruReadSelectedBtn();
   if (mode === 'auto') {
     // autoに切り替えたら先頭から再生
@@ -627,7 +1013,7 @@ function readSelectedRows() {
     document.querySelectorAll('.kuku-row').forEach(r => r.classList.remove('current'));
     const row = document.getElementById(`kr-${i}`);
     if (row) { row.classList.add('current'); row.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
-    speakThen(p.reading, 0.86, () => {
+    speakThen(kukuTts(p.reading), 0.86, () => {
       const waitMs = Math.max(1000, p.reading.length * 120);
       setTimeout(readNext, waitMs);
     });
@@ -656,15 +1042,17 @@ let rT = null;
 function startRenshu() {
   let probs;
   if (S.dan === 'random') {
-    // 全9段から問題をランダムに抽出
-    probs = [];
-    for (let d = 1; d <= 9; d++) {
-      probs = probs.concat(KD.problems(d));
-    }
-    // Fisher-Yatesシャッフル
-    for (let i = probs.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [probs[i], probs[j]] = [probs[j], probs[i]];
+    // おぼえるで生成した同じ10問を再利用（なければ新規生成）
+    if (S._oboeruProblems && S._oboeruProblems.length) {
+      probs = S._oboeruProblems;
+    } else {
+      probs = [];
+      for (let d = 1; d <= 9; d++) probs = probs.concat(KD.problems(d));
+      for (let i = probs.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [probs[i], probs[j]] = [probs[j], probs[i]];
+      }
+      probs = probs.slice(0, 10);
     }
   } else {
     probs = KD.problems(S.dan);
@@ -687,12 +1075,13 @@ function buildAnsGrid() {
   b0.className = 'ans-btn'; b0.textContent = KD.fw(0); b0.dataset.val = 0;
   b0.onclick = () => inputDigit('0'); g.appendChild(b0);
 
-  const bDel = document.createElement('button');
-  bDel.className = 'ans-btn ans-del'; bDel.textContent = 'けす';
-  bDel.onclick = () => deleteDigit(); g.appendChild(bDel);
+  const bHint = document.createElement('button');
+  bHint.className = 'ans-btn ans-del'; bHint.textContent = 'ヒント';
+  bHint.onclick = () => showFruitHint(); g.appendChild(bHint);
 
-  const bSp = document.createElement('div'); // spacer
-  bSp.style.cssText = 'visibility:hidden;'; g.appendChild(bSp);
+  const bDel = document.createElement('button');
+  bDel.className = 'ans-btn ans-erase'; bDel.textContent = 'けす';
+  bDel.onclick = () => deleteDigit(); g.appendChild(bDel);
 
   // ── 2〜4行目: 1-9 ──
   for (let n = 1; n <= 9; n++) {
@@ -700,6 +1089,44 @@ function buildAnsGrid() {
     b.className = 'ans-btn'; b.textContent = KD.fw(n); b.dataset.val = n;
     b.onclick = () => inputDigit(String(n)); g.appendChild(b);
   }
+}
+
+function showFruitHint() {
+  const p = S.probs[S.idx];
+  if (!p) return;
+  Snd.tap();
+  const sweets = ['🍬', '🍩', '🍰'];
+  const candy = sweets[Math.floor(Math.random() * sweets.length)];
+  // dan>=6: 10スロット固定＋破線円、それ以外: 5スロット固定＋透明スペーサー
+  const showEmpty = p.dan >= 6;
+  const totalSlots = showEmpty ? 10 : 5;
+  let rows = '';
+  for (let row = 0; row < p.multiplier; row++) {
+    let slots = '';
+    for (let i = 0; i < totalSlots; i++) {
+      const gap = i === 5 ? 'margin-left:7px;' : '';
+      slots += i < p.dan
+        ? `<span style="font-size:22px;line-height:1;${gap}flex-shrink:0;">${candy}</span>`
+        : showEmpty
+          ? `<span style="display:inline-block;width:22px;height:22px;border-radius:50%;border:2px dashed #ccc;box-sizing:border-box;flex-shrink:0;${gap}"></span>`
+          : `<span style="display:inline-block;width:22px;height:22px;flex-shrink:0;${gap}"></span>`;
+    }
+    rows += `<div style="display:flex;align-items:center;gap:2px;border:1.5px solid #aac;border-radius:10px;padding:7px 10px;margin-bottom:6px;background:#f4f0ff;">${slots}</div>`;
+  }
+  document.getElementById('fruit-hint-overlay')?.remove();
+  const overlay = document.createElement('div');
+  overlay.id = 'fruit-hint-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:9999;padding:16px;box-sizing:border-box;';
+  overlay.innerHTML = `
+    <div style="background:#fff;border-radius:16px;padding:24px 16px 20px;width:min(100%,380px);position:relative;text-align:center;font-family:var(--font);">
+      <button onclick="document.getElementById('fruit-hint-overlay').remove()"
+              style="position:absolute;top:10px;right:10px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;font-size:14px;padding:6px 14px;cursor:pointer;color:var(--text2);font-family:var(--font);">とじる</button>
+      <div style="font-size:20px;margin-bottom:12px;color:var(--theme);">${KD.fw(p.dan)}×${KD.fw(p.multiplier)}</div>
+      <div style="overflow-x:auto;">${rows}</div>
+      <div style="font-size:12px;color:var(--text2);margin-top:10px;">${KD.fw(p.dan)}こずつが　${KD.fw(p.multiplier)}こ</div>
+    </div>`;
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+  document.body.appendChild(overlay);
 }
 
 function deleteDigit() {
@@ -736,7 +1163,7 @@ function inputDigit(d) {
     S.hanamaruCount++;
     setTimeout(() => { Snd.pingpong(); showHanamaru(); }, 180);
     showAnsEl(p);
-    speakThen(p.reading, 0.86, () => {
+    speakThen(kukuTts(p.reading), 0.86, () => {
       setTimeout(() => { nextRenshu(); S.ansInput = ''; }, 1000);
     });
   } else if (p.answer < 10 || S.ansInput.length >= 2) {
@@ -764,16 +1191,17 @@ function showProb() {
   // 式：２×３＝？
   document.getElementById('renshu-problem').innerHTML =
     `${KD.fw(p.dan)}×${KD.fw(p.multiplier)}＝<span class="q-mark" id="q-slot" style="display:inline-block;min-width:${p.answer >= 10 ? '2em' : '1.2em'};text-align:center;">？</span>`;
-  document.getElementById('renshu-hint').textContent = p.answer >= 10 ? '８びょう　たつと　こたえが　でるよ' : '５びょう　たつと　こたえが　でるよ';
+  { const t = S.renshuAnsTime;
+    document.getElementById('renshu-hint').textContent = t === 0 ? 'こたえは　じどうでは　でないよ'
+      : `${t === 5 ? '５' : t === 10 ? '１０' : '１５'}びょう　たつと　こたえが　でるよ`; }
   document.getElementById('renshu-next-btn').style.display = 'none';
   document.querySelectorAll('.ans-btn').forEach(b => { b.classList.remove('correct','wrong'); b.disabled = false; });
   S.ansShown = false; S.ansInput = '';
   updateQSlotInput();
   // 音声：「が」で終わる場合はそのまま「が？」、それ以外は読みだけ＋「？」
-  const speechQ = p.questionRead + '？';
+  const speechQ = kukuTts(p.questionRead) + '？';
   speak(speechQ);
-  const waitTime = p.answer >= 10 ? 8000 : 5000;
-  rT = setTimeout(showAns, waitTime);
+  if (S.renshuAnsTime > 0) rT = setTimeout(showAns, S.renshuAnsTime * 1000);
 }
 function showAnsEl(p) {
   // ？マークを答えで置き換え（赤・ポップイン、全角数字）
@@ -782,11 +1210,8 @@ function showAnsEl(p) {
     slot.textContent = KD.fw(p.answer);
     slot.className = 'ans-revealed';
   }
-  // 上段の読みを完全版に（が前後スペース）
-  const fullFmt = p.reading.includes('が')
-    ? p.reading.replace('が', '\u3000が\u3000')
-    : p.reading;
-  document.getElementById('renshu-reading').textContent = fullFmt;
+  // 上段の読みを完全版に（問題と答えの間にスペース）
+  document.getElementById('renshu-reading').textContent = fmtReading(p);
   document.getElementById('renshu-hint').textContent = '';
   document.getElementById('renshu-next-btn').style.display = 'block';
 }
@@ -795,7 +1220,7 @@ function showAns() {
   if (S.ansShown) return;
   S.ansShown = true;
   const p = S.probs[S.idx];
-  showAnsEl(p); speak(p.reading);
+  showAnsEl(p); speak(kukuTts(p.reading));
 }
 function checkAns(n, btn) {
   if (S.ansShown) return;
@@ -809,7 +1234,7 @@ function checkAns(n, btn) {
     setTimeout(() => { Snd.pingpong(); showHanamaru(); }, 180);
     showAnsEl(p);
     // 読み上げ終了後1秒で自動次問
-    speakThen(p.reading, 0.86, () => {
+    speakThen(kukuTts(p.reading), 0.86, () => {
       setTimeout(() => nextRenshu(), 1000);
     });
   } else {
@@ -820,74 +1245,56 @@ function checkAns(n, btn) {
 }
 
 function debugClears(delta) {
+  // デバッグ: S.renshuClears を直接操作して成長確認
   if (delta === null) {
     S.renshuClears = 0;
   } else {
     S.renshuClears = Math.max(0, S.renshuClears + delta);
   }
-  save();
-  // 卵未選択時はgreen決め打ちでプレビュー
   if (!S.selectedEgg) {
     S.selectedEgg = 'green';
-    const homeWrap = document.getElementById('home-creature-wrap');
-    if (homeWrap) homeWrap.style.display = 'flex';
   }
-  // 成長度を charClears に記録
-  S.charClears[S.selectedEgg] = S.renshuClears;
-  
-  // 成人状態に遷移したら卵選択フラグをリセット（デバッグで確認できるように）
+  // デバッグ時は renshuClears を直接使って表示（growthLevel は使わない）
   const n = S.renshuClears;
   const stage = getCharStage(n);
-  if (stage === 'adult') {
-    S._isAdultEggSelected = false;
-    // 成人になったなら記録
-    if (!S.adultCharacters.includes(S.selectedEgg)) {
-      S.adultCharacters.push(S.selectedEgg);
-    }
-  }
-  // ── デバッグパネル内プレビュー更新 ──
   const kind = S.selectedEgg;
   const stageNames = {newborn:'うまれたて',baby:'あかちゃん',child:'こども',adult:'おとな'};
   const previewImg = document.getElementById('debug-preview-img');
   if (previewImg) {
-    previewImg.src = stage ? getCharSprite(kind, n - 3) : getEggSprite(kind, n);
+    previewImg.src = stage ? getCharSprite(kind, charStageIdx(n)) : getEggSprite(kind, n);
     previewImg.style.display = 'block';
   }
   const label = document.getElementById('debug-clears-label');
-  if (label) label.textContent = n + 'かい';
+  if (label) label.textContent = 'スコア:' + growthLevel() + '/30\n' + n + 'clears';
   const stageLabel = document.getElementById('debug-stage-label');
-  if (stageLabel) {
-    stageLabel.textContent = stage ? stageNames[stage] : 'たまご (' + n + '/3)';
-  }
-  // ホーム画面も更新（表示中なら反映される）
-  updateCreature();
-  eggWobble.restart();
-}
-function debugShowClear() {
-  if (!S.selectedEgg) { S.selectedEgg = 'green'; }
-  
-  const charStage = getCharStage(S.renshuClears);
-  
-  // 成人になったなら記録
-  if (charStage === 'adult' && !S.adultCharacters.includes(S.selectedEgg)) {
-    S.adultCharacters.push(S.selectedEgg);
-  }
-  
-  updateClearScreen();
-  const title = document.getElementById('clear-title');
-  if (title) title.textContent = '🔧 デバッグ確認';
-  
-  // 成人状態かつ未選択なら卵選択画面へ
-  if (charStage === 'adult' && S.selectedEgg && !S._isAdultEggSelected) {
-    S._isAdultEggSelected = true;
+  if (stageLabel) stageLabel.textContent = stage ? stageNames[stage] : 'たまご (' + n + '/10)';
+  // adult到達 かつ 卒業前 → 卒業フローへ
+  if (stage === 'adult' && S.selectedEgg && !S._pendingGraduation) {
+    if (!S.adultCharacters.includes(S.selectedEgg)) S.adultCharacters.push(S.selectedEgg);
+    S._pendingGraduation = true;
+    updateCreature();
     setTimeout(() => {
-      showScreen('screen-egg-select');
+      S._pendingGraduation = false;
+      S.renshuClears = 0;
+      S._growthBase = growthLevel();
+      S.selectedEgg = null;
       buildEggSelectGrid();
-      speak('また　あらたまごを　えらんでね！');
+      showScreen('screen-egg-select');
     }, 1000);
     return;
   }
-  
+  updateCreature();
+  eggWobble.restart();
+  // せいちょう画面が表示中なら画像とアニメを連動更新
+  if (document.getElementById('screen-growth').classList.contains('active')) {
+    _refreshGrowthScreen();
+  }
+}
+function debugShowClear() {
+  if (!S.selectedEgg) { S.selectedEgg = 'green'; }
+  updateClearScreen();
+  const title = document.getElementById('clear-title');
+  if (title) title.textContent = '🔧 デバッグ確認';
   showScreen('screen-clear');
   confetti();
 }
@@ -899,6 +1306,410 @@ function debugGoHome() {
   showScreen('screen-home');
   updateCreature();
 }
+function debugBuildCertBtns() {
+  const row = document.getElementById('debug-cert-btns');
+  if (!row) return;
+  row.innerHTML = '';
+  CERT_TYPES.forEach(ct => {
+    const btn = document.createElement('button');
+    btn.className = 'btn btn-sm cert-icon-btn';
+    btn.style.cssText = `background:${ct.btnColor};color:${ct.btnText};border-color:${ct.btnShadow};box-shadow:0 4px 0 ${ct.btnShadow},var(--sh);flex:1;min-width:0;`;
+    btn.innerHTML = ct.iconStyle ? `<span style="${ct.iconStyle}">${ct.icon}</span>` : ct.icon;
+    btn.onclick = () => {
+      tapSnd();
+      const t = new Date();
+      const tmp = `${t.getFullYear()}ねん${t.getMonth()+1}がつ${t.getDate()}にち`;
+      const prev = S.certificates[ct.id];
+      if (!prev) S.certificates[ct.id] = tmp;
+      showCertificate(ct.id);
+      if (!prev) delete S.certificates[ct.id];
+    };
+    row.appendChild(btn);
+  });
+}
+
+/* ════════════════════════════════
+   GROWTH SCREEN — せいちょうをみる
+════════════════════════════════ */
+let _growthRaf = null;
+
+function _refreshGrowthScreen() {
+  const n = S.renshuClears;
+  const kind = S.selectedEgg || 'green';
+  const charStage = getCharStage(n);
+  const img = document.getElementById('growth-char-img');
+  if (charStage) {
+    img.src = getCharSprite(kind, charStageIdx(n));
+    img.style.height = ({ newborn: 40, baby: 47, child: 57, adult: 67 }[charStage] || 47) + 'px';
+  } else if (S.selectedEgg) {
+    img.src = getEggSprite(kind, n);
+    img.style.height = (n >= 3 ? '65' : '53') + 'px';
+  }
+  stopGrowthAnim();
+  _startGrowthAnim(charStage);
+}
+
+function showGrowthScreen() {
+  updateBottomBar('growth');
+  const n = S.renshuClears;
+  const kind = S.selectedEgg || 'green';
+  const charStage = getCharStage(n);
+
+  const img = document.getElementById('growth-char-img');
+
+  if (charStage) {
+    img.src = getCharSprite(kind, charStageIdx(n));
+    const sz = { newborn: 40, baby: 47, child: 57, adult: 67 }[charStage] || 47;
+    img.style.height = sz + 'px';
+  } else if (S.selectedEgg) {
+    img.src = getEggSprite(kind, n);
+    // hatch(crack3)は欠片が広がり視覚的に小さく見えるため補正
+    img.style.height = (n >= 3 ? '65' : '53') + 'px';
+  } else {
+    img.src = '';
+  }
+
+  const medalCount = Object.values(S.medals).filter(v => v).length;
+  const el = document.getElementById('growth-medal-count');
+  if (el) el.textContent = medalCount;
+
+  showScreen('screen-growth');
+  _startGrowthAnim(charStage);
+}
+
+let _growthTouchAnim = null;
+
+function _startGrowthAnim(charStage) {
+  stopGrowthAnim();
+  _growthTouchAnim = null;
+  const area = document.getElementById('growth-area');
+  if (!area) return;
+
+  // 以前のadultキャラimgと星空キャンバスを削除
+  area.querySelectorAll('.growth-adult-img').forEach(e => e.remove());
+  const _oldCanvas = document.getElementById('growth-stars-canvas');
+  if (_oldCanvas) _oldCanvas.remove();
+
+  // 星空キャンバス（最背面）
+  const starsCanvas = document.createElement('canvas');
+  starsCanvas.id = 'growth-stars-canvas';
+  starsCanvas.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;';
+  area.insertBefore(starsCanvas, area.firstChild);
+  // py を二乗分布にして上に行くほど密集させ、上位10%に収める
+  const _stars = [
+    ...Array.from({length: 80}, () => ({
+      px: Math.random(), py: Math.pow(Math.random(), 2) * 0.10,
+      r: 0.3 + Math.random() * 1.5,
+      phase: Math.random() * Math.PI * 2,
+      spd: 0.0015 + Math.random() * 0.004,
+    })),
+    ...Array.from({length: 10}, () => ({
+      px: Math.random(), py: Math.pow(Math.random(), 2) * 0.10,
+      r: 0.15 + Math.random() * 0.25,
+      phase: Math.random() * Math.PI * 2,
+      spd: 0.004 + Math.random() * 0.006,
+    })),
+    // 上位10〜20%に追加（全星の半数相当）
+    ...Array.from({length: 45}, () => ({
+      px: Math.random(), py: 0.10 + Math.random() * 0.10,
+      r: 0.3 + Math.random() * 1.2,
+      phase: Math.random() * Math.PI * 2,
+      spd: 0.0015 + Math.random() * 0.004,
+    })),
+    // 上位20〜35%に追加（全星の約15%）
+    ...Array.from({length: 20}, () => ({
+      px: Math.random(), py: 0.20 + Math.random() * 0.15,
+      r: 0.3 + Math.random() * 1.2,
+      phase: Math.random() * Math.PI * 2,
+      spd: 0.0015 + Math.random() * 0.004,
+    })),
+    // 上位35〜45%に追加
+    ...Array.from({length: 10}, () => ({
+      px: Math.random(), py: 0.35 + Math.random() * 0.10,
+      r: 0.3 + Math.random() * 1.2,
+      phase: Math.random() * Math.PI * 2,
+      spd: 0.0015 + Math.random() * 0.004,
+    })),
+  ];
+  const _nebulae = [
+    { px: 0.22, py: 0.10, pr: 0.26, rgb: '130,55,220' },
+    { px: 0.78, py: 0.06, pr: 0.18, rgb: '55,90,240'  },
+    { px: 0.50, py: 0.30, pr: 0.16, rgb: '200,70,170' },
+    { px: 0.10, py: 0.40, pr: 0.14, rgb: '80,130,210' },
+  ];
+
+  const mainImg = document.getElementById('growth-char-img');
+  let eggImg = null;
+
+  // アニメーション対象のキャラリスト
+  const chars = [];
+
+  if (charStage && mainImg) {
+    mainImg.style.width = 'auto';
+    // adult: なめらか飛行+ゆらゆら / child: ゆっくり歩き / baby: 地面を左右のみ
+    const isAdult = charStage === 'adult';
+    const spd = { newborn: 0.15, baby: 0.25, child: 0.35, adult: 0.75 }[charStage] || 0.25;
+    const stageH = { newborn: 37, baby: 47, child: 60, adult: 73 }[charStage] || 73;
+    mainImg.style.height = stageH + 'px';
+    chars.push({
+      img: mainImg,
+      x: 80, y: 200,
+      vx: spd * (Math.random() > .5 ? 1 : -1), vy: isAdult ? spd * .4 : 0,
+      spd, canFly: isAdult, groundOnly: !isAdult,
+      facingLeft: false,
+      walk: true,
+      walkPeriod: { newborn: 500, baby: 400, child: 300, adult: 220 }[charStage] || 300,
+      walkAngle: { newborn: 5, baby: 6, child: 7, adult: 7 }[charStage] || 5,
+    });
+  } else if (mainImg) {
+    // 卵は下寄り固定、ゆれアニメはJSで管理
+    mainImg.style.left = '50%'; mainImg.style.top = '74%';
+    mainImg.style.transform = 'translate(-50%,-60%)';
+    eggImg = mainImg;
+  }
+
+  // タッチ判定とハート
+  function _spawnHearts(x, y) {
+    const offsets = [[-10, -8], [8, -4]];
+    offsets.forEach(([dx, dy]) => {
+      const el = document.createElement('span');
+      el.className = 'growth-heart';
+      el.textContent = '💕';
+      el.style.left = (x + dx) + 'px';
+      el.style.top  = (y + dy) + 'px';
+      area.appendChild(el);
+      setTimeout(() => el.remove(), 1600);
+    });
+  }
+
+  area.addEventListener('click', (e) => {
+    const areaRect = area.getBoundingClientRect();
+    const clickX = e.clientX - areaRect.left;
+    const clickY = e.clientY - areaRect.top;
+
+    // 卵の近接判定（getBoundingClientRectで実際の描画位置を取得）
+    if (eggImg) {
+      const er = eggImg.getBoundingClientRect();
+      const ex = er.left - areaRect.left + er.width  / 2;
+      const ey = er.top  - areaRect.top  + er.height / 2;
+      if (Math.hypot(clickX - ex, clickY - ey) < er.height / 2 + 50) {
+        tapSnd();
+        _growthTouchAnim = { type: 'egg', born: Date.now() };
+        _spawnHearts(ex, ey - er.height * 0.4);
+        return;
+      }
+    }
+
+    // キャラの近接判定（c.x / c.y はフレームループで更新される実座標）
+    for (const c of chars) {
+      const iW = c.img.offsetWidth || 50;
+      const iH = c.img.offsetHeight || 50;
+      const cx = c.x + iW / 2;
+      const cy = c.y + iH / 2;
+      if (Math.hypot(clickX - cx, clickY - cy) < iH + 60) {
+        tapSnd();
+        if (Math.random() < 0.5) { c.shakeStart = Date.now(); }
+        else                      { c.spinStart  = Date.now(); }
+        _spawnHearts(cx, cy - iH * 0.4);
+        return;
+      }
+    }
+  });
+
+  // 以前に育てたadultキャラをうろうろ（なめらか飛行）
+  S.adultCharacters.forEach(adultKind => {
+    const adultImg = document.createElement('img');
+    adultImg.className = 'growth-adult-img';
+    adultImg.src = SPRITES.char[adultKind].adult;
+    adultImg.style.cssText = 'position:absolute;height:53px;image-rendering:pixelated;';
+    area.appendChild(adultImg);
+    const spd = 0.5 + Math.random() * 0.35;
+    chars.push({
+      img: adultImg,
+      x: 40 + Math.random() * 180, y: 150 + Math.random() * 60,
+      vx: spd * (Math.random() > .5 ? 1 : -1), vy: (Math.random() - .5) * spd,
+      spd, canFly: true,
+      facingLeft: Math.random() > .5,
+      walk: true,
+      walkPeriod: 220, walkAngle: 7,
+    });
+  });
+
+  if (chars.length === 0 && !eggImg) return;
+
+
+  // 草地の煌めき（下部の緑エリア）
+  const grassSparkles = Array.from({length: 60}, () => ({
+    px: Math.random(), py: 0.70 + Math.random() * 0.30,
+    r: 0.4 + Math.random() * 1.0,
+    phase: Math.random() * Math.PI * 2,
+    spd: 0.0008 + Math.random() * 0.0025,
+  }));
+
+  const startTime = Date.now();
+
+  function frame() {
+    const W = area.clientWidth, H = area.clientHeight;
+    const t = Date.now() - startTime;
+
+    // 星空描画
+    const sCtx = starsCanvas.getContext('2d');
+    if (starsCanvas.width !== W || starsCanvas.height !== H) {
+      starsCanvas.width = W; starsCanvas.height = H;
+    }
+    sCtx.clearRect(0, 0, W, H);
+    _nebulae.forEach(n => {
+      const grd = sCtx.createRadialGradient(n.px*W, n.py*H, 0, n.px*W, n.py*H, n.pr*W);
+      grd.addColorStop(0, `rgba(${n.rgb},0.13)`);
+      grd.addColorStop(1, 'rgba(0,0,0,0)');
+      sCtx.fillStyle = grd;
+      sCtx.fillRect(0, 0, W, H);
+    });
+    _stars.forEach(s => {
+      const alpha = 0.3 + 0.7 * (0.5 + 0.5 * Math.sin(t * s.spd + s.phase));
+      sCtx.beginPath();
+      sCtx.arc(s.px * W, s.py * H, s.r, 0, Math.PI * 2);
+      sCtx.fillStyle = `rgba(255,255,255,${alpha.toFixed(2)})`;
+      sCtx.fill();
+    });
+    // 草地の煌めき
+    grassSparkles.forEach(s => {
+      const alpha = 0.15 + 0.65 * (0.5 + 0.5 * Math.sin(t * s.spd + s.phase));
+      sCtx.beginPath();
+      sCtx.arc(s.px * W, s.py * H, s.r, 0, Math.PI * 2);
+      sCtx.fillStyle = `rgba(210,255,220,${alpha.toFixed(2)})`;
+      sCtx.fill();
+    });
+
+    // 卵のゆれ（ランダム間欠 + タッチぐらぐら）
+    if (eggImg) {
+      const n = S.renshuClears;
+      const wobbleAngle = [2, 5, 9, 14][Math.min(n, 3)];
+      const period      = [6000, 4000, 2500, 1500][Math.min(n, 3)];
+      const wobbleDur   = [600, 700, 800, 900][Math.min(n, 3)];
+      let rot = 0;
+      if (_growthTouchAnim && _growthTouchAnim.type === 'egg') {
+        const age = Date.now() - _growthTouchAnim.born;
+        const shakeDur = 750;
+        if (age < shakeDur) {
+          rot = Math.sin((age / shakeDur) * Math.PI * 7) * 22 * (1 - age / shakeDur);
+        } else {
+          _growthTouchAnim = null;
+        }
+      } else {
+        const phase = t % period;
+        rot = phase < wobbleDur
+          ? Math.sin((phase / wobbleDur) * Math.PI * 2) * wobbleAngle
+          : 0;
+      }
+      eggImg.style.transform = `translate(-50%,-60%) rotate(${rot.toFixed(2)}deg)`;
+    }
+
+    chars.forEach(c => {
+      const iW = c.img.offsetWidth || 60, iH = c.img.offsetHeight || 60;
+      const floor = c.canFly ? 20 : H * 0.6;
+      c.x += c.vx;
+      if (c.groundOnly) {
+        // 赤ちゃんは地面を左右のみ
+        c.y = H - iH - 10;
+        c.vy = 0;
+      } else {
+        c.y += c.vy;
+        if (Math.random() < 0.015) c.vy += (Math.random() - .5) * c.spd * (c.canFly ? .3 : .1);
+        const maxVy = c.spd * 2;
+        if (Math.abs(c.vy) > maxVy) c.vy = Math.sign(c.vy) * maxVy;
+        if (c.y < floor)       { c.y = floor;      c.vy =  Math.abs(c.vy); }
+        if (c.y > H - iH - 10) { c.y = H - iH-10; c.vy = -Math.abs(c.vy); }
+      }
+      if (Math.random() < 0.015) c.vx += (Math.random() - .5) * c.spd * .5;
+      const maxV = c.spd * 2;
+      if (Math.abs(c.vx) > maxV) c.vx = Math.sign(c.vx) * maxV;
+      if (c.x < 0)           { c.x = 0;         c.vx =  Math.abs(c.vx); }
+      if (c.x > W - iW)      { c.x = W - iW;    c.vx = -Math.abs(c.vx); }
+      c.facingLeft = c.vx < -0.1 ? true : c.vx > 0.1 ? false : c.facingLeft;
+      const flipX = c.facingLeft ? -1 : 1;
+      let tfm;
+      if (c.spinStart) {
+        const age = Date.now() - c.spinStart;
+        const dur = 560;
+        if (age < dur) {
+          const eased = 1 - Math.pow(1 - age / dur, 2);
+          tfm = `scaleX(${flipX}) rotate(${(eased * 360).toFixed(1)}deg)`;
+        } else {
+          c.spinStart = null;
+          tfm = `scaleX(${flipX})`;
+        }
+      } else if (c.shakeStart) {
+        const age = Date.now() - c.shakeStart;
+        if (age < 650) {
+          const p = age / 650;
+          const shakeRot = Math.sin(p * Math.PI * 9) * 18 * (1 - p);
+          const shakeX   = Math.sin(p * Math.PI * 11) * 5 * (1 - p);
+          tfm = `scaleX(${flipX}) rotate(${shakeRot.toFixed(2)}deg) translateX(${shakeX.toFixed(1)}px)`;
+        } else {
+          c.shakeStart = null;
+          tfm = `scaleX(${flipX})`;
+        }
+      } else if (c.walk) {
+        // カタカタ歩き: 速度があるときだけ揺れる
+        const moving = Math.abs(c.vx) > 0.2;
+        const walkRot = moving ? Math.sin(t / c.walkPeriod) * c.walkAngle : 0;
+        tfm = `scaleX(${flipX}) rotate(${walkRot.toFixed(2)}deg)`;
+      } else {
+        tfm = `scaleX(${flipX})`;
+      }
+      c.img.style.left = c.x.toFixed(1) + 'px';
+      c.img.style.top  = c.y.toFixed(1) + 'px';
+      c.img.style.transform = tfm;
+    });
+
+    // キャラ同士の重なりを解消
+    for (let i = 0; i < chars.length; i++) {
+      for (let j = i + 1; j < chars.length; j++) {
+        const ci = chars[i], cj = chars[j];
+        const wiW = ci.img.offsetWidth || 60, wiH = ci.img.offsetHeight || 60;
+        const wjW = cj.img.offsetWidth || 60, wjH = cj.img.offsetHeight || 60;
+        const dx = (ci.x + wiW / 2) - (cj.x + wjW / 2);
+        const dy = (ci.y + wiH / 2) - (cj.y + wjH / 2);
+        const minDist = (wiW + wjW) / 2;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist > 0 && dist < minDist) {
+          const push = (minDist - dist) / 2;
+          const nx = dx / dist, ny = dy / dist;
+          ci.x += nx * push; ci.y += ny * push;
+          cj.x -= nx * push; cj.y -= ny * push;
+          ci.vx += nx * 0.1; cj.vx -= nx * 0.1;
+        }
+      }
+    }
+
+    // 卵とキャラの重なりを解消
+    if (eggImg) {
+      const eW = eggImg.offsetWidth || 50, eH = eggImg.offsetHeight || 60;
+      const eCx = W * 0.5, eCy = H * 0.74 - eH * 0.1;
+      chars.forEach(c => {
+        const cW = c.img.offsetWidth || 60, cH = c.img.offsetHeight || 60;
+        const cCx = c.x + cW / 2, cCy = c.y + cH / 2;
+        const dx = cCx - eCx, dy = cCy - eCy;
+        const minDist = (eW + cW) / 2 * 0.85;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist > 0 && dist < minDist) {
+          const push = minDist - dist;
+          const nx = dx / dist;
+          c.x += nx * push;
+          c.vx += nx * 0.2;
+        }
+      });
+    }
+
+    _growthRaf = requestAnimationFrame(frame);
+  }
+  _growthRaf = requestAnimationFrame(frame);
+}
+
+function stopGrowthAnim() {
+  if (_growthRaf) { cancelAnimationFrame(_growthRaf); _growthRaf = null; }
+}
 
 function nextRenshu() {
   S.idx++;
@@ -909,67 +1720,58 @@ function doneDan() {
   if (S.dan !== 'random') {
     S.done[S.dan] = true;
   }
-  // 正答率6割以上ならrenshuClears+1（成長トリガー）
+  const growthBefore = getGrowthClears();
+  // 正答率6割以上なら れんしゅうメダル を付与（成長トリガー）
   const total = S.probs.length;
   const correct = S.hanamaruCount - (S._hanamaruAtStart || 0);
-  if (correct / total >= 0.6) {
-    S.renshuClears++;
-    S.charClears[S.selectedEgg] = S.renshuClears;  // 現在の卵の成長度を更新
-    eggWobble.restart(); // ステージ変化→揺れ周期更新
+  const passedRenshu = correct / total >= 0.6;
+  const alreadyHadRenshu = getMedals(S.dan).renshu;
+  if (passedRenshu) {
+    getMedals(S.dan).renshu = true;
+    updateGrowthFromMedals();
+    refreshDanBadge(S.dan);
+    refreshModeMedals();
+    saveState();
   }
-  
-  const charStage = getCharStage(S.renshuClears);
-  
-  // 成人になったなら記録
-  if (charStage === 'adult' && S.selectedEgg && !S.adultCharacters.includes(S.selectedEgg)) {
-    S.adultCharacters.push(S.selectedEgg);
-  }
-  
+
   updateCreature();
-  // クリア画面の卵・恐竜を更新
-  updateClearScreen();
-  const clearTitle = S.dan === 'random' ? 'らんだむが　できたね！' : KD.fw(S.dan) + 'のだんが　できたね！';
-  document.getElementById('clear-title').textContent = clearTitle;
-  
-  // 大人になった直後なら卵選択画面へ遷移
-  if (charStage === 'adult' && S.selectedEgg && !S._isAdultEggSelected) {
-    S._isAdultEggSelected = true;
-    setTimeout(() => {
-      showScreen('screen-egg-select');
-      buildEggSelectGrid();
-      speak('また　あらたまごを　えらんでね！');
-    }, 1500);
-    return;
+  if (S._pendingGraduation) return;
+
+  const grew = getGrowthClears() > growthBefore;
+  updateClearScreen(grew);
+  document.getElementById('clear-title').textContent = grew
+    ? 'せいちょう　したよ！'
+    : (S.dan === 'random' ? 'ばらばらのだんが　できたね！' : KD.fw(S.dan) + 'のだんが　できたね！');
+  const medalMsgEl = document.getElementById('clear-medal-msg');
+  if (medalMsgEl) {
+    medalMsgEl.textContent = passedRenshu
+      ? (alreadyHadRenshu ? 'メダルは　もう　もってるよ！' : 'メダルを　もらえたよ！')
+      : '';
   }
-  
   showScreen('screen-clear');
   confetti();
-  speak('やったー！ぜんもんできたよ！すごい！');
+  speak(grew ? 'せいちょうしたよ！やったね！' : 'やったー！ぜんもんできたよ！すごい！');
 }
 
-function updateClearScreen() {
+function updateClearScreen(grew = false) {
   if (!S.selectedEgg) return;
   const n = S.renshuClears;
   const kind = S.selectedEgg;
   const charStage = getCharStage(n);
-  const stageNames = {newborn:'うまれたて',baby:'あかちゃん',child:'こども',adult:'おとな'};
   const clearEgg = document.getElementById('clear-egg-img');
   const clearLabel = document.getElementById('clear-stage-label');
   const crackSvg = document.getElementById('clear-crack-svg');
-  if (crackSvg) crackSvg.style.display = 'none'; // SVGヒビは使わない
+  if (crackSvg) crackSvg.style.display = 'none';
 
   if (charStage) {
-    if (clearEgg) {
-      clearEgg.src = getCharSprite(kind, n - 3);
-      clearEgg.style.height = '90px';
-    }
-    if (clearLabel) clearLabel.textContent = 'せいちょう\u3000したね！';
+    if (clearEgg) { clearEgg.src = getCharSprite(kind, charStageIdx(n)); clearEgg.style.height = '90px'; }
   } else {
-    if (clearEgg) {
-      clearEgg.src = getEggSprite(kind, n);
-      clearEgg.style.height = '90px';
-    }
-    if (clearLabel) clearLabel.textContent = 'はなまる ' + KD.fw(S.hanamaruCount) + ' こ';
+    if (clearEgg) { clearEgg.src = getEggSprite(kind, n); clearEgg.style.height = '90px'; }
+  }
+  if (clearLabel) {
+    clearLabel.textContent = grew
+      ? (charStage ? 'せいちょう　したよ！🎉' : 'たまごが　かわったよ！🎉')
+      : 'つぎのメダルで　せいちょうするよ';
   }
 }
 
@@ -1022,7 +1824,6 @@ function confetti() {
    ・メダル：初回=ブロンズ、2回目=銀、3回目以降=金
 ════════════════════════════════ */
 
-const NEXT_MEDAL = { null: 'bronze', bronze: 'silver', silver: 'gold', gold: 'gold' };
 
 function startTest() {
   let all;
@@ -1041,12 +1842,12 @@ function startTest() {
     const j = Math.floor(Math.random() * (i + 1));
     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
-  S._testProbs   = shuffled;
+  S._testProbs   = S.dan === 'random' ? shuffled.slice(0, 10) : shuffled;
   S._testIdx     = 0;
   S._testCorrect = 0;
   S._testShown   = false;
   S._testInput   = '';
-  const testLabel = S.dan === 'random' ? 'らんだむ　テスト' : KD.danLabel(S.dan) + '　テスト';
+  const testLabel = S.dan === 'random' ? 'ばらばらのだん　テスト' : KD.fw(S.dan) + 'のだん　テスト';
   document.getElementById('test-dan-label').textContent = testLabel;
   buildTestGrid();
   showScreen('screen-test');
@@ -1093,8 +1894,21 @@ function showTestProb() {
   document.querySelectorAll('#test-grid .ans-btn').forEach(b => { b.classList.remove('correct','wrong','test-btn-correct','test-btn-wrong'); b.disabled = false; });
   S._testShown = false; S._testInput = '';
   updateTestSlot();
-  const speechQ = p.questionRead.endsWith('が') ? p.questionRead + '？' : p.questionRead + '\u3000わ？';
+  const speechQ = p.questionRead.endsWith('が') ? kukuTts(p.questionRead) + '？' : kukuTts(p.questionRead) + '\u3000わ？';
   speak(speechQ);
+  if (S.testAnsTime > 0) tT = setTimeout(testAutoReveal, S.testAnsTime * 1000);
+}
+
+function testAutoReveal() {
+  if (S._testShown) return;
+  S._testShown = true;
+  const p = S._testProbs[S._testIdx];
+  const slot = document.getElementById('tq-slot');
+  if (slot) { slot.textContent = KD.fw(p.answer); slot.className = 'ans-revealed'; }
+  document.getElementById('test-reading').textContent = fmtReading(p);
+  document.getElementById('test-hint').textContent = 'じかんぎれ　だよ';
+  speak(kukuTts(p.reading));
+  setTimeout(() => { S._testInput = ''; testNextProb(); }, 2000);
 }
 
 function updateTestSlot() {
@@ -1128,9 +1942,8 @@ function testInputDigit(d) {
     // ？を答えで置換
     const slot = document.getElementById('tq-slot');
     if (slot) { slot.textContent = KD.fw(p.answer); slot.className = 'ans-revealed'; }
-    const fullFmt = p.reading.includes('が') ? p.reading.replace('が', '\u3000が\u3000') : p.reading;
-    document.getElementById('test-reading').textContent = fullFmt;
-    speakThen(p.reading, 0.86, () => {
+    document.getElementById('test-reading').textContent = fmtReading(p);
+    speakThen(kukuTts(p.reading), 0.86, () => {
       setTimeout(() => { S._testInput = ''; testNextProb(); }, 800);
     });
   } else if (p.answer < 10 || S._testInput.length >= 2) {
@@ -1158,56 +1971,80 @@ function doneTest() {
   const pct     = correct / total;
   const dan     = S.dan;
   const cleared = pct >= 0.75;  // 75%以上でクリア
+  const growthBefore = getGrowthClears();
+  const preAwardMedal = getMedals(dan).test;  // 付与前のメダル状態を保存
 
-  if (cleared && dan !== 'random') {
-    const cur  = S.medals[dan] || null;
+  if (cleared) {
+    const m = getMedals(dan);
+    const cur  = m.test;
     const next = NEXT_MEDAL[cur];
-    S.medals[dan] = next;
+    m.test = next;
+    updateGrowthFromMedals();
     refreshDanBadge(dan);
-    
-    // 大人になった直後（renshuClears >= 6）で、かつこれが1回目のテストクリアなら
-    // たまご選択画面へ戻す
-    const charStage = getCharStage(S.renshuClears);
-    if (charStage === 'adult' && S.selectedEgg && !S._isAdultEggSelected) {
-      S._isAdultEggSelected = true;
-      setTimeout(() => {
-        showScreen('screen-egg-select');
-        buildEggSelectGrid();
-        speak('また　あらたまごを　えらんでね！');
-      }, 1500);
-      return;
-    }
+    refreshModeMedals();
+    saveState();
+    if (S._pendingGraduation) return; // 卒業遷移中は結果画面をスキップ
   }
 
+  const grew = getGrowthClears() > growthBefore;
   // 結果画面
-  const medal = dan !== 'random' ? S.medals[dan] : null;
-  const medalEm = medal === 'gold' ? '🥇' : medal === 'silver' ? '🥈' : medal === 'bronze' ? '🥉' : '';
-  document.getElementById('test-result-medal').textContent = cleared ? medalEm || '⭐' : '😢';
+  const medal = getMedals(dan).test;
+  document.getElementById('test-result-medal').innerHTML = cleared ? (medal ? ctIcon(medal) : '⭐') : '😢';
   document.getElementById('test-result-label').textContent =
-    cleared ? (medal ? MEDAL_NAMES[medal] + 'メダル　ゲット！' : 'クリア！') : 'もう　いちど！';
-  const titleText = dan === 'random' 
-    ? (cleared ? 'らんだむ　クリア！' : 'らんだむ　もう　すこし！')
+    cleared ? (medal ? MEDAL_NAMES[medal] + (preAwardMedal === 'gold' ? 'メダル' : 'メダル　ゲット！') : 'クリア！') : 'もう　いちど！';
+  const titleText = dan === 'random'
+    ? (cleared ? 'ばらばらのだん　クリア！' : 'ばらばらのだん　もう　すこし！')
     : (cleared ? KD.fw(dan) + 'のだん　クリア！' : KD.fw(dan) + 'のだん　もう　すこし！');
   document.getElementById('test-result-title').textContent = titleText;
   document.getElementById('test-result-score').textContent =
     KD.fw(total) + 'もん中　' + KD.fw(correct) + 'もん　せいかい！';
+  const growthEl = document.getElementById('test-result-growth');
+  if (growthEl) {
+    growthEl.textContent = cleared
+      ? (grew ? 'せいちょう　したよ！🎉' : 'つぎのメダルで　せいちょうするよ')
+      : '';
+  }
+  const testMedalMsgEl = document.getElementById('test-medal-msg');
+  if (testMedalMsgEl) {
+    testMedalMsgEl.textContent = cleared
+      ? (preAwardMedal === 'gold' ? 'メダルは　もう　もってるよ！' : 'メダルを　もらえたよ！')
+      : '';
+  }
 
   showScreen('screen-test-result');
-  if (cleared) { confetti(); speak('やったー！メダルゲット！'); }
+  if (cleared) { confetti(); speak(grew ? 'せいちょうしたよ！メダルゲット！' : 'やったー！メダルゲット！'); }
   else { speak('もう　いちど　ちゃれんじして　ね！'); }
 }
-const MEDAL_NAMES = { bronze:'ブロンズ', silver:'ぎん', gold:'きん' };
+
 
 
 /* ════════════════════════════════
-   EGG SELECT — 3種から選ぶ（green/pink/blue）
+   EGG SELECT — 初回3種(green/pink/blue)、2回目以降6種からランダム3つ
 ════════════════════════════════ */
-const EGG_KINDS = ['green','pink','blue'];
+const EGG_KINDS_FIRST  = ['green','pink','blue'];
+const EGG_KINDS_ALL    = ['green','pink','blue','purple','orange','silver'];
+
+function _pickEggChoices() {
+  // 初回（卵を一度も選んでいない）: 元の3種固定
+  if (S.adultCharacters.length === 0) return EGG_KINDS_FIRST;
+  // 2回目以降: 6種からランダムで3つ
+  const pool = EGG_KINDS_ALL.slice();
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  return pool.slice(0, 3);
+}
+
 function buildEggSelectGrid() {
   const g = document.getElementById('egg-select-grid'); g.innerHTML = '';
-  EGG_KINDS.forEach(kind => {
+  // OKボタンを毎回 disabled 状態にリセット（前回の enabled 状態が残らないよう）
+  const okBtn = document.getElementById('egg-ok-btn');
+  if (okBtn) { okBtn.disabled = true; okBtn.style.opacity = '.4'; }
+  const choices = _pickEggChoices();
+  choices.forEach(kind => {
     const btn = document.createElement('button');
-    btn.className = 'egg-sel-btn';
+    btn.className = 'egg-sel-btn' + (S.selectedEgg === kind ? ' selected' : '');
     btn.dataset.egg = kind;
     const img = document.createElement('img');
     img.src = SPRITES.egg[kind].intact;
@@ -1215,22 +2052,17 @@ function buildEggSelectGrid() {
     btn.appendChild(img);
     btn.onclick = () => {
       Snd.tap();
-      // 前の卵の成長度を保存
-      if (S.selectedEgg) {
-        S.charClears[S.selectedEgg] = S.renshuClears;
-      }
-      // 新しい卵を選択
       document.querySelectorAll('.egg-sel-btn').forEach(b => b.classList.remove('selected'));
       btn.classList.add('selected');
       S.selectedEgg = kind;
-      // 選んだ卵の成長度を復元
-      S.renshuClears = S.charClears[kind] || 0;
       const okBtn = document.getElementById('egg-ok-btn');
       okBtn.disabled = false; okBtn.style.opacity = '1';
       speak('このたまごにする！');
     };
     g.appendChild(btn);
   });
+  // 既に選択済みの卵があればOKボタンを有効化
+  if (okBtn && S.selectedEgg) { okBtn.disabled = false; okBtn.style.opacity = '1'; }
 }
 
 
@@ -1255,6 +2087,7 @@ function handleZenbukesus() {
   if (debugTapCount === 3) {
     const debugPanel = document.getElementById('debug-panel');
     debugPanel.classList.toggle('visible');
+    if (debugPanel.classList.contains('visible')) debugBuildCertBtns();
     debugTapCount = 0; // リセット
   } else {
     // 2秒以内に次のタップがなければリセット
@@ -1264,18 +2097,129 @@ function handleZenbukesus() {
   }
 }
 
+/* ════════════════════════════════
+   SETTINGS
+════════════════════════════════ */
+function openSettings() {
+  const nameLabel = document.getElementById('settings-name-label');
+  if (nameLabel) nameLabel.textContent = fullName() || '（なし）';
+  refreshSpeechUI();
+  updateTimeSelUI('renshu-time-sel', S.renshuAnsTime);
+  updateTimeSelUI('test-time-sel', S.testAnsTime);
+  updateBottomBar('settings');
+  showScreen('screen-settings');
+}
+function updateTimeSelUI(id, val) {
+  const grp = document.getElementById(id);
+  if (!grp) return;
+  grp.querySelectorAll('button').forEach(b => {
+    b.classList.toggle('selected', parseInt(b.dataset.val, 10) === val);
+  });
+}
+function setRenshuTime(t) { tapSnd(); S.renshuAnsTime = t; saveState(); updateTimeSelUI('renshu-time-sel', t); }
+function setTestTime(t)   { tapSnd(); S.testAnsTime   = t; saveState(); updateTimeSelUI('test-time-sel',   t); }
+
+function refreshSpeechUI() {
+  const on = S.speechEnabled !== false;
+  const yomu = document.getElementById('speech-yomu-btn');
+  const yomanai = document.getElementById('speech-yomanai-btn');
+  if (yomu)    { yomu.style.background = on ? 'var(--theme)' : 'transparent'; yomu.style.color = on ? '#fff' : 'var(--text2)'; }
+  if (yomanai) { yomanai.style.background = on ? 'transparent' : 'var(--theme)'; yomanai.style.color = on ? 'var(--text2)' : '#fff'; }
+}
+function setSpeech(val) {
+  S.speechEnabled = val;
+  refreshSpeechUI();
+  saveState();
+}
+function toggleSpeech() { setSpeech(!S.speechEnabled); }
+
+function goChangeName() {
+  // 名前入力画面へ（現在の名前をクリア）
+  _skipEggSelect = true;
+  const nd = document.getElementById('name-display');
+  if (nd) nd.innerHTML = '<span class="name-placeholder">ここに　でるよ</span>';
+  const ok = document.getElementById('name-ok-btn');
+  if (ok) { ok.disabled = true; ok.style.opacity = '.4'; }
+  showScreen('screen-name');
+  speak('あたらしい　なまえを　おしえてね');
+}
+
+let _skipEggSelect = false;
+let _confirmType = null;
+function openConfirm(type) {
+  _confirmType = type;
+  const title = document.getElementById('confirm-title');
+  const msg = document.getElementById('confirm-msg');
+  const okBtn = document.getElementById('confirm-ok-btn');
+  if (type === 'name') {
+    if (title) title.textContent = 'なまえを　かえる';
+    if (msg) msg.textContent = 'なまえを　かえると　はじめから\nいれなおすよ。\nほんとうに　かえる？';
+    if (okBtn) okBtn.textContent = 'かえる';
+  } else if (type === 'medal') {
+    if (title) title.textContent = 'めだると　せいちょうを　けす';
+    if (msg) msg.textContent = 'めだると　せいちょうが　ぜんぶ　きえるよ。\nほんとうに　けす？';
+    if (okBtn) okBtn.textContent = 'けす';
+  } else {
+    if (title) title.textContent = 'ぜんぶ　けして　はじめから　やる';
+    if (msg) msg.textContent = 'なまえや　めだるが　ぜんぶ　きえて\nはじめから　やりなおしになるよ。\nほんとうに　けす？';
+    if (okBtn) okBtn.textContent = 'けす';
+  }
+  const overlay = document.getElementById('confirm-overlay');
+  if (overlay) overlay.style.display = 'flex';
+  requestAnimationFrame(() => {
+    const cancel = document.getElementById('confirm-cancel-btn');
+    if (cancel) cancel.focus();
+  });
+}
+function closeConfirm() {
+  const overlay = document.getElementById('confirm-overlay');
+  if (overlay) overlay.style.display = 'none';
+  _confirmType = null;
+}
+function executeConfirm() {
+  if (_confirmType === 'name') {
+    closeConfirm();
+    goChangeName();
+  } else if (_confirmType === 'medal') {
+    S.medals = {};
+    S.certificates = {};
+    S._growthBase = 0;
+    S.adultCharacters = [];
+    S.selectedEgg = null;
+    S.renshuClears = 0;
+    S.done = {};
+    S.hanamaruCount = 0;
+    saveState();
+    closeConfirm();
+    buildDanGrid();
+    updateCreature();
+    showScreen('screen-home');
+    speak('メダルを　リセットしたよ');
+  } else if (_confirmType === 'app') {
+    try { localStorage.removeItem(SAVE_KEY); } catch(e) {}
+    location.reload();
+  }
+}
+
 // データJSON一括ロード後に初期化
 Promise.all([
   fetch('kana.json').then(r => r.json()),
   fetch('messages.json').then(r => r.json()),
-]).then(([kana, msg]) => {
+  fetch('kana_hoka.json').then(r => r.json()),
+  fetch('balloon_messages.json').then(r => r.ok ? r.json() : {}).catch(() => ({})),
+]).then(([kana, msg, hoka, balloon]) => {
   KANA_ROWS      = kana.kanaRows;
   SUFFIXES       = kana.suffixes;
+  HOKA_SECTIONS  = hoka.hokaSections;
   kukurunMessages = msg.kukurunMessages;
   kukurunScripts  = msg.kukurunScripts;
   // kukurun.js側のメッセージも更新
   if (typeof HOME_KUKURUN_MESSAGES !== 'undefined') {
     HOME_KUKURUN_MESSAGES.splice(0, HOME_KUKURUN_MESSAGES.length, ...msg.homeMessages);
+  }
+  // 吹き出しメッセージをJSONで上書き
+  if (typeof SCREEN_MESSAGES !== 'undefined') {
+    Object.assign(SCREEN_MESSAGES, balloon);
   }
   buildKanaGrid();
 }).catch(err => {
@@ -1288,6 +2232,10 @@ Promise.all([
     ['ら','り','る','れ','ろ'],
   ];
   SUFFIXES = [{l:'なし',v:''},{l:'さん',v:'さん'},{l:'くん',v:'くん'},{l:'ちゃん',v:'ちゃん'}];
+  HOKA_SECTIONS = [
+    {title:'だくてん・はんだくてん',rows:[['が','ぎ','ぐ','げ','ご'],['ざ','じ','ず','ぜ','ぞ'],['だ','ぢ','づ','で','ど'],['ば','び','ぶ','べ','ぼ'],['ぱ','ぴ','ぷ','ぺ','ぽ']]},
+    {title:'ちいさいかな・のばすおと',rows:[['っ','ゃ','ゅ','ょ','ー']]},
+  ];
   kukurunMessages = ['どれを　やる？','がんばろうね！','すごーい！','天才だよ！'];
   kukurunScripts  = [
     {text:'どれを　やる？', sequence:['O','E','O','A','U']},
@@ -1296,12 +2244,82 @@ Promise.all([
   buildKanaGrid();
 });
 
+loadState();
 initDinos();
 
 initKukurun();
 
-// イントロアニメーション再生
+restoreSession();
+
+// イントロアニメーション（毎回表示）
 playIntroAnimation();
 
-// iOS: 初回タッチでAudioContext起動
-document.addEventListener('touchstart', () => { try { Snd.tap(); } catch(e) {} }, { once: true, passive: true });
+// iOS: 初回タッチでAudioContextをアンロック（サイレント再生）
+document.addEventListener('touchstart', () => Snd.unlock(), { once: true, passive: true });
+
+// ══ グローバルタップエフェクト ══
+(function initTapFx() {
+  const cvs = document.getElementById('tap-fx-canvas');
+  if (!cvs) return;
+  const ctx = cvs.getContext('2d');
+  const effects = [];
+  let raf = null;
+
+  function resize() {
+    cvs.width  = window.innerWidth;
+    cvs.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  function addEffect(x, y) {
+    const r = cvs.getBoundingClientRect();
+    const sx = r.width  ? cvs.width  / r.width  : 1;
+    const sy = r.height ? cvs.height / r.height : 1;
+    effects.push({ x: x * sx, y: y * sy, born: Date.now() });
+    if (!raf) raf = requestAnimationFrame(loop);
+  }
+
+  function loop() {
+    const now = Date.now();
+    ctx.clearRect(0, 0, cvs.width, cvs.height);
+    for (let i = effects.length - 1; i >= 0; i--) {
+      const ef = effects[i];
+      const age = now - ef.born;
+      const dur = 520;
+      if (age > dur) { effects.splice(i, 1); continue; }
+      const p = age / dur;
+      const ease = 1 - p * p;
+      // 中心フラッシュ（序盤のみ）
+      if (p < 0.25) {
+        const fp = p / 0.25;
+        ctx.beginPath();
+        ctx.arc(ef.x, ef.y, 8 * (1 - fp), 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255,255,230,${((1 - fp) * 0.7).toFixed(2)})`;
+        ctx.fill();
+      }
+      // 外輪
+      ctx.beginPath();
+      ctx.arc(ef.x, ef.y, 6 + p * 34, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(255,235,140,${(ease * 0.85).toFixed(2)})`;
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+      // 内輪
+      ctx.beginPath();
+      ctx.arc(ef.x, ef.y, 3 + p * 9, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(255,255,255,${(ease * 0.75).toFixed(2)})`;
+      ctx.lineWidth = 3;
+      ctx.stroke();
+    }
+    raf = effects.length ? requestAnimationFrame(loop) : null;
+  }
+
+  let _lastTouch = 0;
+  document.addEventListener('touchstart', e => {
+    _lastTouch = Date.now();
+    addEffect(e.touches[0].clientX, e.touches[0].clientY);
+  }, { passive: true });
+  document.addEventListener('click', e => {
+    if (Date.now() - _lastTouch > 400) addEffect(e.clientX, e.clientY);
+  });
+})();

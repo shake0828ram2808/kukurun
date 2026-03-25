@@ -1070,3 +1070,94 @@ body {
   font-weight: bold;
   color: var(--theme);
 }
+
+/* ══════════════════
+   RESPONSIVE
+══════════════════ */
+
+/* ── Tablet: 640px+ ── */
+@media (min-width: 640px) {
+  .screen        { max-width: 600px; }
+  #app           { padding: 24px 24px 52px; }
+  .card          { padding: 24px 22px; }
+
+  .intro-content { max-width: 460px; }
+
+  .prob-eq       { font-size: 64px; }
+  .prob-reading-top { font-size: 17px; }
+  .ans-grid      { gap: 10px; margin: 14px 0; }
+  .ans-btn       { font-size: 22px; padding: 16px 8px; }
+
+  .dan-btn .dn   { font-size: 30px; }
+  .dan-btn       { padding: 18px 4px; }
+  .dan-grid      { gap: 12px; }
+
+  .sel-main      { font-size: 18px; }
+  .sel-sub       { font-size: 13px; }
+
+  .btn           { font-size: 17px; }
+  .suffix-btn    { font-size: 20px; padding: 15px 12px; }
+
+  .balloon-text  { font-size: 15px; padding: 11px 18px; }
+
+  .hoka-modal    { width: min(600px, 100vw); }
+
+  #bottom-bar    { gap: 32px; }
+  .bottom-btn    { padding: 6px 28px; }
+}
+
+/* ── Desktop: 1024px+ ── */
+@media (min-width: 1024px) {
+  .screen        { max-width: 760px; }
+  #app           { padding: 36px 40px 60px; }
+  .card          { padding: 28px 28px; }
+
+  .intro-content { max-width: 520px; }
+
+  .prob-eq       { font-size: 80px; }
+  .prob-reading-top { font-size: 18px; }
+  .ans-grid      { gap: 14px; margin: 18px 0; }
+  .ans-btn       { font-size: 26px; padding: 20px 10px; }
+
+  .dan-btn .dn   { font-size: 34px; }
+  .dan-btn       { padding: 22px 4px; }
+  .dan-grid      { gap: 14px; }
+
+  .sel-main      { font-size: 19px; }
+  .sel-sub       { font-size: 14px; }
+  .sel-row       { padding: 18px 20px; }
+
+  .btn           { font-size: 18px; padding: 16px 24px; }
+  .suffix-btn    { font-size: 22px; padding: 18px 14px; }
+  .suffix-grid   { grid-template-columns: repeat(4, 1fr); }
+
+  .balloon-text  { font-size: 16px; padding: 12px 20px; }
+
+  .name-display  { font-size: 30px; min-height: 58px; }
+  .kana-btn      { font-size: 16px; padding: 10px 2px; }
+  .kana-grid     { gap: 6px; margin-bottom: 18px; }
+  .kana-del-btn  { height: 38px; font-size: 13px; }
+
+  /* ほかモーダル: デスクトップでは中央モーダルに */
+  .hoka-modal {
+    width: min(760px, 90vw);
+    bottom: auto;
+    top: 50%;
+    transform: translate(-50%, calc(-50% + 40px));
+    border-radius: 20px;
+    max-height: 80vh;
+    opacity: 0;
+    transition: transform .22s cubic-bezier(.34,1.2,.64,1), opacity .22s;
+  }
+  .hoka-modal.visible {
+    transform: translate(-50%, -50%);
+    opacity: 1;
+  }
+
+  #bottom-bar    { height: calc(64px + env(safe-area-inset-bottom, 0)); gap: 40px; }
+  .bottom-btn    { font-size: 12px; padding: 8px 36px; }
+
+  #screen-growth,
+  #screen-settings,
+  #screen-cert   { height: calc(100dvh - 116px); }
+}

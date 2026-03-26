@@ -378,7 +378,8 @@ function showScreen(id) {
   if (bb) bb.style.display = noChrome ? 'none' : '';
   const cr = document.getElementById('cert-btn-row');
   if (cr) cr.style.display = id === 'screen-home' ? 'flex' : 'none';
-  window.scrollTo(0, 0);
+  const appEl = document.getElementById('app');
+  if (appEl) appEl.scrollTop = 0;
 }
 
 function goBack() {

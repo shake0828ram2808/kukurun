@@ -374,11 +374,15 @@ function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   const bb = document.getElementById('bottom-bar');
-  const noChrome = ['screen-name', 'screen-suffix', 'screen-egg-select'].includes(id);
-  if (bb) bb.style.display = noChrome ? 'none' : '';
+  const noChrome = ['screen-name', 'screen-suffix', 'screen-egg-select', 'screen-speech-select'].includes(id);
+  if (bb) bb.style.display = noChrome ? 'none' : 'flex';
   const cr = document.getElementById('cert-btn-row');
   if (cr) cr.style.display = id === 'screen-home' ? 'flex' : 'none';
-  window.scrollTo(0, 0);
+  const appEl = document.getElementById('app');
+  if (appEl) {
+    appEl.scrollTop = 0;
+    appEl.style.paddingBottom = id === 'screen-growth' ? '0' : '';
+  }
 }
 
 function goBack() {
@@ -559,6 +563,9 @@ function goHome() {
   saveState();
   updateCreature();
   buildDanGrid(); showScreen('screen-home');
+}
+function showSpeechSelect() {
+  showScreen('screen-speech-select');
 }
 function goHomeFromEgg() {
   try { Snd.tap(); } catch(e) {}
@@ -1369,7 +1376,10 @@ function showGrowthScreen() {
     img.src = '';
   }
 
-  const medalCount = Object.values(S.medals).filter(v => v).length;
+  const medalCount = Object.values(S.medals).reduce((sum, m) => {
+    if (!m || typeof m !== 'object') return sum;
+    return sum + (m.oboeru ? 1 : 0) + (m.renshu ? 1 : 0) + (m.test ? 1 : 0);
+  }, 0);
   const el = document.getElementById('growth-medal-count');
   if (el) el.textContent = medalCount;
 

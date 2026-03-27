@@ -50,11 +50,13 @@ button:focus, button:focus-visible { outline: none; }
 
 html {
   height: 100dvh;
+  height: -webkit-fill-available;
 }
 body {
   font-family: var(--font);
   background: var(--bg);
   height: 100%;
+  min-height: -webkit-fill-available;
   overflow: hidden;
   color: var(--text);
   display: flex;
@@ -66,7 +68,7 @@ body {
   flex: 1; min-height: 0;
   overflow-y: auto; -webkit-overflow-scrolling: touch;
   display: flex; flex-direction: column; align-items: center;
-  padding: 20px 16px 40px;
+  padding: max(20px, env(safe-area-inset-top)) 16px 40px;
 }
 
 /* ── screens ── */
@@ -364,8 +366,8 @@ body {
 }
 
 /* ══ せいちょうをみる画面 ══ */
-#screen-growth { height: calc(100dvh - 100px); min-height: 300px; border-radius: var(--r); overflow: hidden; }
-#screen-settings { height: calc(100dvh - 100px); min-height: 300px; }
+#screen-growth { flex: 1; min-height: 300px; border-radius: var(--r); overflow: hidden; }
+#screen-settings { min-height: 300px; }
 /* ハートアニメ */
 @keyframes floatHeart {
   0%   { opacity: 1; transform: translateY(0) scale(1); }
@@ -863,6 +865,7 @@ body {
    BOTTOM BAR
 ══════════════════ */
 #bottom-bar {
+  display: none;
   flex-shrink: 0;
   width: 100%;
   height: calc(54px + env(safe-area-inset-bottom, 0));
@@ -1078,7 +1081,7 @@ body {
 /* ── Tablet: 640px+ ── */
 @media (min-width: 640px) {
   .screen        { max-width: 600px; }
-  #app           { padding: 24px 24px 52px; }
+  #app           { padding: max(24px, env(safe-area-inset-top)) 24px 52px; }
   .card          { padding: 24px 22px; }
 
   .intro-content { max-width: 460px; }
@@ -1109,7 +1112,7 @@ body {
 /* ── Desktop: 1024px+ ── */
 @media (min-width: 1024px) {
   .screen        { max-width: 760px; }
-  #app           { padding: 36px 40px 60px; }
+  #app           { padding: max(36px, env(safe-area-inset-top)) 40px 60px; }
   .card          { padding: 28px 28px; }
 
   .intro-content { max-width: 520px; }
@@ -1157,7 +1160,6 @@ body {
   #bottom-bar    { height: calc(64px + env(safe-area-inset-bottom, 0)); gap: 40px; }
   .bottom-btn    { font-size: 12px; padding: 8px 36px; }
 
-  #screen-growth,
-  #screen-settings,
   #screen-cert   { height: calc(100dvh - 116px); }
 }
+

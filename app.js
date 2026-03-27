@@ -379,7 +379,10 @@ function showScreen(id) {
   const cr = document.getElementById('cert-btn-row');
   if (cr) cr.style.display = id === 'screen-home' ? 'flex' : 'none';
   const appEl = document.getElementById('app');
-  if (appEl) appEl.scrollTop = 0;
+  if (appEl) {
+    appEl.scrollTop = 0;
+    appEl.style.paddingBottom = id === 'screen-growth' ? '0' : '';
+  }
 }
 
 function goBack() {

@@ -865,6 +865,7 @@ body {
    BOTTOM BAR
 ══════════════════ */
 #bottom-bar {
+  display: none;
   flex-shrink: 0;
   width: 100%;
   height: calc(54px + env(safe-area-inset-bottom, 0));

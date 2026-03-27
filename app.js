@@ -375,7 +375,7 @@ function showScreen(id) {
   document.getElementById(id).classList.add('active');
   const bb = document.getElementById('bottom-bar');
   const noChrome = ['screen-name', 'screen-suffix', 'screen-egg-select', 'screen-speech-select'].includes(id);
-  if (bb) bb.style.display = noChrome ? 'none' : '';
+  if (bb) bb.style.display = noChrome ? 'none' : 'flex';
   const cr = document.getElementById('cert-btn-row');
   if (cr) cr.style.display = id === 'screen-home' ? 'flex' : 'none';
   const appEl = document.getElementById('app');

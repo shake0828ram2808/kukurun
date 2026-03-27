@@ -1373,7 +1373,10 @@ function showGrowthScreen() {
     img.src = '';
   }
 
-  const medalCount = Object.values(S.medals).filter(v => v).length;
+  const medalCount = Object.values(S.medals).reduce((sum, m) => {
+    if (!m || typeof m !== 'object') return sum;
+    return sum + (m.oboeru ? 1 : 0) + (m.renshu ? 1 : 0) + (m.test ? 1 : 0);
+  }, 0);
   const el = document.getElementById('growth-medal-count');
   if (el) el.textContent = medalCount;
 

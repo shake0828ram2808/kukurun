@@ -366,14 +366,8 @@ body {
 }
 
 /* ══ せいちょうをみる画面 ══ */
-#screen-growth {
-  height: calc(100dvh - max(20px, env(safe-area-inset-top)) - calc(54px + env(safe-area-inset-bottom, 0px)));
-  min-height: 300px; border-radius: var(--r); overflow: hidden;
-}
-#screen-settings {
-  height: calc(100dvh - max(20px, env(safe-area-inset-top)) - calc(54px + env(safe-area-inset-bottom, 0px)));
-  min-height: 300px; overflow-y: auto;
-}
+#screen-growth   { height: calc(100dvh - 100px); min-height: 300px; border-radius: var(--r); overflow: hidden; }
+#screen-settings { height: calc(100dvh - 100px); min-height: 300px; }
 /* ハートアニメ */
 @keyframes floatHeart {
   0%   { opacity: 1; transform: translateY(0) scale(1); }
@@ -1167,9 +1161,7 @@ body {
   .bottom-btn    { font-size: 12px; padding: 8px 36px; }
 
   #screen-growth,
-  #screen-settings {
-    height: calc(100dvh - max(36px, env(safe-area-inset-top)) - calc(64px + env(safe-area-inset-bottom, 0px)));
-  }
-  #screen-cert   { height: calc(100dvh - 116px); }
+  #screen-settings { height: calc(100dvh - 116px); }
+  #screen-cert      { height: calc(100dvh - 116px); }
 }
 

@@ -394,11 +394,11 @@ function closeIntroModal(e) {
   modal.style.animation = 'fadeOut 0.3s ease forwards';
   setTimeout(() => {
     modal.style.display = 'none';
-    // 名前登録済みならホーム、未登録なら名前入力へ
+    // 名前登録済みならホーム、未登録なら音声選択→名前入力へ
     if (typeof S !== 'undefined' && S.name) {
       showScreen('screen-home');
     } else {
-      showScreen('screen-name');
+      showScreen('screen-speech-select');
     }
   }, 300);
 }
@@ -416,6 +416,8 @@ function setIntroKukurunMouth(state) {
 function playIntroAnimation() {
   const svg = document.getElementById('intro-kukurun-svg');
   if (!svg) return;
+  const bb = document.getElementById('bottom-bar');
+  if (bb) bb.style.display = 'none';
   playKukurunTapAnim(svg);
   (async () => {
     for (let m of ['O', 'I', 'A', 'U', 'O']) { setIntroKukurunMouth(m); await new Promise(r => setTimeout(r, 120)); }

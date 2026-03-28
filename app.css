@@ -367,7 +367,7 @@ body {
 
 /* ══ せいちょうをみる画面 ══ */
 #screen-growth { flex: 1; min-height: 300px; border-radius: var(--r); overflow: hidden; }
-#screen-settings { min-height: 300px; }
+#screen-settings { flex: 1; min-height: 300px; overflow-y: auto; }
 /* ハートアニメ */
 @keyframes floatHeart {
   0%   { opacity: 1; transform: translateY(0) scale(1); }

@@ -1,4 +1,4 @@
-const CACHE = 'kukurun-v1';
+const CACHE = 'kukurun-v2';
 const ASSETS = [
   '/',
   '/index.html',
@@ -31,6 +31,14 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
+  // HTML はネットワーク優先（常に最新版を取得、オフライン時はキャッシュ）
+  if (e.request.mode === 'navigate') {
+    e.respondWith(
+      fetch(e.request).catch(() => caches.match('/index.html'))
+    );
+    return;
+  }
+  // 静的アセットはキャッシュ優先
   e.respondWith(
     caches.match(e.request).then(cached => cached || fetch(e.request))
   );

@@ -871,7 +871,6 @@ body {
   height: calc(54px + env(safe-area-inset-bottom, 0));
   background: var(--surface);
   border-top: 1px solid var(--border);
-  display: flex;
   align-items: center;
   justify-content: center;
   gap: 24px;
@@ -1163,5 +1162,19 @@ body {
   #screen-growth,
   #screen-settings { height: calc(100dvh - 116px); }
   #screen-cert      { height: calc(100dvh - 116px); }
+}
+
+/* ── PWA standalone: safe-area-aware height ── */
+@media (display-mode: standalone) {
+  #screen-growth,
+  #screen-settings {
+    height: calc(100dvh - max(20px, env(safe-area-inset-top)) - env(safe-area-inset-bottom, 0px) - 54px);
+  }
+}
+@media (display-mode: standalone) and (min-width: 1024px) {
+  #screen-growth,
+  #screen-settings {
+    height: calc(100dvh - max(36px, env(safe-area-inset-top)) - env(safe-area-inset-bottom, 0px) - 64px);
+  }
 }
 

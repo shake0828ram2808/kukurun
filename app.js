@@ -381,7 +381,7 @@ function showScreen(id) {
   const appEl = document.getElementById('app');
   if (appEl) {
     appEl.scrollTop = 0;
-    appEl.style.paddingBottom = ['screen-growth', 'screen-settings'].includes(id) ? '0' : '';
+    appEl.style.paddingBottom = id === 'screen-growth' ? '0' : '';
   }
 }
 

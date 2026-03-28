@@ -877,7 +877,7 @@ body {
   gap: 24px;
   z-index: 100;
 }
-/* safe-area 部分の背景を白く延長（アイコンの見かけ上の位置は変わらない） */
+/* iOS safe-area の背景色を延長（ホームインジケーター後ろを白にする） */
 #bottom-bar::after {
   content: '';
   position: absolute;
@@ -1174,7 +1174,7 @@ body {
 }
 
 /* ── PWA standalone: safe-area-aware height ── */
-/* bar は常に 54px (::after で safe-area 分を延長)。式から safe-area-bottom は不要 */
+/* bar は 54px 固定 (::after で safe-area 背景を延長)。式から safe-area-bottom は不要 */
 @media (display-mode: standalone) {
   #screen-growth,
   #screen-settings {

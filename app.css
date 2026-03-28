@@ -866,16 +866,25 @@ body {
 ══════════════════ */
 #bottom-bar {
   display: none;
+  position: relative;
   flex-shrink: 0;
   width: 100%;
-  height: calc(54px + env(safe-area-inset-bottom, 0));
+  height: 54px;
   background: var(--surface);
   border-top: 1px solid var(--border);
   align-items: center;
   justify-content: center;
   gap: 24px;
   z-index: 100;
-  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+/* safe-area 部分の背景を白く延長（アイコンの見かけ上の位置は変わらない） */
+#bottom-bar::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0;
+  top: 100%;
+  height: env(safe-area-inset-bottom, 0px);
+  background: var(--surface);
 }
 .bottom-btn {
   display: flex;
@@ -906,7 +915,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 18px 0;
+  padding: 14px 0;
   border-bottom: 1px solid var(--border);
   gap: 12px;
 }
@@ -1156,7 +1165,7 @@ body {
     opacity: 1;
   }
 
-  #bottom-bar    { height: calc(64px + env(safe-area-inset-bottom, 0)); gap: 40px; }
+  #bottom-bar    { height: 64px; gap: 40px; }
   .bottom-btn    { font-size: 12px; padding: 8px 36px; }
 
   #screen-growth,
@@ -1165,16 +1174,17 @@ body {
 }
 
 /* ── PWA standalone: safe-area-aware height ── */
+/* bar は常に 54px (::after で safe-area 分を延長)。式から safe-area-bottom は不要 */
 @media (display-mode: standalone) {
   #screen-growth,
   #screen-settings {
-    height: calc(100dvh - max(20px, env(safe-area-inset-top)) - env(safe-area-inset-bottom, 0px) - 54px);
+    height: calc(100dvh - max(20px, env(safe-area-inset-top)) - 54px);
   }
 }
 @media (display-mode: standalone) and (min-width: 1024px) {
   #screen-growth,
   #screen-settings {
-    height: calc(100dvh - max(36px, env(safe-area-inset-top)) - env(safe-area-inset-bottom, 0px) - 64px);
+    height: calc(100dvh - max(36px, env(safe-area-inset-top)) - 64px);
   }
 }
 

@@ -51,7 +51,9 @@ button:focus, button:focus-visible { outline: none; }
 html {
   height: -webkit-fill-available; /* 旧iOS fallback */
   height: 100dvh;                 /* 現代iOS/他: 100dvh が後勝ち */
-  overflow: hidden;               /* ← ここで overflow を制御 */
+  overflow: hidden;
+  /* バー下のiOSクロム領域・セーフエリアをバー色(白)に統一 */
+  background: var(--surface);
 }
 body {
   font-family: var(--font);

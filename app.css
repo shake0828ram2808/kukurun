@@ -870,26 +870,19 @@ body {
 ══════════════════ */
 #bottom-bar {
   display: none;
-  /* safe-area の直上に固定 → bottom: env(...) で確実にインジケーターより上に来る */
   position: fixed;
-  bottom: env(safe-area-inset-bottom, 0px);
+  /* iOSは bottom:0 / bottom:env(safe-area-inset-bottom) どちらもセーフエリア上端(898px)に来る。
+     負値でセーフエリア内に食い込ませ、バー背景でホームインジケーター部分を白く覆う */
+  bottom: calc(-1 * env(safe-area-inset-bottom, 0px));
   left: 0; right: 0;
-  height: 54px;
+  height: calc(54px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
   background: var(--surface);
   border-top: 1px solid var(--border);
   align-items: center;
   justify-content: center;
   gap: 24px;
   z-index: 100;
-}
-/* safe-area ゾーンをバーと同色で塗りつぶす */
-#bottom-bar::after {
-  content: '';
-  position: absolute;
-  top: 100%;
-  left: 0; right: 0;
-  height: env(safe-area-inset-bottom, 0px);
-  background: var(--surface);
 }
 .bottom-btn {
   display: flex;
@@ -1003,9 +996,9 @@ body {
 #screen-cert { height: calc(100dvh - 100px); min-height: 300px; }
 #cert-btn-row {
   display: none; flex-wrap: nowrap; gap: 6px; justify-content: center;
-  /* バーの直上に fixed 配置 */
   position: fixed;
-  bottom: calc(54px + env(safe-area-inset-bottom, 0px) + 4px);
+  /* バー content 高さ(54px)の直上。safe-area-inset-bottom は底部座標系に含まない */
+  bottom: calc(54px + 4px);
   left: 0; right: 0;
   padding: 6px 16px;
   box-sizing: border-box;
@@ -1172,7 +1165,7 @@ body {
     opacity: 1;
   }
 
-  #bottom-bar    { height: 64px; bottom: env(safe-area-inset-bottom, 0px); gap: 40px; }
+  #bottom-bar    { height: calc(64px + env(safe-area-inset-bottom, 0px)); bottom: calc(-1 * env(safe-area-inset-bottom, 0px)); padding-bottom: env(safe-area-inset-bottom, 0px); gap: 40px; }
   .bottom-btn    { font-size: 12px; padding: 8px 36px; }
 
   #screen-growth,

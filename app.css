@@ -57,10 +57,13 @@ html {
 }
 body {
   font-family: var(--font);
-  background: var(--bg);
+  /* safe-area (ホームインジケーター帯) をバーと同色(白)にする */
+  background: var(--surface);
   min-height: -webkit-fill-available; /* 旧iOS fallback */
   height: 100dvh;                     /* 現代iOS: safe-area含む全高 */
-  /* overflow: hidden を html に移動。body に置くと iOS で fixed の基準がズレる */
+  /* padding-bottom でセーフエリア分を body のパディング領域に確保し
+     flex child の #app がそこに入らないようにする */
+  padding-bottom: env(safe-area-inset-bottom, 0px);
   color: var(--text);
   display: flex;
   flex-direction: column;
@@ -71,7 +74,8 @@ body {
   flex: 1; min-height: 0;
   overflow-y: auto; -webkit-overflow-scrolling: touch;
   display: flex; flex-direction: column; align-items: center;
-  /* バー+safe-area分を bottom padding に加算してコンテンツが隠れないよう確保 */
+  /* 青い背景を body から移動。body は白(safe-area用)にしたため #app で明示指定 */
+  background: var(--bg);
   padding: max(20px, env(safe-area-inset-top)) 16px calc(54px + env(safe-area-inset-bottom, 0px) + 40px);
 }
 

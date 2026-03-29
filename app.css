@@ -51,13 +51,14 @@ button:focus, button:focus-visible { outline: none; }
 html {
   height: -webkit-fill-available; /* 旧iOS fallback */
   height: 100dvh;                 /* 現代iOS/他: 100dvh が後勝ち */
+  overflow: hidden;               /* ← ここで overflow を制御 */
 }
 body {
   font-family: var(--font);
   background: var(--bg);
   min-height: -webkit-fill-available; /* 旧iOS fallback */
   height: 100dvh;                     /* 現代iOS: safe-area含む全高 */
-  overflow: hidden;
+  /* overflow: hidden を html に移動。body に置くと iOS で fixed の基準がズレる */
   color: var(--text);
   display: flex;
   flex-direction: column;

@@ -1,4 +1,4 @@
-const CACHE = 'kukurun-v2';
+const CACHE = 'kukurun-v3';
 const ASSETS = [
   '/',
   '/index.html',

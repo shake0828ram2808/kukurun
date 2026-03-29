@@ -868,17 +868,26 @@ body {
 ══════════════════ */
 #bottom-bar {
   display: none;
-  /* viewport 絶対下端に固定 → body の高さに関係なく safe-area まで到達 */
+  /* safe-area の直上に固定 → bottom: env(...) で確実にインジケーターより上に来る */
   position: fixed;
-  bottom: 0; left: 0; right: 0;
-  height: calc(54px + env(safe-area-inset-bottom, 0px));
-  padding-bottom: env(safe-area-inset-bottom, 0px);
+  bottom: env(safe-area-inset-bottom, 0px);
+  left: 0; right: 0;
+  height: 54px;
   background: var(--surface);
   border-top: 1px solid var(--border);
   align-items: center;
   justify-content: center;
   gap: 24px;
   z-index: 100;
+}
+/* safe-area ゾーンをバーと同色で塗りつぶす */
+#bottom-bar::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 0; right: 0;
+  height: env(safe-area-inset-bottom, 0px);
+  background: var(--surface);
 }
 .bottom-btn {
   display: flex;
@@ -1161,7 +1170,7 @@ body {
     opacity: 1;
   }
 
-  #bottom-bar    { height: calc(64px + env(safe-area-inset-bottom, 0px)); padding-bottom: env(safe-area-inset-bottom, 0px); gap: 40px; }
+  #bottom-bar    { height: 64px; bottom: env(safe-area-inset-bottom, 0px); gap: 40px; }
   .bottom-btn    { font-size: 12px; padding: 8px 36px; }
 
   #screen-growth,

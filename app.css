@@ -68,7 +68,8 @@ body {
   flex: 1; min-height: 0;
   overflow-y: auto; -webkit-overflow-scrolling: touch;
   display: flex; flex-direction: column; align-items: center;
-  padding: max(20px, env(safe-area-inset-top)) 16px 40px;
+  /* バー+safe-area分を bottom padding に加算してコンテンツが隠れないよう確保 */
+  padding: max(20px, env(safe-area-inset-top)) 16px calc(54px + env(safe-area-inset-bottom, 0px) + 40px);
 }
 
 /* ── screens ── */
@@ -866,10 +867,9 @@ body {
 ══════════════════ */
 #bottom-bar {
   display: none;
-  position: relative;
-  flex-shrink: 0;
-  width: 100%;
-  /* padding-bottom でホームインジケーター分を確保。border-box のため height も同分拡大 */
+  /* viewport 絶対下端に固定 → body の高さに関係なく safe-area まで到達 */
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
   height: calc(54px + env(safe-area-inset-bottom, 0px));
   padding-bottom: env(safe-area-inset-bottom, 0px);
   background: var(--surface);
@@ -990,12 +990,14 @@ body {
 ══════════════════ */
 #screen-cert { height: calc(100dvh - 100px); min-height: 300px; }
 #cert-btn-row {
-  display: none; flex-wrap: nowrap; gap: 6px;
-  width: 100%; flex-shrink: 0;
+  display: none; flex-wrap: nowrap; gap: 6px; justify-content: center;
+  /* バーの直上に fixed 配置 */
+  position: fixed;
+  bottom: calc(54px + env(safe-area-inset-bottom, 0px) + 4px);
+  left: 0; right: 0;
   padding: 6px 16px;
-  margin-bottom: 14px;
   box-sizing: border-box;
-  max-width: 430px; align-self: center;
+  z-index: 99;
 }
 .cert-icon-btn { font-size: 22px; padding: 6px 2px; line-height: 1; }
 #cert-tooltip { transition: opacity .5s; }
@@ -1158,7 +1160,7 @@ body {
     opacity: 1;
   }
 
-  #bottom-bar    { height: calc(64px + env(safe-area-inset-bottom, 0px)); gap: 40px; }
+  #bottom-bar    { height: calc(64px + env(safe-area-inset-bottom, 0px)); padding-bottom: env(safe-area-inset-bottom, 0px); gap: 40px; }
   .bottom-btn    { font-size: 12px; padding: 8px 36px; }
 
   #screen-growth,

@@ -41,13 +41,14 @@
         <div class="balloon-text" id="name-balloon-text">なまえを　おしえてね</div>
         <div class="balloon-tail"></div>
       </div>
-      <svg 
+      <div class="kukurun-svg-wrap">
+      <svg
         id="name-kukurun-svg"
-        width="47" 
-        height="47" 
+        width="80"
+        height="80"
         viewBox="0 0 100 100"
         class="kukurun-character"
-        style="width:47px;height:47px;flex-shrink:0;"
+        style="width:80px;height:80px;flex-shrink:0;"
       >
         <defs>
           <radialGradient id="nameBodyGrad" cx="42%" cy="35%" r="58%">
@@ -88,6 +89,8 @@
         <ellipse cx="50" cy="17" rx="8" ry="6" fill="#a0c8ff" fill-opacity="0.7" />
         <circle cx="50" cy="12" r="4" fill="#6aabee" />
       </svg>
+      <div class="floor-shadow" id="name-floor-shadow"></div>
+      </div>
 
     </div>
   </div>
@@ -120,13 +123,14 @@
         <div class="balloon-text" id="suffix-balloon-text">よびかたを　おしえてね</div>
         <div class="balloon-tail"></div>
       </div>
-      <svg 
+      <div class="kukurun-svg-wrap">
+      <svg
         id="suffix-kukurun-svg"
-        width="47" 
-        height="47" 
+        width="80"
+        height="80"
         viewBox="0 0 100 100"
         class="kukurun-character"
-        style="width:47px;height:47px;flex-shrink:0;"
+        style="width:80px;height:80px;flex-shrink:0;"
       >
         <defs>
           <radialGradient id="suffixBodyGrad" cx="42%" cy="35%" r="58%">
@@ -167,6 +171,8 @@
         <ellipse cx="50" cy="17" rx="8" ry="6" fill="#a0c8ff" fill-opacity="0.7" />
         <circle cx="50" cy="12" r="4" fill="#6aabee" />
       </svg>
+      <div class="floor-shadow" id="suffix-floor-shadow"></div>
+      </div>
 
     </div>
   </div>
@@ -192,13 +198,14 @@
         <div class="balloon-text" id="egg-balloon-text">どれを　そだてる？</div>
         <div class="balloon-tail"></div>
       </div>
-      <svg 
+      <div class="kukurun-svg-wrap">
+      <svg
         id="egg-kukurun-svg"
-        width="47" 
-        height="47" 
+        width="80"
+        height="80"
         viewBox="0 0 100 100"
         class="kukurun-character"
-        style="width:47px;height:47px;flex-shrink:0;"
+        style="width:80px;height:80px;flex-shrink:0;"
       >
         <defs>
           <radialGradient id="eggBodyGrad" cx="42%" cy="35%" r="58%">
@@ -239,6 +246,8 @@
         <ellipse cx="50" cy="17" rx="8" ry="6" fill="#a0c8ff" fill-opacity="0.7" />
         <circle cx="50" cy="12" r="4" fill="#6aabee" />
       </svg>
+      <div class="floor-shadow" id="egg-floor-shadow"></div>
+      </div>
 
     </div>
   </div>
@@ -255,6 +264,52 @@
 
 <!-- ══ SCREEN: SPEECH SELECT ══ -->
 <div class="screen" id="screen-speech-select">
+  <div style="display:flex;flex-direction:column;align-items:center;gap:8px;width:100%;max-width:430px;margin:0 auto;">
+    <div class="kukurun-wrap" onclick="tapSnd();kukurunTalkSpeech()">
+      <div class="kukurun-balloon" id="speech-kukurun-balloon">
+        <div class="balloon-text" id="speech-balloon-text">はじめまして！</div>
+        <div class="balloon-tail"></div>
+      </div>
+      <div class="kukurun-svg-wrap">
+        <svg id="speech-kukurun-svg" width="80" height="80" viewBox="0 0 100 100" class="kukurun-character" style="width:80px;height:80px;flex-shrink:0;">
+          <defs>
+            <radialGradient id="speechBodyGrad" cx="42%" cy="35%" r="58%">
+              <stop offset="0%" stop-color="#ffffff" />
+              <stop offset="60%" stop-color="#b8d9ff" />
+              <stop offset="100%" stop-color="#6aabee" />
+            </radialGradient>
+            <radialGradient id="speechEyeGrad" cx="35%" cy="30%" r="65%">
+              <stop offset="0%" stop-color="#6699ff" />
+              <stop offset="100%" stop-color="#003399" />
+            </radialGradient>
+            <filter id="speechSoftShadow" x="-20%" y="-20%" width="140%" height="140%">
+              <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#0055aa" flood-opacity="0.18"/>
+            </filter>
+          </defs>
+          <circle cx="50" cy="54" r="38" fill="url(#speechBodyGrad)" filter="url(#speechSoftShadow)"/>
+          <ellipse cx="28" cy="62" rx="7" ry="5" fill="#ffaacc" fill-opacity="0.45" />
+          <ellipse cx="72" cy="62" rx="7" ry="5" fill="#ffaacc" fill-opacity="0.45" />
+          <g id="speech-kukurun-eyes">
+            <g transform="translate(37, 48)">
+              <circle r="5.8" fill="url(#speechEyeGrad)" />
+              <circle cx="1.4" cy="-1.8" r="1.8" fill="white" />
+            </g>
+            <g transform="translate(63, 48)">
+              <circle r="5.8" fill="url(#speechEyeGrad)" />
+              <circle cx="-1.4" cy="-1.8" r="1.8" fill="white" />
+            </g>
+          </g>
+          <g id="speech-kukurun-mouth">
+            <path id="speech-kukurun-mouth-fill" d="M 45,60 C 46,62 48,62 50,60 C 52,62 54,62 55,60" fill="none" stroke="#334" stroke-width="2.2" stroke-linecap="round" />
+            <circle id="speech-kukurun-tongue" cx="50" cy="64" r="4" fill="#ff88aa" style="display:none;" />
+          </g>
+          <ellipse cx="50" cy="17" rx="8" ry="6" fill="#a0c8ff" fill-opacity="0.7" />
+          <circle cx="50" cy="12" r="4" fill="#6aabee" />
+        </svg>
+        <div class="floor-shadow" id="speech-floor-shadow"></div>
+      </div>
+    </div>
+  </div>
   <div class="card">
     <div style="font-size:17px;font-weight:bold;line-height:1.6;margin-bottom:4px;">ことばを　こえで　よんでも　いい？</div>
     <div class="sec-lbl" style="margin-bottom:20px;">おとが　でるから　きをつけてね</div>
@@ -602,7 +657,7 @@
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
       ホームに　もどる
     </button>
-    <div id="version-badge">ver.2026.0329.0010</div>
+    <div id="version-badge">ver.2026.0329.0011</div>
   </div>
   <div class="card">
     <div class="sec-lbl" style="margin-bottom:8px;">せってい</div>

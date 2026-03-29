@@ -99,7 +99,7 @@ function playKukurunTapAnim(svg, animName) {
   if (anim.name === 'kukuPyon') {
     const shadowId = svg.id.replace('-svg', '').replace('-kukurun', '') + '-floor-shadow';
     // home-kukurun-svg → home-floor-shadow
-    const shadow = document.getElementById('home-floor-shadow');
+    const shadow = document.getElementById(shadowId);
     if (shadow) {
       shadow.style.animation = 'none';
       void shadow.offsetWidth;
@@ -279,6 +279,42 @@ async function homeKukurunTalk() {
   await new Promise(r => setTimeout(r, 800));
   setKukurunSmile(false);
   setKukurunMouth('munyu');
+  kukurunState.isJumping = false;
+}
+
+/* ── 音声選択画面 ── */
+function setKukurunMouthSpeech(state) {
+  const mouthPath = document.getElementById('speech-kukurun-mouth-fill');
+  const tongue    = document.getElementById('speech-kukurun-tongue');
+  const mouth     = kukurunMouthSequences[state];
+  if (!mouth) return;
+  if (mouthPath) {
+    mouthPath.setAttribute('d', mouth.path);
+    mouthPath.setAttribute('fill', mouth.path.includes('Z') ? '#442222' : 'none');
+  }
+  if (tongue) tongue.style.display = mouth.tongue ? 'block' : 'none';
+}
+function setKukurunSmileSpeech(isSmiling) {
+  const eyes = document.getElementById('speech-kukurun-eyes');
+  if (!eyes) return;
+  eyes.querySelectorAll('g').forEach((eye, i) => {
+    eye.innerHTML = isSmiling
+      ? '<path d="M -5,-1 Q 0,-3 5,-1" fill="none" stroke="#222" stroke-width="2.8" stroke-linecap="round" />'
+      : `<circle r="5.8" fill="url(#speechEyeGrad)" /><circle cx="${i===0?'1.4':'-1.4'}" cy="-1.8" r="1.8" fill="white" />`;
+  });
+}
+async function kukurunTalkSpeech() {
+  if (kukurunState.isJumping) return;
+  kukurunState.isJumping = true;
+  const svg = document.getElementById('speech-kukurun-svg');
+  playKukurunTapAnim(svg);
+  Snd.tap();
+  for (let m of ['O', 'A', 'I', 'U', 'O']) { setKukurunMouthSpeech(m); await new Promise(r => setTimeout(r, 120)); }
+  setKukurunSmileSpeech(true);
+  setKukurunMouthSpeech('munyu');
+  await new Promise(r => setTimeout(r, 800));
+  setKukurunSmileSpeech(false);
+  setKukurunMouthSpeech('munyu');
   kukurunState.isJumping = false;
 }
 

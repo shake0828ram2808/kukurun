@@ -56,13 +56,9 @@ html {
 }
 body {
   font-family: var(--font);
-  /* safe-area (ホームインジケーター帯) をバーと同色(白)にする */
-  background: var(--surface);
+  background: var(--bg);
   min-height: -webkit-fill-available; /* 旧iOS fallback */
   height: 100dvh;                     /* 現代iOS: safe-area含む全高 */
-  /* padding-bottom でセーフエリア分を body のパディング領域に確保し
-     flex child の #app がそこに入らないようにする */
-  padding-bottom: env(safe-area-inset-bottom, 0px);
   color: var(--text);
   display: flex;
   flex-direction: column;

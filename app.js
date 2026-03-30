@@ -2290,7 +2290,42 @@ restoreSession();
 })();
 
 
-// イントロアニメーション（毎回表示）
+// ══ バージョンバッジ 5連打で診断情報を表示 ══
+(function initDiag() {
+  const badge = document.getElementById('version-badge');
+  if (!badge) return;
+  let taps = 0, timer;
+  badge.addEventListener('click', () => {
+    taps++;
+    clearTimeout(timer);
+    timer = setTimeout(() => { taps = 0; }, 1200);
+    if (taps < 5) return;
+    taps = 0;
+
+    // env() 実測
+    const probe = document.createElement('div');
+    probe.style.cssText = 'position:fixed;bottom:0;left:0;width:0;height:env(safe-area-inset-bottom,0px);visibility:hidden;pointer-events:none;';
+    document.body.appendChild(probe);
+    const sabPx = probe.offsetHeight;
+    probe.remove();
+
+    const bar = document.getElementById('bottom-bar');
+    const barRect = bar ? bar.getBoundingClientRect() : null;
+
+    const msg = [
+      'screen.height : ' + screen.height,
+      'screen.width  : ' + screen.width,
+      'innerHeight   : ' + window.innerHeight,
+      'visualVP.h    : ' + (window.visualViewport ? Math.round(window.visualViewport.height) : 'N/A'),
+      'env(sab) px   : ' + sabPx,
+      'bar bottom    : ' + (barRect ? Math.round(barRect.bottom) : 'N/A'),
+      'bar height    : ' + (barRect ? Math.round(barRect.height) : 'N/A'),
+      'PWA mode      : ' + window.matchMedia('(display-mode:standalone)').matches,
+    ].join('\n');
+    alert(msg);
+  });
+})();
+
 playIntroAnimation();
 
 // iOS: 初回タッチでAudioContextをアンロック（サイレント再生）

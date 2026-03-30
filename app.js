@@ -2285,7 +2285,7 @@ restoreSession();
 
   const SAB = 34; // ホームインジケーター搭載 iPhone の標準値 (px)
   bar.style.bottom        = `-${SAB}px`;
-  bar.style.height        = `${54 + SAB}px`;
+  bar.style.height        = `${49 + SAB}px`;
   bar.style.paddingBottom = `${SAB}px`;
 })();
 

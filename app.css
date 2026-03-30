@@ -75,7 +75,7 @@ body {
   display: flex; flex-direction: column; align-items: center;
   /* 青い背景を body から移動。body は白(safe-area用)にしたため #app で明示指定 */
   background: var(--bg);
-  padding: max(20px, env(safe-area-inset-top)) 16px calc(54px + env(safe-area-inset-bottom, 0px) + 40px);
+  padding: max(20px, env(safe-area-inset-top)) 16px calc(49px + env(safe-area-inset-bottom, 0px) + 40px);
 }
 
 /* ── screens ── */
@@ -876,7 +876,7 @@ body {
   position: fixed;
   bottom: calc(-1 * env(safe-area-inset-bottom, 0px));
   left: 0; right: 0;
-  height: calc(54px + env(safe-area-inset-bottom, 0px));
+  height: calc(49px + env(safe-area-inset-bottom, 0px));
   padding-bottom: env(safe-area-inset-bottom, 0px);
   background: var(--surface);
   border-top: 1px solid var(--border);
@@ -998,8 +998,8 @@ body {
 #cert-btn-row {
   display: none; flex-wrap: nowrap; gap: 6px; justify-content: center;
   position: fixed;
-  /* バー content 高さ(54px) + safe-area + 余白の直上 */
-  bottom: calc(54px + env(safe-area-inset-bottom, 0px) + 4px);
+  /* バー content 高さ(49px) + safe-area + 余白の直上 */
+  bottom: calc(49px + env(safe-area-inset-bottom, 0px) + 4px);
   left: 0; right: 0;
   padding: 6px 16px;
   box-sizing: border-box;
@@ -1175,11 +1175,11 @@ body {
 }
 
 /* ── PWA standalone: safe-area-aware height ── */
-/* bar = 54px + env(safe-area-inset-bottom) のため両方を引く */
+/* bar = 49px + env(safe-area-inset-bottom) のため両方を引く */
 @media (display-mode: standalone) {
   #screen-growth,
   #screen-settings {
-    height: calc(100dvh - max(20px, env(safe-area-inset-top)) - 54px - env(safe-area-inset-bottom, 0px));
+    height: calc(100dvh - max(20px, env(safe-area-inset-top)) - 49px - env(safe-area-inset-bottom, 0px));
   }
 }
 @media (display-mode: standalone) and (min-width: 1024px) {

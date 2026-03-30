@@ -848,7 +848,21 @@ body {
   100% { width: 90px;  opacity: 1; }
 }
 
+/* ── ハテナマーク ── */
+.kukurun-hatena { transform-origin: 50px 12px; }
+@keyframes kukurunHatenaIn {
+  0%   { opacity:0; transform:scale(0) rotate(-15deg); }
+  65%  { opacity:1; transform:scale(1.15) rotate(4deg); }
+  85%  { transform:scale(0.93) rotate(-1deg); }
+  100% { opacity:1; transform:scale(1) rotate(0deg); }
+}
+@keyframes kukurunHatenaOut {
+  0%   { opacity:1; transform:scale(1) rotate(0deg); }
+  100% { opacity:0; transform:scale(0) rotate(15deg); }
+}
+
 /* ── くくるんSVGラッパー（影を正確にSVG底辺中央へ） ── */
+.kukurun-character { overflow: visible; }
 .kukurun-svg-wrap {
   position: relative;
   display: inline-flex;

@@ -115,6 +115,30 @@ function playKukurunTapAnim(svg, animName) {
 }
 
 
+/* ── ハテナマーク 表示/非表示 ──
+ *  setKukurunHatena('home-kukurun-svg', true)  で表示
+ *  setKukurunHatena('home-kukurun-svg', false) で非表示
+ */
+function setKukurunHatena(svgId, show) {
+  const svgEl = typeof svgId === 'string' ? document.getElementById(svgId) : svgId;
+  if (!svgEl) return;
+  const hatena = svgEl.querySelector('.kukurun-hatena');
+  if (!hatena) return;
+  if (show) {
+    hatena.style.display = 'block';
+    hatena.style.animation = 'none';
+    void hatena.offsetWidth;
+    hatena.style.animation = 'kukurunHatenaIn 0.45s cubic-bezier(0.34,1.56,0.64,1) forwards';
+  } else {
+    if (hatena.style.display === 'none') return;
+    hatena.style.animation = 'kukurunHatenaOut 0.25s ease-in forwards';
+    hatena.addEventListener('animationend', () => {
+      hatena.style.display = 'none';
+      hatena.style.animation = '';
+    }, { once: true });
+  }
+}
+
 /* ════════════════════════════════
    KUKURUN — 共通キャラクター制御
    状態・口・目・アニメーション・全画面分

@@ -51,10 +51,7 @@ button:focus, button:focus-visible { outline: none; }
 html {
   height: -webkit-fill-available; /* 旧iOS fallback */
   height: 100dvh;                 /* 現代iOS/他: 100dvh が後勝ち */
-  /* overflow:hidden を外す: iOSはhtml/body に overflow:hidden があると
-     position:fixed の基準が viewport でなく html 要素になるバグがある。
-     代わりに overscroll-behavior:none でバウンス抑制する。 */
-  overscroll-behavior: none;
+  overflow: hidden;
   background: var(--surface);
 }
 body {
@@ -877,10 +874,7 @@ body {
 #bottom-bar {
   display: none;
   position: fixed;
-  /* html の overflow:hidden を外したことで position:fixed の基準が
-     真の viewport（物理画面下端）になる。bottom:0 = 物理画面下端。
-     padding-bottom で safe-area 分だけコンテンツを上にずらす。 */
-  bottom: 0;
+  bottom: calc(-1 * env(safe-area-inset-bottom, 0px));
   left: 0; right: 0;
   height: calc(54px + env(safe-area-inset-bottom, 0px));
   padding-bottom: env(safe-area-inset-bottom, 0px);
@@ -1172,7 +1166,7 @@ body {
     opacity: 1;
   }
 
-  #bottom-bar    { height: calc(64px + env(safe-area-inset-bottom, 0px)); bottom: 0; padding-bottom: env(safe-area-inset-bottom, 0px); gap: 40px; }
+  #bottom-bar    { height: calc(64px + env(safe-area-inset-bottom, 0px)); bottom: calc(-1 * env(safe-area-inset-bottom, 0px)); padding-bottom: env(safe-area-inset-bottom, 0px); gap: 40px; }
   .bottom-btn    { font-size: 12px; padding: 8px 36px; }
 
   #screen-growth,

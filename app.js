@@ -2261,6 +2261,35 @@ initKukurun();
 
 restoreSession();
 
+// ══ ボトムバー safe-area 補正 ══
+// env(safe-area-inset-bottom) が 0 を返す環境でも
+// ホームインジケーター帯まで正しく伸ばす
+(function fixBottomBarSafeArea() {
+  const bar = document.getElementById('bottom-bar');
+  if (!bar) return;
+
+  // CSS の env() が実際に返す値を DOM 計測で取得
+  const probe = document.createElement('div');
+  probe.style.cssText = 'position:fixed;bottom:0;left:0;width:0;height:env(safe-area-inset-bottom,0px);visibility:hidden;pointer-events:none;';
+  document.body.appendChild(probe);
+  const cssSab = probe.offsetHeight;
+  probe.remove();
+
+  if (cssSab > 0) return; // env() が正常に動作している → CSS のみで対応済み
+
+  // env() が 0 を返す場合: 画面アスペクト比でホームインジケーター有無を判定
+  // ホームインジケーター搭載 iPhone (X 以降) は縦横比 > 1.9
+  const tall = Math.max(screen.width, screen.height);
+  const wide = Math.min(screen.width, screen.height);
+  if (tall / wide <= 1.9) return; // ホームインジケーターなし → 補正不要
+
+  const SAB = 34; // ホームインジケーター搭載 iPhone の標準値 (px)
+  bar.style.bottom        = `-${SAB}px`;
+  bar.style.height        = `${54 + SAB}px`;
+  bar.style.paddingBottom = `${SAB}px`;
+})();
+
+
 // イントロアニメーション（毎回表示）
 playIntroAnimation();
 

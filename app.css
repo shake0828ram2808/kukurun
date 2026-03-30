@@ -51,8 +51,10 @@ button:focus, button:focus-visible { outline: none; }
 html {
   height: -webkit-fill-available; /* 旧iOS fallback */
   height: 100dvh;                 /* 現代iOS/他: 100dvh が後勝ち */
-  overflow: hidden;
-  /* バー下のiOSクロム領域・セーフエリアをバー色(白)に統一 */
+  /* overflow:hidden を外す: iOSはhtml/body に overflow:hidden があると
+     position:fixed の基準が viewport でなく html 要素になるバグがある。
+     代わりに overscroll-behavior:none でバウンス抑制する。 */
+  overscroll-behavior: none;
   background: var(--surface);
 }
 body {
@@ -72,7 +74,7 @@ body {
 #app {
   position: relative; z-index: 1;
   flex: 1; min-height: 0;
-  overflow-y: auto; -webkit-overflow-scrolling: touch;
+  overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
   display: flex; flex-direction: column; align-items: center;
   /* 青い背景を body から移動。body は白(safe-area用)にしたため #app で明示指定 */
   background: var(--bg);
@@ -875,9 +877,10 @@ body {
 #bottom-bar {
   display: none;
   position: fixed;
-  /* iOSは bottom:0 / bottom:env(safe-area-inset-bottom) どちらもセーフエリア上端(898px)に来る。
-     負値でセーフエリア内に食い込ませ、バー背景でホームインジケーター部分を白く覆う */
-  bottom: calc(-1 * env(safe-area-inset-bottom, 0px));
+  /* html の overflow:hidden を外したことで position:fixed の基準が
+     真の viewport（物理画面下端）になる。bottom:0 = 物理画面下端。
+     padding-bottom で safe-area 分だけコンテンツを上にずらす。 */
+  bottom: 0;
   left: 0; right: 0;
   height: calc(54px + env(safe-area-inset-bottom, 0px));
   padding-bottom: env(safe-area-inset-bottom, 0px);
@@ -1001,8 +1004,8 @@ body {
 #cert-btn-row {
   display: none; flex-wrap: nowrap; gap: 6px; justify-content: center;
   position: fixed;
-  /* バー content 高さ(54px)の直上。safe-area-inset-bottom は底部座標系に含まない */
-  bottom: calc(54px + 4px);
+  /* バー content 高さ(54px) + safe-area + 余白の直上 */
+  bottom: calc(54px + env(safe-area-inset-bottom, 0px) + 4px);
   left: 0; right: 0;
   padding: 6px 16px;
   box-sizing: border-box;
@@ -1169,7 +1172,7 @@ body {
     opacity: 1;
   }
 
-  #bottom-bar    { height: calc(64px + env(safe-area-inset-bottom, 0px)); bottom: calc(-1 * env(safe-area-inset-bottom, 0px)); padding-bottom: env(safe-area-inset-bottom, 0px); gap: 40px; }
+  #bottom-bar    { height: calc(64px + env(safe-area-inset-bottom, 0px)); bottom: 0; padding-bottom: env(safe-area-inset-bottom, 0px); gap: 40px; }
   .bottom-btn    { font-size: 12px; padding: 8px 36px; }
 
   #screen-growth,

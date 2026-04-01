@@ -177,8 +177,8 @@ function buildKukurunSVG(prefix, size) {
     <circle id="${prefix}-kukurun-tongue" cx="50" cy="64" r="4" fill="#ff88aa" style="display:none;"/>
   </g>
   <g transform="translate(17, 5) rotate(30, 50, 22)">
-    <ellipse cx="50" cy="21" rx="10" ry="4" fill="#a0c8ff" fill-opacity="0.7"/>
-    <ellipse cx="50" cy="16" rx="8" ry="3" fill="#6aabee"/>
+    <ellipse cx="50" cy="21" rx="13" ry="6" fill="#7ab0ee" fill-opacity="0.9"/>
+    <circle cx="50" cy="16" r="4.5" fill="#5599ee"/>
     <g class="kukurun-hatena">
       <path d="M 50,13 L 50,10 A 6 6 0 1 0 44,4" fill="none" stroke="#5599ee" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
     </g>

@@ -849,7 +849,7 @@ body {
 }
 
 /* ── ハテナマーク ── */
-.kukurun-hatena { transform-origin: 50px 14px; }
+.kukurun-hatena { transform-origin: 50px 16px; }
 @keyframes kukurunHatenaIn {
   0%   { opacity:0; transform:scale(0) rotate(-15deg); }
   65%  { opacity:1; transform:scale(1.15) rotate(4deg); }

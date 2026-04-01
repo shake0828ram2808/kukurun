@@ -176,7 +176,7 @@ function buildKukurunSVG(prefix, size) {
     <path id="${prefix}-kukurun-mouth-fill" d="M 45,60 C 46,62 48,62 50,60 C 52,62 54,62 55,60" fill="none" stroke="#334" stroke-width="2.2" stroke-linecap="round"/>
     <circle id="${prefix}-kukurun-tongue" cx="50" cy="64" r="4" fill="#ff88aa" style="display:none;"/>
   </g>
-  <g transform="rotate(20, 50, 22)">
+  <g transform="rotate(30, 50, 22)">
     <ellipse cx="50" cy="21" rx="8" ry="6" fill="#a0c8ff" fill-opacity="0.7"/>
     <circle cx="50" cy="16" r="4" fill="#6aabee"/>
     <g class="kukurun-hatena">

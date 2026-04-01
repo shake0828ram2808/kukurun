@@ -155,6 +155,11 @@ function buildKukurunSVG(prefix, size) {
       <stop offset="0%" stop-color="#6699ff"/>
       <stop offset="100%" stop-color="#003399"/>
     </radialGradient>
+    <radialGradient id="${prefix}HatenaGrad" cx="35%" cy="25%" r="70%">
+      <stop offset="0%" stop-color="#aad0ff"/>
+      <stop offset="50%" stop-color="#5599ee"/>
+      <stop offset="100%" stop-color="#2266bb"/>
+    </radialGradient>
     <radialGradient id="${prefix}BrimGrad" cx="40%" cy="30%" r="65%">
       <stop offset="0%" stop-color="#d0e8ff"/>
       <stop offset="55%" stop-color="#7ab0ee"/>
@@ -183,9 +188,9 @@ function buildKukurunSVG(prefix, size) {
   </g>
   <g transform="translate(17, 5) rotate(30, 50, 22)">
     <ellipse cx="50" cy="21" rx="13" ry="6" fill="url(#${prefix}BrimGrad)"/>
-    <circle cx="50" cy="16" r="3.5" fill="#5599ee"/>
+    <circle cx="50" cy="16" r="3.5" fill="url(#${prefix}HatenaGrad)"/>
     <g class="kukurun-hatena">
-      <path d="M 50,13 L 50,11.5 A 4.5 4.5 0 1 0 45.5,7" fill="none" stroke="#5599ee" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M 50,13 L 50,11.5 A 4.5 4.5 0 1 0 45.5,7" fill="none" stroke="url(#${prefix}HatenaGrad)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
     </g>
   </g>
 </svg>`;

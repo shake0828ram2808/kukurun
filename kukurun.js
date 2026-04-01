@@ -155,6 +155,11 @@ function buildKukurunSVG(prefix, size) {
       <stop offset="0%" stop-color="#6699ff"/>
       <stop offset="100%" stop-color="#003399"/>
     </radialGradient>
+    <radialGradient id="${prefix}BrimGrad" cx="40%" cy="30%" r="65%">
+      <stop offset="0%" stop-color="#d0e8ff"/>
+      <stop offset="55%" stop-color="#7ab0ee"/>
+      <stop offset="100%" stop-color="#4488cc"/>
+    </radialGradient>
     <filter id="${prefix}SoftShadow" x="-20%" y="-20%" width="140%" height="140%">
       <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#0055aa" flood-opacity="0.18"/>
     </filter>
@@ -177,10 +182,10 @@ function buildKukurunSVG(prefix, size) {
     <circle id="${prefix}-kukurun-tongue" cx="50" cy="64" r="4" fill="#ff88aa" style="display:none;"/>
   </g>
   <g transform="translate(17, 5) rotate(30, 50, 22)">
-    <ellipse cx="50" cy="21" rx="13" ry="6" fill="#7ab0ee" fill-opacity="0.9"/>
-    <circle cx="50" cy="16" r="4.5" fill="#5599ee"/>
+    <ellipse cx="50" cy="21" rx="13" ry="6" fill="url(#${prefix}BrimGrad)"/>
+    <circle cx="50" cy="16" r="3.5" fill="#5599ee"/>
     <g class="kukurun-hatena">
-      <path d="M 50,13 L 50,10 A 6 6 0 1 0 44,4" fill="none" stroke="#5599ee" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M 50,13 L 50,11.5 A 4.5 4.5 0 1 0 45.5,7" fill="none" stroke="#5599ee" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
     </g>
   </g>
 </svg>`;

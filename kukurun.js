@@ -158,7 +158,7 @@ function buildKukurunSVG(prefix, size) {
     <radialGradient id="${prefix}HatenaGrad" cx="38%" cy="30%" r="62%">
       <stop offset="0%" stop-color="#ddeeff"/>
       <stop offset="60%" stop-color="#88bbee"/>
-      <stop offset="100%" stop-color="#2d6ecc"/>
+      <stop offset="100%" stop-color="#6aabee"/>
     </radialGradient>
     <radialGradient id="${prefix}BrimGrad" cx="40%" cy="30%" r="65%">
       <stop offset="0%" stop-color="#d0e8ff"/>

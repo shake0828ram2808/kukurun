@@ -179,7 +179,7 @@ function buildKukurunSVG(prefix, size) {
   <ellipse cx="50" cy="17" rx="8" ry="6" fill="#a0c8ff" fill-opacity="0.7"/>
   <circle cx="50" cy="12" r="4" fill="#6aabee"/>
   <g class="kukurun-hatena">
-    <path d="M 50,7 L 50,2 A 9 9 0 1 0 41,-7" fill="none" stroke="#5599ee" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M 50,7 L 50,2 A 8 8 0 1 0 42,-6" fill="none" stroke="#5599ee" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
   </g>
 </svg>`;
 }

@@ -222,7 +222,6 @@ let kukurunState = {
   isSmiling: false
 };
 
-let kukurunMessages = [];
 
 const kukurunMouthSequences = {
   idle:  { path: "M 46,60 Q 50,62 54,60" },
@@ -342,8 +341,6 @@ function _resetBalloonTimer(screen) {
 }
 
 /* ── ホーム画面タップ ── */
-let HOME_KUKURUN_MESSAGES = []; // 後方互換のため残す
-
 async function homeKukurunTalk() {
   if (kukurunState.isJumping) return;
   kukurunState.isJumping = true;

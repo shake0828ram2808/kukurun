@@ -49,15 +49,16 @@ button:focus, button:focus-visible { outline: none; }
 :root { --sh-press: 0 1px 0 rgba(0,0,0,.18); }
 
 html {
-  height: 100dvh;
-  height: -webkit-fill-available;
+  height: -webkit-fill-available; /* 旧iOS fallback */
+  height: 100dvh;                 /* 現代iOS/他: 100dvh が後勝ち */
+  overflow: hidden;
+  background: var(--surface);
 }
 body {
   font-family: var(--font);
   background: var(--bg);
-  height: 100%;
-  min-height: -webkit-fill-available;
-  overflow: hidden;
+  min-height: -webkit-fill-available; /* 旧iOS fallback */
+  height: 100dvh;                     /* 現代iOS: safe-area含む全高 */
   color: var(--text);
   display: flex;
   flex-direction: column;
@@ -66,9 +67,11 @@ body {
 #app {
   position: relative; z-index: 1;
   flex: 1; min-height: 0;
-  overflow-y: auto; -webkit-overflow-scrolling: touch;
+  overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
   display: flex; flex-direction: column; align-items: center;
-  padding: max(20px, env(safe-area-inset-top)) 16px 40px;
+  /* 青い背景を body から移動。body は白(safe-area用)にしたため #app で明示指定 */
+  background: var(--bg);
+  padding: max(20px, env(safe-area-inset-top)) 16px calc(49px + env(safe-area-inset-bottom, 0px) + 40px);
 }
 
 /* ── screens ── */
@@ -366,14 +369,8 @@ body {
 }
 
 /* ══ せいちょうをみる画面 ══ */
-#screen-growth {
-  height: calc(100dvh - max(20px, env(safe-area-inset-top)) - calc(54px + env(safe-area-inset-bottom, 0px)));
-  min-height: 300px; border-radius: var(--r); overflow: hidden;
-}
-#screen-settings {
-  height: calc(100dvh - max(20px, env(safe-area-inset-top)) - calc(54px + env(safe-area-inset-bottom, 0px)));
-  min-height: 300px; overflow-y: auto;
-}
+#screen-growth   { height: calc(100dvh - 100px); min-height: 300px; border-radius: var(--r); overflow: hidden; }
+#screen-settings { height: calc(100dvh - 100px); min-height: 300px; }
 /* ハートアニメ */
 @keyframes floatHeart {
   0%   { opacity: 1; transform: translateY(0) scale(1); }
@@ -851,7 +848,21 @@ body {
   100% { width: 90px;  opacity: 1; }
 }
 
+/* ── ハテナマーク ── */
+.kukurun-hatena { transform-origin: 50px 16px; }
+@keyframes kukurunHatenaIn {
+  0%   { opacity:0; transform:scale(0) rotate(-15deg); }
+  65%  { opacity:1; transform:scale(1.15) rotate(4deg); }
+  85%  { transform:scale(0.93) rotate(-1deg); }
+  100% { opacity:1; transform:scale(1) rotate(0deg); }
+}
+@keyframes kukurunHatenaOut {
+  0%   { opacity:1; transform:scale(1) rotate(0deg); }
+  100% { opacity:0; transform:scale(0) rotate(15deg); }
+}
+
 /* ── くくるんSVGラッパー（影を正確にSVG底辺中央へ） ── */
+.kukurun-character { overflow: visible; }
 .kukurun-svg-wrap {
   position: relative;
   display: inline-flex;
@@ -872,17 +883,17 @@ body {
 ══════════════════ */
 #bottom-bar {
   display: none;
-  flex-shrink: 0;
-  width: 100%;
-  height: calc(54px + env(safe-area-inset-bottom, 0));
+  position: fixed;
+  bottom: calc(-1 * env(safe-area-inset-bottom, 0px));
+  left: 0; right: 0;
+  height: calc(49px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
   background: var(--surface);
   border-top: 1px solid var(--border);
-  display: flex;
   align-items: center;
   justify-content: center;
   gap: 24px;
   z-index: 100;
-  padding-bottom: env(safe-area-inset-bottom, 0);
 }
 .bottom-btn {
   display: flex;
@@ -913,7 +924,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 18px 0;
+  padding: 14px 0;
   border-bottom: 1px solid var(--border);
   gap: 12px;
 }
@@ -995,12 +1006,14 @@ body {
 ══════════════════ */
 #screen-cert { height: calc(100dvh - 100px); min-height: 300px; }
 #cert-btn-row {
-  display: none; flex-wrap: nowrap; gap: 6px;
-  width: 100%; flex-shrink: 0;
+  display: none; flex-wrap: nowrap; gap: 6px; justify-content: center;
+  position: fixed;
+  /* バー content 高さ(49px) + safe-area + 余白の直上 */
+  bottom: calc(49px + env(safe-area-inset-bottom, 0px) + 4px);
+  left: 0; right: 0;
   padding: 6px 16px;
-  margin-bottom: 14px;
   box-sizing: border-box;
-  max-width: 430px; align-self: center;
+  z-index: 99;
 }
 .cert-icon-btn { font-size: 22px; padding: 6px 2px; line-height: 1; }
 #cert-tooltip { transition: opacity .5s; }
@@ -1163,13 +1176,26 @@ body {
     opacity: 1;
   }
 
-  #bottom-bar    { height: calc(64px + env(safe-area-inset-bottom, 0)); gap: 40px; }
+  #bottom-bar    { height: calc(64px + env(safe-area-inset-bottom, 0px)); bottom: calc(-1 * env(safe-area-inset-bottom, 0px)); padding-bottom: env(safe-area-inset-bottom, 0px); gap: 40px; }
   .bottom-btn    { font-size: 12px; padding: 8px 36px; }
 
   #screen-growth,
+  #screen-settings { height: calc(100dvh - 116px); }
+  #screen-cert      { height: calc(100dvh - 116px); }
+}
+
+/* ── PWA standalone: safe-area-aware height ── */
+/* bar = 49px + env(safe-area-inset-bottom) のため両方を引く */
+@media (display-mode: standalone) {
+  #screen-growth,
   #screen-settings {
-    height: calc(100dvh - max(36px, env(safe-area-inset-top)) - calc(64px + env(safe-area-inset-bottom, 0px)));
+    height: calc(100dvh - max(20px, env(safe-area-inset-top)) - 49px - env(safe-area-inset-bottom, 0px));
   }
-  #screen-cert   { height: calc(100dvh - 116px); }
+}
+@media (display-mode: standalone) and (min-width: 1024px) {
+  #screen-growth,
+  #screen-settings {
+    height: calc(100dvh - max(36px, env(safe-area-inset-top)) - 64px - env(safe-area-inset-bottom, 0px));
+  }
 }
 

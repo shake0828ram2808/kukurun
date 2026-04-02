@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="くくるん">
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
-<link rel="stylesheet" href="app.css?v=20260318">
+<link rel="stylesheet" href="app.css?v=20260330b">
 
 </head>
 <body>
@@ -32,7 +32,7 @@
 <div id="app">
 
 <!-- ══ SCREEN: NAME ══ -->
-<div class="screen active" id="screen-name">
+<div class="screen" id="screen-name">
   <div style="display:flex;flex-direction:column;align-items:center;gap:8px;width:100%;max-width:430px;margin:0 auto;">
     <!-- くくるん -->
     <div class="kukurun-wrap" id="name-kukurun-wrap" onclick="kukurunNameIntro()">
@@ -41,53 +41,9 @@
         <div class="balloon-text" id="name-balloon-text">なまえを　おしえてね</div>
         <div class="balloon-tail"></div>
       </div>
-      <svg 
-        id="name-kukurun-svg"
-        width="47" 
-        height="47" 
-        viewBox="0 0 100 100"
-        class="kukurun-character"
-        style="width:47px;height:47px;flex-shrink:0;"
-      >
-        <defs>
-          <radialGradient id="nameBodyGrad" cx="42%" cy="35%" r="58%">
-            <stop offset="0%" stop-color="#ffffff" />
-            <stop offset="60%" stop-color="#b8d9ff" />
-            <stop offset="100%" stop-color="#6aabee" />
-          </radialGradient>
-          <radialGradient id="nameEyeGrad" cx="35%" cy="30%" r="65%">
-            <stop offset="0%" stop-color="#6699ff" />
-            <stop offset="100%" stop-color="#003399" />
-          </radialGradient>
-          <filter id="nameSoftShadow" x="-20%" y="-20%" width="140%" height="140%">
-            <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#0055aa" flood-opacity="0.18"/>
-          </filter>
-        </defs>
-        <!-- 体（まんまる） -->
-        <circle cx="50" cy="54" r="38" fill="url(#nameBodyGrad)" filter="url(#nameSoftShadow)"/>
-        <!-- ほっぺ -->
-        <ellipse cx="28" cy="62" rx="7" ry="5" fill="#ffaacc" fill-opacity="0.45" />
-        <ellipse cx="72" cy="62" rx="7" ry="5" fill="#ffaacc" fill-opacity="0.45" />
-        <!-- 目 -->
-        <g id="name-kukurun-eyes">
-          <g transform="translate(37, 48)">
-            <circle r="5.8" fill="url(#nameEyeGrad)" />
-            <circle cx="1.4" cy="-1.8" r="1.8" fill="white" />
-          </g>
-          <g transform="translate(63, 48)">
-            <circle r="5.8" fill="url(#nameEyeGrad)" />
-            <circle cx="-1.4" cy="-1.8" r="1.8" fill="white" />
-          </g>
-        </g>
-        <!-- 口 -->
-        <g id="name-kukurun-mouth">
-          <path id="name-kukurun-mouth-fill" d="M 45,60 C 46,62 48,62 50,60 C 52,62 54,62 55,60" fill="none" stroke="#334" stroke-width="2.2" stroke-linecap="round" />
-          <circle id="name-kukurun-tongue" cx="50" cy="64" r="4" fill="#ff88aa" style="display:none;" />
-        </g>
-        <!-- 頭の飾り -->
-        <ellipse cx="50" cy="17" rx="8" ry="6" fill="#a0c8ff" fill-opacity="0.7" />
-        <circle cx="50" cy="12" r="4" fill="#6aabee" />
-      </svg>
+      <div class="kukurun-svg-wrap" id="name-kukurun-svg-wrap">
+      <div class="floor-shadow" id="name-floor-shadow"></div>
+      </div>
 
     </div>
   </div>
@@ -120,53 +76,9 @@
         <div class="balloon-text" id="suffix-balloon-text">よびかたを　おしえてね</div>
         <div class="balloon-tail"></div>
       </div>
-      <svg 
-        id="suffix-kukurun-svg"
-        width="47" 
-        height="47" 
-        viewBox="0 0 100 100"
-        class="kukurun-character"
-        style="width:47px;height:47px;flex-shrink:0;"
-      >
-        <defs>
-          <radialGradient id="suffixBodyGrad" cx="42%" cy="35%" r="58%">
-            <stop offset="0%" stop-color="#ffffff" />
-            <stop offset="60%" stop-color="#b8d9ff" />
-            <stop offset="100%" stop-color="#6aabee" />
-          </radialGradient>
-          <radialGradient id="suffixEyeGrad" cx="35%" cy="30%" r="65%">
-            <stop offset="0%" stop-color="#6699ff" />
-            <stop offset="100%" stop-color="#003399" />
-          </radialGradient>
-          <filter id="suffixSoftShadow" x="-20%" y="-20%" width="140%" height="140%">
-            <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#0055aa" flood-opacity="0.18"/>
-          </filter>
-        </defs>
-        <!-- 体（まんまる） -->
-        <circle cx="50" cy="54" r="38" fill="url(#suffixBodyGrad)" filter="url(#suffixSoftShadow)"/>
-        <!-- ほっぺ -->
-        <ellipse cx="28" cy="62" rx="7" ry="5" fill="#ffaacc" fill-opacity="0.45" />
-        <ellipse cx="72" cy="62" rx="7" ry="5" fill="#ffaacc" fill-opacity="0.45" />
-        <!-- 目 -->
-        <g id="suffix-kukurun-eyes">
-          <g transform="translate(37, 48)">
-            <circle r="5.8" fill="url(#suffixEyeGrad)" />
-            <circle cx="1.4" cy="-1.8" r="1.8" fill="white" />
-          </g>
-          <g transform="translate(63, 48)">
-            <circle r="5.8" fill="url(#suffixEyeGrad)" />
-            <circle cx="-1.4" cy="-1.8" r="1.8" fill="white" />
-          </g>
-        </g>
-        <!-- 口 -->
-        <g id="suffix-kukurun-mouth">
-          <path id="suffix-kukurun-mouth-fill" d="M 45,60 C 46,62 48,62 50,60 C 52,62 54,62 55,60" fill="none" stroke="#334" stroke-width="2.2" stroke-linecap="round" />
-          <circle id="suffix-kukurun-tongue" cx="50" cy="64" r="4" fill="#ff88aa" style="display:none;" />
-        </g>
-        <!-- 頭の飾り -->
-        <ellipse cx="50" cy="17" rx="8" ry="6" fill="#a0c8ff" fill-opacity="0.7" />
-        <circle cx="50" cy="12" r="4" fill="#6aabee" />
-      </svg>
+      <div class="kukurun-svg-wrap" id="suffix-kukurun-svg-wrap">
+      <div class="floor-shadow" id="suffix-floor-shadow"></div>
+      </div>
 
     </div>
   </div>
@@ -192,53 +104,9 @@
         <div class="balloon-text" id="egg-balloon-text">どれを　そだてる？</div>
         <div class="balloon-tail"></div>
       </div>
-      <svg 
-        id="egg-kukurun-svg"
-        width="47" 
-        height="47" 
-        viewBox="0 0 100 100"
-        class="kukurun-character"
-        style="width:47px;height:47px;flex-shrink:0;"
-      >
-        <defs>
-          <radialGradient id="eggBodyGrad" cx="42%" cy="35%" r="58%">
-            <stop offset="0%" stop-color="#ffffff" />
-            <stop offset="60%" stop-color="#b8d9ff" />
-            <stop offset="100%" stop-color="#6aabee" />
-          </radialGradient>
-          <radialGradient id="eggEyeGrad" cx="35%" cy="30%" r="65%">
-            <stop offset="0%" stop-color="#6699ff" />
-            <stop offset="100%" stop-color="#003399" />
-          </radialGradient>
-          <filter id="eggSoftShadow" x="-20%" y="-20%" width="140%" height="140%">
-            <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#0055aa" flood-opacity="0.18"/>
-          </filter>
-        </defs>
-        <!-- 体（まんまる） -->
-        <circle cx="50" cy="54" r="38" fill="url(#eggBodyGrad)" filter="url(#eggSoftShadow)"/>
-        <!-- ほっぺ -->
-        <ellipse cx="28" cy="62" rx="7" ry="5" fill="#ffaacc" fill-opacity="0.45" />
-        <ellipse cx="72" cy="62" rx="7" ry="5" fill="#ffaacc" fill-opacity="0.45" />
-        <!-- 目 -->
-        <g id="egg-kukurun-eyes">
-          <g transform="translate(37, 48)">
-            <circle r="5.8" fill="url(#eggEyeGrad)" />
-            <circle cx="1.4" cy="-1.8" r="1.8" fill="white" />
-          </g>
-          <g transform="translate(63, 48)">
-            <circle r="5.8" fill="url(#eggEyeGrad)" />
-            <circle cx="-1.4" cy="-1.8" r="1.8" fill="white" />
-          </g>
-        </g>
-        <!-- 口 -->
-        <g id="egg-kukurun-mouth">
-          <path id="egg-kukurun-mouth-fill" d="M 45,60 C 46,62 48,62 50,60 C 52,62 54,62 55,60" fill="none" stroke="#334" stroke-width="2.2" stroke-linecap="round" />
-          <circle id="egg-kukurun-tongue" cx="50" cy="64" r="4" fill="#ff88aa" style="display:none;" />
-        </g>
-        <!-- 頭の飾り -->
-        <ellipse cx="50" cy="17" rx="8" ry="6" fill="#a0c8ff" fill-opacity="0.7" />
-        <circle cx="50" cy="12" r="4" fill="#6aabee" />
-      </svg>
+      <div class="kukurun-svg-wrap" id="egg-kukurun-svg-wrap">
+      <div class="floor-shadow" id="egg-floor-shadow"></div>
+      </div>
 
     </div>
   </div>
@@ -255,10 +123,21 @@
 
 <!-- ══ SCREEN: SPEECH SELECT ══ -->
 <div class="screen" id="screen-speech-select">
+  <div style="display:flex;flex-direction:column;align-items:center;gap:8px;width:100%;max-width:430px;margin:0 auto;">
+    <div class="kukurun-wrap" onclick="tapSnd();kukurunTalkSpeech()">
+      <div class="kukurun-balloon" id="speech-kukurun-balloon">
+        <div class="balloon-text" id="speech-balloon-text">はじめまして！</div>
+        <div class="balloon-tail"></div>
+      </div>
+      <div class="kukurun-svg-wrap" id="speech-kukurun-svg-wrap">
+        <div class="floor-shadow" id="speech-floor-shadow"></div>
+      </div>
+    </div>
+  </div>
   <div class="card">
     <div style="font-size:17px;font-weight:bold;line-height:1.6;margin-bottom:4px;">ことばを　こえで　よんでも　いい？</div>
     <div class="sec-lbl" style="margin-bottom:20px;">おとが　でるから　きをつけてね</div>
-    <div class="sel-row" onclick="tapSnd();setSpeech(true);showScreen('screen-name')"
+    <div class="sel-row" onclick="tapSnd();setSpeech(true);showScreen('screen-name')">
       <div class="sel-icon" style="background:var(--theme-lt);">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--theme)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
@@ -272,7 +151,7 @@
       </div>
     </div>
     <div style="height:12px;"></div>
-    <div class="sel-row" onclick="tapSnd();setSpeech(false);showScreen('screen-name')"
+    <div class="sel-row" onclick="tapSnd();setSpeech(false);showScreen('screen-name')">
       <div class="sel-icon" style="background:var(--surface2);">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
@@ -299,54 +178,7 @@
         <div class="balloon-tail"></div>
       </div>
       <!-- SVGラッパー（影連動用） -->
-      <div class="kukurun-svg-wrap">
-      <svg 
-        id="home-kukurun-svg"
-        width="80" 
-        height="80" 
-        viewBox="0 0 100 100"
-        class="kukurun-character"
-        style="width:80px;height:80px;flex-shrink:0;"
-      >
-        <defs>
-          <radialGradient id="kukurunBodyGrad" cx="42%" cy="35%" r="58%">
-            <stop offset="0%" stop-color="#ffffff" />
-            <stop offset="60%" stop-color="#b8d9ff" />
-            <stop offset="100%" stop-color="#6aabee" />
-          </radialGradient>
-          <radialGradient id="kukurunEyeGrad" cx="35%" cy="30%" r="65%">
-            <stop offset="0%" stop-color="#6699ff" />
-            <stop offset="100%" stop-color="#003399" />
-          </radialGradient>
-          <filter id="kukurunSoftShadow" x="-20%" y="-20%" width="140%" height="140%">
-            <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#0055aa" flood-opacity="0.18"/>
-          </filter>
-        </defs>
-        <!-- 体（まんまる） -->
-        <circle cx="50" cy="54" r="38" fill="url(#kukurunBodyGrad)" filter="url(#kukurunSoftShadow)"/>
-        <!-- ほっぺ -->
-        <ellipse cx="28" cy="62" rx="7" ry="5" fill="#ffaacc" fill-opacity="0.45" />
-        <ellipse cx="72" cy="62" rx="7" ry="5" fill="#ffaacc" fill-opacity="0.45" />
-        <!-- 目 -->
-        <g id="kukurun-eyes">
-          <g transform="translate(37, 48)">
-            <circle r="5.8" fill="url(#kukurunEyeGrad)" />
-            <circle cx="1.4" cy="-1.8" r="1.8" fill="white" />
-          </g>
-          <g transform="translate(63, 48)">
-            <circle r="5.8" fill="url(#kukurunEyeGrad)" />
-            <circle cx="-1.4" cy="-1.8" r="1.8" fill="white" />
-          </g>
-        </g>
-        <!-- 口 -->
-        <g id="kukurun-mouth">
-          <path id="kukurun-mouth-fill" d="M 45,60 C 46,62 48,62 50,60 C 52,62 54,62 55,60" fill="none" stroke="#334" stroke-width="2.2" stroke-linecap="round" />
-          <circle id="kukurun-tongue" cx="50" cy="64" r="4" fill="#ff88aa" style="display:none;" />
-        </g>
-        <!-- 頭の飾り -->
-        <ellipse cx="50" cy="17" rx="8" ry="6" fill="#a0c8ff" fill-opacity="0.7" />
-        <circle cx="50" cy="12" r="4" fill="#6aabee" />
-      </svg>
+      <div class="kukurun-svg-wrap" id="home-kukurun-svg-wrap">
       <!-- 床の影（SVGラッパー内→くくるん底辺中央に連動） -->
       <div class="floor-shadow" id="home-floor-shadow"></div>
       </div><!-- /.kukurun-svg-wrap -->
@@ -602,7 +434,7 @@
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
       ホームに　もどる
     </button>
-    <div id="version-badge">ver.2026.0328.0003</div>
+    <div id="version-badge">ver.2026.0401.0017</div>
   </div>
   <div class="card">
     <div class="sec-lbl" style="margin-bottom:8px;">せってい</div>
@@ -660,7 +492,7 @@
       </div>
       <button class="btn" style="background:#FFE8E8;color:#E03030;border:none;" onclick="tapSnd();openConfirm('app')">けす</button>
     </div>
-    <div class="sec-lbl" style="margin-top:20px;margin-bottom:8px;">保護者の方へ</div>
+    <div class="sec-lbl" style="margin-top:12px;margin-bottom:6px;">保護者の方へ</div>
     <div class="settings-row" style="border-bottom:none;">
       <div class="settings-row-text">
         <div class="settings-row-label">プライバシーポリシー</div>
@@ -704,35 +536,7 @@
 <!-- ══ INTRO MODAL ══ -->
 <div id="intro-modal" onclick="closeIntroModal(event)">
   <div class="intro-content">
-    <svg id="intro-kukurun-svg" width="120" height="120" viewBox="0 0 100 100" class="kukurun-character" style="width:120px;height:120px;flex-shrink:0;">
-      <defs>
-        <radialGradient id="introBodyGrad" cx="42%" cy="35%" r="58%">
-          <stop offset="0%" stop-color="#ffffff" />
-          <stop offset="60%" stop-color="#b8d9ff" />
-          <stop offset="100%" stop-color="#6aabee" />
-        </radialGradient>
-        <radialGradient id="introEyeGrad" cx="35%" cy="30%" r="65%">
-          <stop offset="0%" stop-color="#6699ff" />
-          <stop offset="100%" stop-color="#003399" />
-        </radialGradient>
-        <filter id="introSoftShadow" x="-20%" y="-20%" width="140%" height="140%">
-          <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#0055aa" flood-opacity="0.18"/>
-        </filter>
-      </defs>
-      <circle cx="50" cy="54" r="38" fill="url(#introBodyGrad)" filter="url(#introSoftShadow)"/>
-      <ellipse cx="28" cy="62" rx="7" ry="5" fill="#ffaacc" fill-opacity="0.45" />
-      <ellipse cx="72" cy="62" rx="7" ry="5" fill="#ffaacc" fill-opacity="0.45" />
-      <g id="intro-kukurun-eyes">
-        <g transform="translate(37, 48)"><circle r="5.8" fill="url(#introEyeGrad)" /><circle cx="1.4" cy="-1.8" r="1.8" fill="white" /></g>
-        <g transform="translate(63, 48)"><circle r="5.8" fill="url(#introEyeGrad)" /><circle cx="-1.4" cy="-1.8" r="1.8" fill="white" /></g>
-      </g>
-      <g id="intro-kukurun-mouth">
-        <path id="intro-kukurun-mouth-fill" d="M 45,60 C 46,62 48,62 50,60 C 52,62 54,62 55,60" fill="none" stroke="#334" stroke-width="2.2" stroke-linecap="round" />
-        <circle id="intro-kukurun-tongue" cx="50" cy="64" r="4" fill="#ff88aa" style="display:none;" />
-      </g>
-      <ellipse cx="50" cy="17" rx="8" ry="6" fill="#a0c8ff" fill-opacity="0.7" />
-      <circle cx="50" cy="12" r="4" fill="#6aabee" />
-    </svg>
+    <div id="intro-kukurun-svg-wrap"></div>
     <div class="intro-balloon">
       <div class="intro-balloon-text">くくるんへ<br>ようこそ！</div>
       <div class="balloon-tail"></div>
@@ -745,7 +549,7 @@
 
 <script src="medals.js?v=20260318"></script>
 <script src="questions.js?v=20260318"></script>
-<script src="kukurun.js?v=20260318"></script>
+<script src="kukurun.js?v=20260401"></script>
 <script src="sprites.js?v=20260318"></script>
 <script src="app.js?v=20260318"></script>
 

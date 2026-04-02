@@ -99,7 +99,7 @@ function playKukurunTapAnim(svg, animName) {
   if (anim.name === 'kukuPyon') {
     const shadowId = svg.id.replace('-svg', '').replace('-kukurun', '') + '-floor-shadow';
     // home-kukurun-svg → home-floor-shadow
-    const shadow = document.getElementById('home-floor-shadow');
+    const shadow = document.getElementById(shadowId);
     if (shadow) {
       shadow.style.animation = 'none';
       void shadow.offsetWidth;
@@ -114,6 +114,102 @@ function playKukurunTapAnim(svg, animName) {
   }, { once: true });
 }
 
+
+/* ── ハテナマーク 表示/非表示 ──
+ *  setKukurunHatena('home-kukurun-svg', true)  で表示
+ *  setKukurunHatena('home-kukurun-svg', false) で非表示
+ */
+function setKukurunHatena(svgId, show) {
+  const svgEl = typeof svgId === 'string' ? document.getElementById(svgId) : svgId;
+  if (!svgEl) return;
+  const hatena = svgEl.querySelector('.kukurun-hatena');
+  if (!hatena) return;
+  if (show) {
+    hatena.style.display = 'block';
+    hatena.style.animation = 'none';
+    void hatena.offsetWidth;
+    hatena.style.animation = 'kukurunHatenaIn 0.45s cubic-bezier(0.34,1.56,0.64,1) forwards';
+  } else {
+    if (hatena.style.display === 'none') return;
+    hatena.style.animation = 'kukurunHatenaOut 0.25s ease-in forwards';
+    hatena.addEventListener('animationend', () => {
+      hatena.style.display = 'none';
+      hatena.style.animation = '';
+    }, { once: true });
+  }
+}
+
+/* ════════════════════════════════
+   キャラクターSVG テンプレート生成・注入
+════════════════════════════════ */
+function buildKukurunSVG(prefix, size) {
+  size = size || 80;
+  return `<svg id="${prefix}-kukurun-svg" width="${size}" height="${size}" viewBox="0 0 100 100" class="kukurun-character" style="width:${size}px;height:${size}px;flex-shrink:0;">
+  <defs>
+    <radialGradient id="${prefix}BodyGrad" cx="42%" cy="35%" r="58%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="60%" stop-color="#b8d9ff"/>
+      <stop offset="100%" stop-color="#6aabee"/>
+    </radialGradient>
+    <radialGradient id="${prefix}EyeGrad" cx="35%" cy="30%" r="65%">
+      <stop offset="0%" stop-color="#6699ff"/>
+      <stop offset="100%" stop-color="#003399"/>
+    </radialGradient>
+    <radialGradient id="${prefix}HatenaGrad" cx="38%" cy="30%" r="62%">
+      <stop offset="0%" stop-color="#ddeeff"/>
+      <stop offset="60%" stop-color="#88bbee"/>
+      <stop offset="100%" stop-color="#6aabee"/>
+    </radialGradient>
+    <radialGradient id="${prefix}BrimGrad" cx="40%" cy="30%" r="65%">
+      <stop offset="0%" stop-color="#d0e8ff"/>
+      <stop offset="55%" stop-color="#7ab0ee"/>
+      <stop offset="100%" stop-color="#4488cc"/>
+    </radialGradient>
+    <filter id="${prefix}SoftShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#0055aa" flood-opacity="0.18"/>
+    </filter>
+  </defs>
+  <circle cx="50" cy="54" r="38" fill="url(#${prefix}BodyGrad)" filter="url(#${prefix}SoftShadow)"/>
+  <ellipse cx="28" cy="62" rx="7" ry="5" fill="#ffaacc" fill-opacity="0.45"/>
+  <ellipse cx="72" cy="62" rx="7" ry="5" fill="#ffaacc" fill-opacity="0.45"/>
+  <g id="${prefix}-kukurun-eyes">
+    <g transform="translate(37, 48)">
+      <circle r="5.8" fill="url(#${prefix}EyeGrad)"/>
+      <circle cx="1.4" cy="-1.8" r="1.8" fill="white"/>
+    </g>
+    <g transform="translate(63, 48)">
+      <circle r="5.8" fill="url(#${prefix}EyeGrad)"/>
+      <circle cx="-1.4" cy="-1.8" r="1.8" fill="white"/>
+    </g>
+  </g>
+  <g id="${prefix}-kukurun-mouth">
+    <path id="${prefix}-kukurun-mouth-fill" d="M 45,60 C 46,62 48,62 50,60 C 52,62 54,62 55,60" fill="none" stroke="#334" stroke-width="2.2" stroke-linecap="round"/>
+    <circle id="${prefix}-kukurun-tongue" cx="50" cy="64" r="4" fill="#ff88aa" style="display:none;"/>
+  </g>
+  <g transform="translate(17, 5) rotate(30, 50, 22)">
+    <ellipse cx="50" cy="21" rx="13" ry="6" fill="url(#${prefix}BrimGrad)"/>
+    <circle cx="50" cy="16" r="3.5" fill="url(#${prefix}HatenaGrad)"/>
+    <g class="kukurun-hatena">
+      <path d="M 50,13 L 50,11.5 A 4.5 4.5 0 1 0 45.5,7" fill="none" stroke="url(#${prefix}HatenaGrad)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+  </g>
+</svg>`;
+}
+
+function initKukurunSVGs() {
+  [
+    { prefix: 'home',   size: 80  },
+    { prefix: 'name',   size: 80  },
+    { prefix: 'suffix', size: 80  },
+    { prefix: 'egg',    size: 80  },
+    { prefix: 'speech', size: 80  },
+    { prefix: 'intro',  size: 120 },
+  ].forEach(({ prefix, size }) => {
+    const wrap = document.getElementById(`${prefix}-kukurun-svg-wrap`);
+    if (!wrap) return;
+    wrap.insertAdjacentHTML('afterbegin', buildKukurunSVG(prefix, size));
+  });
+}
 
 /* ════════════════════════════════
    KUKURUN — 共通キャラクター制御
@@ -140,12 +236,12 @@ const kukurunMouthSequences = {
 
 let kukurunScripts  = [];
 
-/* ── ホーム画面 ── */
-function setKukurunMouth(state) {
-  const mouthPath = document.getElementById('kukurun-mouth-fill');
-  const tongue    = document.getElementById('kukurun-tongue');
-  const mouth     = kukurunMouthSequences[state];
+/* ── 口・目の共通ヘルパー ── */
+function _setMouth(prefix, state) {
+  const mouth = kukurunMouthSequences[state];
   if (!mouth) return;
+  const mouthPath = document.getElementById(`${prefix}-kukurun-mouth-fill`);
+  const tongue    = document.getElementById(`${prefix}-kukurun-tongue`);
   if (mouthPath) {
     mouthPath.setAttribute('d', mouth.path);
     mouthPath.setAttribute('fill', mouth.path.includes('Z') ? '#442222' : 'none');
@@ -153,35 +249,19 @@ function setKukurunMouth(state) {
   if (tongue) tongue.style.display = mouth.tongue ? 'block' : 'none';
 }
 
-function setKukurunSmile(isSmiling) {
-  const eyes = document.getElementById('kukurun-eyes');
+function _setSmile(prefix, isSmiling) {
+  const eyes = document.getElementById(`${prefix}-kukurun-eyes`);
   if (!eyes) return;
   eyes.querySelectorAll('g').forEach((eye, i) => {
     eye.innerHTML = isSmiling
       ? '<path d="M -5,-1 Q 0,-3 5,-1" fill="none" stroke="#222" stroke-width="2.8" stroke-linecap="round" />'
-      : `<circle r="5.8" fill="url(#kukurunEyeGrad)" /><circle cx="${i===0?'1.4':'-1.4'}" cy="-1.8" r="1.8" fill="white" />`;
+      : `<circle r="5.8" fill="url(#${prefix}EyeGrad)" /><circle cx="${i===0?'1.4':'-1.4'}" cy="-1.8" r="1.8" fill="white" />`;
   });
 }
 
-async function kukurunTalk() {
-  if (kukurunState.isJumping) return;
-  kukurunState.isJumping = true;
-  const svg = document.getElementById('kukurun-svg');
-  playKukurunTapAnim(svg);
-  const script = kukurunScripts[Math.floor(Math.random() * kukurunScripts.length)];
-  const balloonText = document.getElementById('balloon-text');
-  balloonText.textContent = script.text;
-  for (let m of script.sequence) { setKukurunMouth(m); await new Promise(r => setTimeout(r, 120)); }
-  kukurunState.isSmiling = true;
-  setKukurunSmile(true);
-  setKukurunMouth('munyu');
-  setTimeout(() => {
-    kukurunState.isSmiling = false;
-    setKukurunSmile(false);
-    kukurunState.isJumping = false;
-    setKukurunMouth('munyu');
-  }, 800);
-}
+/* ── ホーム画面 ── */
+function setKukurunMouth(state)     { _setMouth('home', state); }
+function setKukurunSmile(isSmiling) { _setSmile('home', isSmiling); }
 
 /* ════════════════════════════════
    各画面のメッセージ定義
@@ -282,28 +362,27 @@ async function homeKukurunTalk() {
   kukurunState.isJumping = false;
 }
 
-/* ── 名前入力画面 ── */
-function setKukurunMouthSmall(state) {
-  const mouthPath = document.getElementById('name-kukurun-mouth-fill');
-  const tongue    = document.getElementById('name-kukurun-tongue');
-  const mouth     = kukurunMouthSequences[state];
-  if (!mouth) return;
-  if (mouthPath) {
-    mouthPath.setAttribute('d', mouth.path);
-    mouthPath.setAttribute('fill', mouth.path.includes('Z') ? '#442222' : 'none');
-  }
-  if (tongue) tongue.style.display = mouth.tongue ? 'block' : 'none';
+/* ── 音声選択画面 ── */
+function setKukurunMouthSpeech(state)     { _setMouth('speech', state); }
+function setKukurunSmileSpeech(isSmiling) { _setSmile('speech', isSmiling); }
+async function kukurunTalkSpeech() {
+  if (kukurunState.isJumping) return;
+  kukurunState.isJumping = true;
+  const svg = document.getElementById('speech-kukurun-svg');
+  playKukurunTapAnim(svg);
+  Snd.tap();
+  for (let m of ['O', 'A', 'I', 'U', 'O']) { setKukurunMouthSpeech(m); await new Promise(r => setTimeout(r, 120)); }
+  setKukurunSmileSpeech(true);
+  setKukurunMouthSpeech('munyu');
+  await new Promise(r => setTimeout(r, 800));
+  setKukurunSmileSpeech(false);
+  setKukurunMouthSpeech('munyu');
+  kukurunState.isJumping = false;
 }
 
-function setKukurunSmileSmall(isSmiling) {
-  const eyes = document.getElementById('name-kukurun-eyes');
-  if (!eyes) return;
-  eyes.querySelectorAll('g').forEach((eye, i) => {
-    eye.innerHTML = isSmiling
-      ? '<path d="M -5,-1 Q 0,-3 5,-1" fill="none" stroke="#222" stroke-width="2.8" stroke-linecap="round" />'
-      : `<circle r="5.8" fill="url(#nameEyeGrad)" /><circle cx="${i===0?'1.4':'-1.4'}" cy="-1.8" r="1.8" fill="white" />`;
-  });
-}
+/* ── 名前入力画面 ── */
+function setKukurunMouthSmall(state)     { _setMouth('name', state); }
+function setKukurunSmileSmall(isSmiling) { _setSmile('name', isSmiling); }
 
 async function kukurunNameIntro() {
   const svg = document.getElementById('name-kukurun-svg');
@@ -320,50 +399,12 @@ async function kukurunNameIntro() {
 }
 
 /* ── 呼称選択画面 ── */
-function setKukurunMouthSuffix(state) {
-  const mouthPath = document.getElementById('suffix-kukurun-mouth-fill');
-  const tongue    = document.getElementById('suffix-kukurun-tongue');
-  const mouth     = kukurunMouthSequences[state];
-  if (!mouth) return;
-  if (mouthPath) {
-    mouthPath.setAttribute('d', mouth.path);
-    mouthPath.setAttribute('fill', mouth.path.includes('Z') ? '#442222' : 'none');
-  }
-  if (tongue) tongue.style.display = mouth.tongue ? 'block' : 'none';
-}
-
-function setKukurunSmileSuffix(isSmiling) {
-  const eyes = document.getElementById('suffix-kukurun-eyes');
-  if (!eyes) return;
-  eyes.querySelectorAll('g').forEach((eye, i) => {
-    eye.innerHTML = isSmiling
-      ? '<path d="M -5,-1 Q 0,-3 5,-1" fill="none" stroke="#222" stroke-width="2.8" stroke-linecap="round" />'
-      : `<circle r="5.8" fill="url(#suffixEyeGrad)" /><circle cx="${i===0?'1.4':'-1.4'}" cy="-1.8" r="1.8" fill="white" />`;
-  });
-}
+function setKukurunMouthSuffix(state)     { _setMouth('suffix', state); }
+function setKukurunSmileSuffix(isSmiling) { _setSmile('suffix', isSmiling); }
 
 /* ── 卵選択画面 ── */
-function setKukurunMouthEgg(state) {
-  const mouthPath = document.getElementById('egg-kukurun-mouth-fill');
-  const tongue    = document.getElementById('egg-kukurun-tongue');
-  const mouth     = kukurunMouthSequences[state];
-  if (!mouth) return;
-  if (mouthPath) {
-    mouthPath.setAttribute('d', mouth.path);
-    mouthPath.setAttribute('fill', mouth.path.includes('Z') ? '#442222' : 'none');
-  }
-  if (tongue) tongue.style.display = mouth.tongue ? 'block' : 'none';
-}
-
-function setKukurunSmileEgg(isSmiling) {
-  const eyes = document.getElementById('egg-kukurun-eyes');
-  if (!eyes) return;
-  eyes.querySelectorAll('g').forEach((eye, i) => {
-    eye.innerHTML = isSmiling
-      ? '<path d="M -5,-1 Q 0,-3 5,-1" fill="none" stroke="#222" stroke-width="2.8" stroke-linecap="round" />'
-      : `<circle r="5.8" fill="url(#eggEyeGrad)" /><circle cx="${i===0?'1.4':'-1.4'}" cy="-1.8" r="1.8" fill="white" />`;
-  });
-}
+function setKukurunMouthEgg(state)     { _setMouth('egg', state); }
+function setKukurunSmileEgg(isSmiling) { _setSmile('egg', isSmiling); }
 
 async function kukurunTalkSmall() {
   if (kukurunState.isJumping) return;
@@ -394,6 +435,10 @@ function closeIntroModal(e) {
   modal.style.animation = 'fadeOut 0.3s ease forwards';
   setTimeout(() => {
     modal.style.display = 'none';
+    // body 背景・ボトムバー z-index を元に戻す
+    document.body.style.background = '';
+    const bb = document.getElementById('bottom-bar');
+    if (bb) bb.style.zIndex = '';
     // 名前登録済みならホーム、未登録なら音声選択→名前入力へ
     if (typeof S !== 'undefined' && S.name) {
       showScreen('screen-home');
@@ -403,21 +448,17 @@ function closeIntroModal(e) {
   }, 300);
 }
 
-function setIntroKukurunMouth(state) {
-  const mouthPath = document.getElementById('intro-kukurun-mouth-fill');
-  const tongue    = document.getElementById('intro-kukurun-tongue');
-  const mouth     = kukurunMouthSequences[state];
-  if (!mouth || !mouthPath) return;
-  mouthPath.setAttribute('d', mouth.path);
-  mouthPath.setAttribute('fill', mouth.path.includes('Z') ? '#442222' : 'none');
-  if (tongue) tongue.style.display = mouth.tongue ? 'block' : 'none';
-}
+function setIntroKukurunMouth(state) { _setMouth('intro', state); }
 
 function playIntroAnimation() {
   const svg = document.getElementById('intro-kukurun-svg');
   if (!svg) return;
+  // ボトムバーを intro-modal の上に表示（z-index を上げる）し、
+  // body 背景を青にしてホームインジケーター帯の白を消す
   const bb = document.getElementById('bottom-bar');
-  if (bb) bb.style.display = 'none';
+  if (bb) { bb.style.display = 'flex'; bb.style.zIndex = '501'; }
+  document.body.style.background = 'var(--bg)';
+  if (typeof updateBottomBar === 'function') updateBottomBar('home');
   playKukurunTapAnim(svg);
   (async () => {
     for (let m of ['O', 'I', 'A', 'U', 'O']) { setIntroKukurunMouth(m); await new Promise(r => setTimeout(r, 120)); }
@@ -461,6 +502,7 @@ function _initScreenWatcher() {
 
 /* ── 初期化 ── */
 function initKukurun() {
+  initKukurunSVGs();
   _getKukurunStyleEl();
   // 吹き出しは1行表示（折り返しなし）
   const balloonStyle = document.createElement('style');

@@ -381,7 +381,7 @@ function showScreen(id) {
   const appEl = document.getElementById('app');
   if (appEl) {
     appEl.scrollTop = 0;
-    appEl.style.paddingBottom = id === 'screen-growth' ? '0' : '';
+    appEl.style.paddingBottom = ['screen-growth', 'screen-settings'].includes(id) ? '0' : '';
   }
 }
 
@@ -2261,7 +2261,71 @@ initKukurun();
 
 restoreSession();
 
-// イントロアニメーション（毎回表示）
+// ══ ボトムバー safe-area 補正 ══
+// env(safe-area-inset-bottom) が 0 を返す環境でも
+// ホームインジケーター帯まで正しく伸ばす
+(function fixBottomBarSafeArea() {
+  const bar = document.getElementById('bottom-bar');
+  if (!bar) return;
+
+  // CSS の env() が実際に返す値を DOM 計測で取得
+  const probe = document.createElement('div');
+  probe.style.cssText = 'position:fixed;bottom:0;left:0;width:0;height:env(safe-area-inset-bottom,0px);visibility:hidden;pointer-events:none;';
+  document.body.appendChild(probe);
+  const cssSab = probe.offsetHeight;
+  probe.remove();
+
+  if (cssSab > 0) return; // env() が正常に動作している → CSS のみで対応済み
+
+  // env() が 0 を返す場合: 画面アスペクト比でホームインジケーター有無を判定
+  // ホームインジケーター搭載 iPhone (X 以降) は縦横比 > 1.9
+  const tall = Math.max(screen.width, screen.height);
+  const wide = Math.min(screen.width, screen.height);
+  if (tall / wide <= 1.9) return; // ホームインジケーターなし → 補正不要
+
+  const SAB = 34; // ホームインジケーター搭載 iPhone の標準値 (px)
+  bar.style.bottom        = `-${SAB}px`;
+  bar.style.height        = `${49 + SAB}px`;
+  bar.style.paddingBottom = `${SAB}px`;
+})();
+
+
+// ══ バージョンバッジ 5連打で診断情報を表示 ══
+(function initDiag() {
+  const badge = document.getElementById('version-badge');
+  if (!badge) return;
+  let taps = 0, timer;
+  badge.addEventListener('click', () => {
+    taps++;
+    clearTimeout(timer);
+    timer = setTimeout(() => { taps = 0; }, 1200);
+    if (taps < 5) return;
+    taps = 0;
+
+    // env() 実測
+    const probe = document.createElement('div');
+    probe.style.cssText = 'position:fixed;bottom:0;left:0;width:0;height:env(safe-area-inset-bottom,0px);visibility:hidden;pointer-events:none;';
+    document.body.appendChild(probe);
+    const sabPx = probe.offsetHeight;
+    probe.remove();
+
+    const bar = document.getElementById('bottom-bar');
+    const barRect = bar ? bar.getBoundingClientRect() : null;
+
+    const msg = [
+      'screen.height : ' + screen.height,
+      'screen.width  : ' + screen.width,
+      'innerHeight   : ' + window.innerHeight,
+      'visualVP.h    : ' + (window.visualViewport ? Math.round(window.visualViewport.height) : 'N/A'),
+      'env(sab) px   : ' + sabPx,
+      'bar bottom    : ' + (barRect ? Math.round(barRect.bottom) : 'N/A'),
+      'bar height    : ' + (barRect ? Math.round(barRect.height) : 'N/A'),
+      'PWA mode      : ' + window.matchMedia('(display-mode:standalone)').matches,
+    ].join('\n');
+    alert(msg);
+  });
+})();
+
 playIntroAnimation();
 
 // iOS: 初回タッチでAudioContextをアンロック（サイレント再生）

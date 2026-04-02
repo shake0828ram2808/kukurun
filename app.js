@@ -2206,20 +2206,14 @@ Promise.all([
   fetch('kana.json').then(r => r.json()),
   fetch('messages.json').then(r => r.json()),
   fetch('kana_hoka.json').then(r => r.json()),
-  fetch('balloon_messages.json').then(r => r.ok ? r.json() : {}).catch(() => ({})),
-]).then(([kana, msg, hoka, balloon]) => {
-  KANA_ROWS      = kana.kanaRows;
-  SUFFIXES       = kana.suffixes;
-  HOKA_SECTIONS  = hoka.hokaSections;
-  kukurunMessages = msg.kukurunMessages;
-  kukurunScripts  = msg.kukurunScripts;
-  // kukurun.js側のメッセージも更新
-  if (typeof HOME_KUKURUN_MESSAGES !== 'undefined') {
-    HOME_KUKURUN_MESSAGES.splice(0, HOME_KUKURUN_MESSAGES.length, ...msg.homeMessages);
-  }
+]).then(([kana, msg, hoka]) => {
+  KANA_ROWS     = kana.kanaRows;
+  SUFFIXES      = kana.suffixes;
+  HOKA_SECTIONS = hoka.hokaSections;
+  kukurunScripts = msg.kukurunScripts;
   // 吹き出しメッセージをJSONで上書き
   if (typeof SCREEN_MESSAGES !== 'undefined') {
-    Object.assign(SCREEN_MESSAGES, balloon);
+    Object.assign(SCREEN_MESSAGES, msg.screenMessages);
   }
   buildKanaGrid();
 }).catch(err => {
@@ -2236,10 +2230,11 @@ Promise.all([
     {title:'だくてん・はんだくてん',rows:[['が','ぎ','ぐ','げ','ご'],['ざ','じ','ず','ぜ','ぞ'],['だ','ぢ','づ','で','ど'],['ば','び','ぶ','べ','ぼ'],['ぱ','ぴ','ぷ','ぺ','ぽ']]},
     {title:'ちいさいかな・のばすおと',rows:[['っ','ゃ','ゅ','ょ','ー']]},
   ];
-  kukurunMessages = ['どれを　やる？','がんばろうね！','すごーい！','天才だよ！'];
-  kukurunScripts  = [
+  kukurunScripts = [
     {text:'どれを　やる？', sequence:['O','E','O','A','U']},
     {text:'がんばろうね！', sequence:['A','I','O','O','U']},
+    {text:'すごーい！',     sequence:['U','O','I']},
+    {text:'天才だよ！',     sequence:['E','I','A','I','O']},
   ];
   buildKanaGrid();
 });

@@ -1135,7 +1135,7 @@ body {
     bottom: auto;
     top: 50%;
     transform: translateY(-50%);
-    width: auto;
+    width: 64px;
     padding: 6px 4px;
   }
 }
@@ -1194,6 +1194,60 @@ body {
   #screen-growth,
   #screen-settings { height: calc(100dvh - 116px); }
   #screen-cert      { height: calc(100dvh - 116px); }
+}
+
+/* ── Landscape (横長・高さ制限) ── */
+@media (orientation: landscape) and (max-height: 500px) {
+
+  /* ホーム画面: 左右2カラムレイアウト */
+  #screen-home {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  /* キャラクターコンテナ: 左カラム固定幅 */
+  #screen-home > div:first-child {
+    flex: 0 0 220px;
+  }
+
+  /* だんカード: 残り幅を占有 */
+  #screen-home > .card {
+    flex: 1;
+    min-width: 0;
+  }
+
+  /* くくるん + 吹き出しを横並びに */
+  .kukurun-wrap {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    padding: 0 4px;
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+
+  /* SVGを左・吹き出しを右 */
+  .kukurun-svg-wrap { order: 1; }
+  .kukurun-balloon  { order: 2; align-self: center; }
+
+  /* 吹き出しの尻尾: 下向き → 左向き */
+  .balloon-tail {
+    left: 0;
+    top: 50%;
+    right: auto;
+    transform: translate(-100%, -50%);
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+    border-right: 10px solid white;
+    border-left: 0;
+  }
+
+  /* だんボタン: コンパクト化 */
+  .dan-btn         { padding: 8px 4px; }
+  .dan-btn .dn     { font-size: 20px; }
+  .dan-btn .dan-main { margin-top: 6px; }
+  .dan-grid        { gap: 6px; }
 }
 
 /* ── PWA standalone: safe-area-aware height ── */

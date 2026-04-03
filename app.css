@@ -1126,6 +1126,18 @@ body {
 
   #bottom-bar    { gap: 32px; }
   .bottom-btn    { padding: 6px 28px; }
+
+  /* しょうじょうボタン: 右縦並び（ボトムバーと重ならないよう） */
+  #cert-btn-row {
+    flex-direction: column;
+    left: auto;
+    right: 8px;
+    bottom: auto;
+    top: 50%;
+    transform: translateY(-50%);
+    width: auto;
+    padding: 6px 4px;
+  }
 }
 
 /* ── Desktop: 1024px+ ── */

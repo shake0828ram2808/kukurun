@@ -1,0 +1,16 @@
+{
+  "name": "kukurun",
+  "version": "1.0.0",
+  "description": "九九を楽しく覚えるアプリ",
+  "scripts": {
+    "build": "rm -rf www && mkdir -p www && cp index.html app.js app.css kukurun.js questions.js sprites.js medals.js kana.json kana_hoka.json messages.json manifest.json sw.js privacy.html www/ && cp -r icons sprites www/",
+    "cap:sync": "npm run build && npx cap sync"
+  },
+  "dependencies": {
+    "@capacitor/core": "^6.0.0",
+    "@capacitor/ios": "^6.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.0.0"
+  }
+}

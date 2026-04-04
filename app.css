@@ -1196,8 +1196,8 @@ body {
   #screen-cert      { height: calc(100dvh - 116px); }
 }
 
-/* ── Landscape (横長・高さ制限) ── */
-@media (orientation: landscape) and (max-height: 500px) {
+/* ── Landscape (横長) ── */
+@media (orientation: landscape) {
 
   /* ホーム画面: 左右2カラムレイアウト */
   #screen-home {

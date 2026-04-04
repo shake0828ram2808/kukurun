@@ -1243,11 +1243,11 @@ body {
     border-left: 0;
   }
 
-  /* だんボタン: コンパクト化 */
+  /* だんボタン: コンパクト化・5列2段 */
   .dan-btn         { padding: 8px 4px; }
   .dan-btn .dn     { font-size: 20px; }
   .dan-btn .dan-main { margin-top: 6px; }
-  .dan-grid        { gap: 6px; }
+  .dan-grid        { gap: 6px; grid-template-columns: repeat(5, 1fr); }
 }
 
 /* ── PWA standalone: safe-area-aware height ── */

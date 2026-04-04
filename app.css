@@ -1235,13 +1235,16 @@ body {
   /* 「どれをやる？」ラベルを非表示 */
   #screen-home .sec-lbl { display: none; }
 
+  /* だんカード: 余白を詰めてボタン領域を最大化 */
+  #screen-home > .card { padding: 10px 12px; }
+
   /* だんボタン: 横長フラット・5列2段 */
-  .dan-grid          { gap: 5px; grid-template-columns: repeat(5, 1fr); margin-bottom: 0; }
-  .dan-btn           { padding: 6px 4px; }
-  .dan-btn .dn       { font-size: 18px; }
+  .dan-grid          { gap: 6px; grid-template-columns: repeat(5, 1fr); margin-bottom: 0; }
+  .dan-btn           { padding: 10px 4px; }
+  .dan-btn .dn       { font-size: 20px; }
   .dan-btn .dl       { font-size: 9px; }
   .dan-btn .dan-main { margin-top: 0; }
-  .d-rnd             { padding: 6px 4px; }
+  .d-rnd             { padding: 8px 4px; }
 }
 
 /* ── PWA standalone: safe-area-aware height ── */

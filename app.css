@@ -1236,15 +1236,15 @@ body {
   #screen-home .sec-lbl { display: none; }
 
   /* だんカード: 余白を詰めてボタン領域を最大化 */
-  #screen-home > .card { padding: 10px 12px; }
+  #screen-home > .card { padding: 8px 12px; flex: 1; display: flex; flex-direction: column; gap: 6px; }
 
-  /* だんボタン: 横長フラット・5列2段 */
-  .dan-grid          { gap: 6px; grid-template-columns: repeat(5, 1fr); margin-bottom: 0; }
-  .dan-btn           { padding: 10px 4px; }
+  /* だんボタン: 縦画面と同じ高さで横長・5列2段 */
+  .dan-grid          { gap: 6px; grid-template-columns: repeat(5, 1fr); flex: 1; align-content: stretch; }
+  .dan-btn           { padding: 14px 4px; }
   .dan-btn .dn       { font-size: 20px; }
   .dan-btn .dl       { font-size: 9px; }
   .dan-btn .dan-main { margin-top: 0; }
-  .d-rnd             { padding: 8px 4px; }
+  .d-rnd             { padding: 10px 4px; }
 }
 
 /* ── PWA standalone: safe-area-aware height ── */

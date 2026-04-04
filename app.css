@@ -1199,29 +1199,18 @@ body {
 /* ── Landscape (横長) ── */
 @media (orientation: landscape) {
 
-  /* ホーム画面: 左右2カラムレイアウト */
+  /* ホーム画面: 縦積み（くくるん上・だんカード下） */
   #screen-home {
-    flex-direction: row;
-    align-items: flex-start;
-    gap: 8px;
-  }
-
-  /* キャラクターコンテナ: 左カラム固定幅 */
-  #screen-home > div:first-child {
-    flex: 0 0 220px;
-  }
-
-  /* だんカード: 残り幅を占有 */
-  #screen-home > .card {
-    flex: 1;
-    min-width: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
   }
 
   /* くくるん + 吹き出しを横並びに */
   .kukurun-wrap {
     flex-direction: row;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     padding: 0 4px;
     margin-top: 0;
     margin-bottom: 0;
@@ -1243,11 +1232,16 @@ body {
     border-left: 0;
   }
 
-  /* だんボタン: コンパクト化・5列2段 */
-  .dan-btn         { padding: 8px 4px; }
-  .dan-btn .dn     { font-size: 20px; }
-  .dan-btn .dan-main { margin-top: 6px; }
-  .dan-grid        { gap: 6px; grid-template-columns: repeat(5, 1fr); }
+  /* 「どれをやる？」ラベルを非表示 */
+  #screen-home .sec-lbl { display: none; }
+
+  /* だんボタン: 横長フラット・5列2段 */
+  .dan-grid          { gap: 5px; grid-template-columns: repeat(5, 1fr); margin-bottom: 0; }
+  .dan-btn           { padding: 6px 4px; }
+  .dan-btn .dn       { font-size: 18px; }
+  .dan-btn .dl       { font-size: 9px; }
+  .dan-btn .dan-main { margin-top: 0; }
+  .d-rnd             { padding: 6px 4px; }
 }
 
 /* ── PWA standalone: safe-area-aware height ── */

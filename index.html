@@ -290,6 +290,11 @@
     <div id="oboeru-clear-title" class="result-pill"></div>
   </div>
   <div class="card" style="text-align:center;margin-top:16px;width:100%;">
+    <div id="oboeru-cert-wrap" class="cert-notice-wrap" style="display:none;">
+      <div class="cert-notice-text">おめでとう！<br>しょうじょうを　もらえたよ！<br>しょうじょうを　みてみてね！</div>
+      <button class="btn btn-cert" data-cert-id=""
+              onclick="tapSnd();showCertFromClear('screen-oboeru-clear',this.dataset.certId)">✦　しょうじょうを　みる　✦</button>
+    </div>
     <div id="oboeru-clear-msg" class="result-growth-msg"></div>
     <div style="display:flex;flex-direction:column;gap:12px;">
       <button class="btn btn-outline"
@@ -361,6 +366,11 @@
     <div id="test-result-label" class="result-pill"></div>
   </div>
   <div class="card" style="text-align:center;margin-top:14px;width:100%;">
+    <div id="test-result-cert-wrap" class="cert-notice-wrap" style="display:none;">
+      <div class="cert-notice-text">おめでとう！<br>しょうじょうを　もらえたよ！<br>しょうじょうを　みてみてね！</div>
+      <button class="btn btn-cert" data-cert-id=""
+              onclick="tapSnd();showCertFromClear('screen-test-result',this.dataset.certId)">✦　しょうじょうを　みる　✦</button>
+    </div>
     <div id="test-result-score" style="font-size:16px;color:var(--text2);margin-bottom:8px;"></div>
     <div id="test-result-growth" class="result-growth-msg"></div>
     <div style="display:flex;flex-direction:column;gap:12px;">
@@ -390,6 +400,11 @@
     <div id="clear-stage-label" class="result-pill"></div>
   </div>
   <div class="card" style="text-align:center;margin-top:14px;width:100%;">
+    <div id="clear-cert-wrap" class="cert-notice-wrap" style="display:none;">
+      <div class="cert-notice-text">おめでとう！<br>しょうじょうを　もらえたよ！<br>しょうじょうを　みてみてね！</div>
+      <button class="btn btn-cert" data-cert-id=""
+              onclick="tapSnd();showCertFromClear('screen-clear',this.dataset.certId)">✦　しょうじょうを　みる　✦</button>
+    </div>
     <div id="clear-score" style="font-size:16px;color:var(--text2);margin-bottom:8px;"></div>
     <div id="clear-growth-msg" class="result-growth-msg"></div>
     <div style="display:flex;flex-direction:column;gap:12px;">
@@ -426,7 +441,7 @@
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
       ホームに　もどる
     </button>
-    <div id="version-badge">ver.2026.0406.0006</div>
+    <div id="version-badge">ver.2026.0406.0007</div>
   </div>
   <div class="card">
     <div class="sec-lbl" style="margin-bottom:8px;">せってい</div>
@@ -516,11 +531,13 @@
 
 <!-- ══ SCREEN: CERT ══ -->
 <div class="screen" id="screen-cert">
-  <button class="back-btn" onclick="tapSnd();showScreen('screen-home')">
+  <button class="back-btn" id="cert-back-btn" onclick="tapSnd();showScreen('screen-home')">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
-    ホームに　もどる
+    <span id="cert-back-label">ホームに　もどる</span>
   </button>
-  <div id="cert-paper" class="cert-paper"></div>
+  <div class="cert-frame">
+    <div id="cert-paper" class="cert-paper"></div>
+  </div>
 </div>
 
 </div><!-- /#app -->

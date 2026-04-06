@@ -642,7 +642,7 @@ function checkCertificates() {
     const earned = ct.isKukuMaster
       ? dans.every(d => { const m = S.medals[d]; return m && m.oboeru && m.renshu && m.test === 'gold'; })
       : dans.every(d => ct.check(S.medals[d]));
-    if (earned) { S.certificates[ct.id] = dateStr; buildCertBtns(); }
+    if (earned) { S.certificates[ct.id] = dateStr; buildCertBtns(); _pendingNewCerts.push(ct.id); }
   });
 }
 function buildCertBtns() {
@@ -673,6 +673,7 @@ function buildCertBtns() {
 }
 let _certTooltipTimer = null;
 let _certTooltipAnchor = null;
+let _pendingNewCerts = [];  // このアクションで新たに解放されたしょうじょう
 function hideCertTooltip() {
   const tip = document.getElementById('cert-tooltip');
   if (tip) tip.style.opacity = '0';
@@ -697,7 +698,7 @@ function showCertTooltip(anchorEl, msg) {
   clearTimeout(_certTooltipTimer);
   _certTooltipTimer = setTimeout(() => { hideCertTooltip(); }, 2800);
 }
-function showCertificate(id) {
+function showCertificate(id, returnScreen) {
   const ct = CERT_TYPES.find(c => c.id === id);
   if (!ct) return;
   const dateStr = S.certificates[id] || '';
@@ -717,8 +718,30 @@ function showCertificate(id) {
     <div class="cert-issuer">くくるん</div>
     <div class="cert-deco bot">── ✦ ── ✦ ── ✦ ──</div>
   `;
+  const backLabel = document.getElementById('cert-back-label');
+  const backBtn = document.getElementById('cert-back-btn');
+  if (returnScreen) {
+    if (backLabel) backLabel.textContent = 'もどる';
+    if (backBtn) backBtn.onclick = () => { tapSnd(); showScreen(returnScreen); };
+  } else {
+    if (backLabel) backLabel.textContent = 'ホームに　もどる';
+    if (backBtn) backBtn.onclick = () => { tapSnd(); showScreen('screen-home'); };
+  }
   showScreen('screen-cert');
   certSparkle(ct.isKukuMaster);
+}
+function showCertFromClear(screenId, certId) {
+  showCertificate(certId, screenId);
+}
+function _applyCertNotice(wrapId) {
+  const wrap = document.getElementById(wrapId);
+  if (!wrap) return;
+  const certId = _pendingNewCerts[0] || null;
+  wrap.style.display = certId ? '' : 'none';
+  if (certId) {
+    const btn = wrap.querySelector('[data-cert-id]');
+    if (btn) btn.dataset.certId = certId;
+  }
 }
 function certSparkle(isKukuMaster) {
   const glyphs = ['⭐︎','✦','✸','✺'];
@@ -892,12 +915,14 @@ function showOboeruClear() {
   }
   const alreadyHad = getMedals(S.dan).oboeru;
   const growthBefore = getGrowthClears();
+  _pendingNewCerts = [];
   awardOboeruMedal();
   const grew = getGrowthClears() > growthBefore;
   document.getElementById('oboeru-clear-medal').innerHTML = ctIcon('oboeru');
   document.getElementById('oboeru-clear-title').textContent = 'おぼえるメダル　ゲット！';
   document.getElementById('oboeru-clear-msg').textContent = growthMsg(!alreadyHad, grew);
   showScreen('screen-oboeru-clear');
+  _applyCertNotice('oboeru-cert-wrap');
   confetti();
   speak(grew ? 'せいちょうしたよ！メダルゲット！' : alreadyHad ? 'メダルは　もう　もってるよ！' : 'やったー！メダルを　もらえたよ！');
 }
@@ -1750,6 +1775,7 @@ function doneDan() {
   const total = S.probs.length;
   const correct = S.hanamaruCount - (S._hanamaruAtStart || 0);
   const passedRenshu = correct / total >= 0.6;
+  _pendingNewCerts = [];
   const alreadyHadRenshu = getMedals(S.dan).renshu;
   if (passedRenshu) {
     getMedals(S.dan).renshu = true;
@@ -1771,6 +1797,7 @@ function doneDan() {
   document.getElementById('clear-growth-msg').textContent =
     passedRenshu ? growthMsg(!alreadyHadRenshu, grew) : '';
   showScreen('screen-clear');
+  _applyCertNotice('clear-cert-wrap');
   confetti();
   speak(grew ? 'せいちょうしたよ！やったね！' : 'やったー！ぜんもんできたよ！すごい！');
 }
@@ -1988,6 +2015,7 @@ function doneTest() {
   const cleared = pct >= 0.75;  // 75%以上でクリア
   const growthBefore = getGrowthClears();
   const preAwardMedal = getMedals(dan).test;  // 付与前のメダル状態を保存
+  _pendingNewCerts = [];
 
   if (cleared) {
     const m = getMedals(dan);
@@ -2013,6 +2041,7 @@ function doneTest() {
     cleared ? growthMsg(preAwardMedal !== 'gold', grew) : '';
 
   showScreen('screen-test-result');
+  _applyCertNotice('test-result-cert-wrap');
   if (cleared) { confetti(); speak(grew ? 'せいちょうしたよ！メダルゲット！' : 'やったー！メダルゲット！'); }
   else { speak('もう　いちど　ちゃれんじして　ね！'); }
 }

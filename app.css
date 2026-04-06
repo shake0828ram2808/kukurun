@@ -358,7 +358,7 @@ body {
     #7a5200 0%, #c49a00 20%, #ffd700 38%, #fff0a0 50%, #ffd700 62%, #c49a00 80%, #7a5200 100%
   );
   background-size: 280% 100%;
-  animation: gold-shimmer 2.8s ease-in-out infinite;
+  animation: gold-shimmer 6s ease-in-out infinite;
   box-shadow: 0 5px 0 #7a5200, 0 0 14px rgba(255,215,0,.4), var(--sh);
   border-color: rgba(255,230,60,.7);
 }

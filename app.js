@@ -1388,9 +1388,10 @@ function showGrowthScreen() {
     img.src = '';
   }
 
+  const TEST_MEDAL_WEIGHT = { bronze: 1, silver: 2, gold: 3 };
   const medalCount = Object.values(S.medals).reduce((sum, m) => {
     if (!m || typeof m !== 'object') return sum;
-    return sum + (m.oboeru ? 1 : 0) + (m.renshu ? 1 : 0) + (m.test ? 1 : 0);
+    return sum + (m.oboeru ? 1 : 0) + (m.renshu ? 1 : 0) + (TEST_MEDAL_WEIGHT[m.test] || 0);
   }, 0);
   const el = document.getElementById('growth-medal-count');
   if (el) el.textContent = medalCount;

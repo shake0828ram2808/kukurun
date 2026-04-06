@@ -570,6 +570,7 @@ function showSpeechSelect() {
 function goHomeFromEgg() {
   try { Snd.tap(); } catch(e) {}
   S.isFirstAccess = false;
+  S.renshuClears = getGrowthClears();  // 新しいたまごの成長度を正しく反映
   try { saveState(); } catch(e) {}
   try { updateCreature(); } catch(e) {}
   try { eggWobble.start(); } catch(e) {}
@@ -757,6 +758,7 @@ function checkGraduation() {
   updateCreature();
   setTimeout(() => {
     S._pendingGraduation = false;
+    S.renshuClears = 0;  // 新しいたまご用にリセット
     S.selectedEgg = null;
     saveState();
     buildEggSelectGrid();

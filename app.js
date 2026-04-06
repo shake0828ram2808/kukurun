@@ -1084,6 +1084,7 @@ function _updateOboeruSwitch() {
    RENSHU
 ════════════════════════════════ */
 let rT = null;
+let renshuAutoTimer = null;
 
 function startRenshu() {
   let probs;
@@ -1210,7 +1211,7 @@ function inputDigit(d) {
     setTimeout(() => { Snd.pingpong(); showHanamaru(); }, 180);
     showAnsEl(p);
     speakThen(kukuTts(p.reading), 0.86, () => {
-      setTimeout(() => { nextRenshu(); S.ansInput = ''; }, 1000);
+      renshuAutoTimer = setTimeout(() => { nextRenshu(); S.ansInput = ''; }, 1000);
     });
   } else if (p.answer < 10 || S.ansInput.length >= 2) {
     // ミス：一桁問題で違う、または二桁入力完了で不正解
@@ -1281,7 +1282,7 @@ function checkAns(n, btn) {
     showAnsEl(p);
     // 読み上げ終了後1秒で自動次問
     speakThen(kukuTts(p.reading), 0.86, () => {
-      setTimeout(() => nextRenshu(), 1000);
+      renshuAutoTimer = setTimeout(() => nextRenshu(), 1000);
     });
   } else {
     btn.classList.add('wrong');
@@ -1762,6 +1763,7 @@ function stopGrowthAnim() {
 }
 
 function nextRenshu() {
+  if (renshuAutoTimer) { clearTimeout(renshuAutoTimer); renshuAutoTimer = null; }
   S.idx++;
   if (S.idx >= S.probs.length) doneDan();
   else showProb();
@@ -1803,9 +1805,8 @@ function doneDan() {
 }
 
 function updateClearScreen() {
-  if (!S.selectedEgg) return;
+  const kind = S.selectedEgg || (S.adultCharacters.length > 0 ? S.adultCharacters[S.adultCharacters.length - 1] : 'green');
   const n = S.renshuClears;
-  const kind = S.selectedEgg;
   const charStage = getCharStage(n);
   const clearEgg = document.getElementById('clear-egg-img');
   const crackSvg = document.getElementById('clear-crack-svg');

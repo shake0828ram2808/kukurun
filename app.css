@@ -349,6 +349,22 @@ body {
   font-size: 18px; line-height: 1;
 }
 
+@keyframes gold-shimmer {
+  0%   { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
+.dan-btn.full-medals {
+  background: linear-gradient(105deg,
+    #7a5200 0%, #c49a00 20%, #ffd700 38%, #fff0a0 50%, #ffd700 62%, #c49a00 80%, #7a5200 100%
+  );
+  background-size: 280% 100%;
+  animation: gold-shimmer 2.8s ease-in-out infinite;
+  box-shadow: 0 5px 0 #7a5200, 0 0 14px rgba(255,215,0,.4), var(--sh);
+  border-color: rgba(255,230,60,.7);
+}
+.dan-btn.full-medals .dn { color: #2a1800; text-shadow: 0 1px 1px rgba(255,255,255,.5); }
+.dan-btn.full-medals .dl { color: rgba(42,24,0,.75); }
+
 .d1 { background: #8B8EF8; }
 .d2 { background: #7B7EEF; }
 .d3 { background: #6B6EE6; }

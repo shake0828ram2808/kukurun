@@ -610,6 +610,12 @@ function growthLevel() {
   }
   return score; // 0-30（9段+ばらばら各: oboeru1+renshu1+test1）
 }
+// クリア画面の成長メッセージ（3パターン）
+function growthMsg(isNew, grew) {
+  if (isNew && grew) return 'メダルを　もらえたから\nせいちょうしたよ！\nせいちょうした　すがたを　みてね♪';
+  if (isNew) return 'つぎの　メダルで　せいちょうするよ！';
+  return 'メダルは　もう　もってるね！';
+}
 function getGrowthClears() {
   // たまご: 1点/ステージ（0=intact, 1=crack1, 2=crack2, 3=hatch）
   // キャラ: 2点/ステージ（4-5=newborn, 6-7=baby, 8-9=child, 10-11=adult）
@@ -883,16 +889,15 @@ function showOboeruClear() {
     return;
   }
   const alreadyHad = getMedals(S.dan).oboeru;
+  const growthBefore = getGrowthClears();
   awardOboeruMedal();
-  const danLabel = S.dan === 'random' ? 'ばらばらのだん' : KD.fw(S.dan) + 'のだん';
-  const obMedalEl = document.getElementById('oboeru-clear-medal');
-  obMedalEl.innerHTML = ctIcon('oboeru');
-  document.getElementById('oboeru-clear-title').textContent = danLabel + '　おぼえたね！';
-  document.getElementById('oboeru-clear-msg').textContent =
-    alreadyHad ? 'メダルは　もう　もってるよ！' : 'メダルを　もらえたよ！';
+  const grew = getGrowthClears() > growthBefore;
+  document.getElementById('oboeru-clear-medal').innerHTML = ctIcon('oboeru');
+  document.getElementById('oboeru-clear-title').textContent = 'おぼえるメダル　ゲット！';
+  document.getElementById('oboeru-clear-msg').textContent = growthMsg(!alreadyHad, grew);
   showScreen('screen-oboeru-clear');
   confetti();
-  speak(alreadyHad ? 'メダルは　もう　もってるよ！' : 'やったー！メダルを　もらえたよ！');
+  speak(grew ? 'せいちょうしたよ！メダルゲット！' : alreadyHad ? 'メダルは　もう　もってるよ！' : 'やったー！メダルを　もらえたよ！');
 }
 function startOboeru() {
   S._oboeruClearShown = false;
@@ -1755,40 +1760,30 @@ function doneDan() {
   if (S._pendingGraduation) return;
 
   const grew = getGrowthClears() > growthBefore;
-  updateClearScreen(grew);
-  document.getElementById('clear-title').textContent = grew
-    ? 'せいちょう　したよ！'
-    : (S.dan === 'random' ? 'ばらばらのだんが　できたね！' : KD.fw(S.dan) + 'のだんが　できたね！');
-  const medalMsgEl = document.getElementById('clear-medal-msg');
-  if (medalMsgEl) {
-    medalMsgEl.textContent = passedRenshu
-      ? (alreadyHadRenshu ? 'メダルは　もう　もってるよ！' : 'メダルを　もらえたよ！')
-      : '';
-  }
+  updateClearScreen();
+  document.getElementById('clear-stage-label').textContent =
+    passedRenshu ? 'れんしゅうメダル　ゲット！' : 'もういちど　やってみよう！';
+  document.getElementById('clear-score').textContent =
+    KD.fw(total) + 'もん中　' + KD.fw(correct) + 'もん　せいかい！';
+  document.getElementById('clear-growth-msg').textContent =
+    passedRenshu ? growthMsg(!alreadyHadRenshu, grew) : '';
   showScreen('screen-clear');
   confetti();
   speak(grew ? 'せいちょうしたよ！やったね！' : 'やったー！ぜんもんできたよ！すごい！');
 }
 
-function updateClearScreen(grew = false) {
+function updateClearScreen() {
   if (!S.selectedEgg) return;
   const n = S.renshuClears;
   const kind = S.selectedEgg;
   const charStage = getCharStage(n);
   const clearEgg = document.getElementById('clear-egg-img');
-  const clearLabel = document.getElementById('clear-stage-label');
   const crackSvg = document.getElementById('clear-crack-svg');
   if (crackSvg) crackSvg.style.display = 'none';
-
   if (charStage) {
     if (clearEgg) { clearEgg.src = getCharSprite(kind, charStageIdx(n)); clearEgg.style.height = '90px'; }
   } else {
     if (clearEgg) { clearEgg.src = getEggSprite(kind, n); clearEgg.style.height = '90px'; }
-  }
-  if (clearLabel) {
-    clearLabel.textContent = grew
-      ? (charStage ? 'せいちょう　したよ！🎉' : 'たまごが　かわったよ！🎉')
-      : 'つぎのメダルで　せいちょうするよ';
   }
 }
 
@@ -2008,25 +2003,11 @@ function doneTest() {
   const medal = getMedals(dan).test;
   document.getElementById('test-result-medal').innerHTML = cleared ? (medal ? ctIcon(medal) : '⭐') : '😢';
   document.getElementById('test-result-label').textContent =
-    cleared ? (medal ? MEDAL_NAMES[medal] + (preAwardMedal === 'gold' ? 'メダル' : 'メダル　ゲット！') : 'クリア！') : 'もう　いちど！';
-  const titleText = dan === 'random'
-    ? (cleared ? 'ばらばらのだん　クリア！' : 'ばらばらのだん　もう　すこし！')
-    : (cleared ? KD.fw(dan) + 'のだん　クリア！' : KD.fw(dan) + 'のだん　もう　すこし！');
-  document.getElementById('test-result-title').textContent = titleText;
+    cleared ? (medal ? MEDAL_NAMES[medal] + 'メダル　ゲット！' : 'クリア！') : 'もういちど　やってみよう！';
   document.getElementById('test-result-score').textContent =
     KD.fw(total) + 'もん中　' + KD.fw(correct) + 'もん　せいかい！';
-  const growthEl = document.getElementById('test-result-growth');
-  if (growthEl) {
-    growthEl.textContent = cleared
-      ? (grew ? 'せいちょう　したよ！🎉' : 'つぎのメダルで　せいちょうするよ')
-      : '';
-  }
-  const testMedalMsgEl = document.getElementById('test-medal-msg');
-  if (testMedalMsgEl) {
-    testMedalMsgEl.textContent = cleared
-      ? (preAwardMedal === 'gold' ? 'メダルは　もう　もってるよ！' : 'メダルを　もらえたよ！')
-      : '';
-  }
+  document.getElementById('test-result-growth').textContent =
+    cleared ? growthMsg(preAwardMedal !== 'gold', grew) : '';
 
   showScreen('screen-test-result');
   if (cleared) { confetti(); speak(grew ? 'せいちょうしたよ！メダルゲット！' : 'やったー！メダルゲット！'); }

@@ -432,6 +432,16 @@ body {
 }
 .btn-primary:hover { background: var(--theme-dk); border-color: var(--theme-dk); }
 
+.result-pill {
+  background: var(--theme); color: #fff;
+  border-radius: var(--r-pill); padding: 4px 18px; font-size: 13px;
+  display: inline-block;
+}
+.result-growth-msg {
+  font-size: 15px; color: var(--theme); font-weight: bold;
+  white-space: pre-line; line-height: 1.7; margin-bottom: 16px; min-height: 1em;
+}
+
 .btn-outline {
   background: var(--surface); color: var(--theme);
   border-color: var(--border); box-shadow: 0 4px 0 var(--border), var(--sh);

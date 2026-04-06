@@ -953,7 +953,10 @@ function hlRow(i, p) {
     ? Array.from(document.querySelectorAll('.kuku-check')).filter(el => el.textContent === '✓').length
     : 0;
   if (total > 0 && checked === total) {
-    setTimeout(() => showOboeruClear(), (S._oboeruMode || 'auto') === 'auto' ? 800 : 300);
+    // 最後の問題を読み上げてからクリア画面へ
+    speakThen(kukuTts(p.reading), 0.86, () => {
+      setTimeout(() => showOboeruClear(), (S._oboeruMode || 'auto') === 'auto' ? 800 : 300);
+    });
     return;
   }
   // autoモードのみ自動進行; manualモードは読み上げのみ

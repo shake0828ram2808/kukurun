@@ -2255,6 +2255,7 @@ Promise.all([
     Object.assign(SCREEN_MESSAGES, msg.screenMessages);
   }
   buildKanaGrid();
+  playIntroAnimation();
   restoreSession();
 }).catch(err => {
   console.warn('JSON load failed, using fallback:', err);
@@ -2277,12 +2278,13 @@ Promise.all([
     {text:'天才だよ！',     sequence:['E','I','A','I','O']},
   ];
   buildKanaGrid();
+  playIntroAnimation();
 });
 
 loadState();
 initDinos();
 initKukurun();
-// restoreSession() は Promise.all 内（JSON読み込み完了後）に移動
+// playIntroAnimation() / restoreSession() は Promise.all 内（JSON読み込み完了後）に移動
 
 // ══ ボトムバー safe-area 補正 ══
 // env(safe-area-inset-bottom) が 0 を返す環境でも
@@ -2348,8 +2350,6 @@ initKukurun();
     alert(msg);
   });
 })();
-
-playIntroAnimation();
 
 // iOS: 初回タッチでAudioContextをアンロック（サイレント再生）
 document.addEventListener('touchstart', () => Snd.unlock(), { once: true, passive: true });

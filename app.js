@@ -965,6 +965,12 @@ function startOboeru() {
       if ((S._oboeruMode || 'auto') === 'manual') {
         toggleSelectRow(i, p);
       } else {
+        // autoモード中に別の問題をタップ→manualに切り替えて読み上げ停止
+        if (window.speechSynthesis) speechSynthesis.cancel();
+        S._oboeruMode = 'manual';
+        S._oboeruSelected = [];
+        _updateOboeruSwitch();
+        _updateOboeruReadSelectedBtn();
         hlRow(i, p);
       }
     };

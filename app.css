@@ -811,6 +811,7 @@ body {
   background: none; border: 3px solid var(--border);
   border-radius: var(--r); padding: 8px;
   cursor: pointer;
+  width: 80px; /* 画像ロード前にレイアウトを確定させる */
   transition: border-color .14s, transform .12s cubic-bezier(.34,1.56,.64,1);
   position: relative;
   touch-action: manipulation;

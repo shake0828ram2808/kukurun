@@ -373,6 +373,7 @@ function showScreen(id) {
   if (cur && cur.id !== id) _prevScreenId = cur.id;
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
+  document.getElementById('app').classList.toggle('home-active', id === 'screen-home');
   const bb = document.getElementById('bottom-bar');
   const noChrome = ['screen-name', 'screen-suffix', 'screen-egg-select', 'screen-speech-select'].includes(id);
   if (bb) bb.style.display = noChrome ? 'none' : 'flex';

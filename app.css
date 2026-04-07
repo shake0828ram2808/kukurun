@@ -1246,7 +1246,7 @@ body {
 
 /* ── Tablet/Desktop 縦画面: ホーム画面を縦中央に ── */
 @media (min-width: 768px) and (orientation: portrait) {
-  #screen-home { flex: 1; justify-content: center; }
+  #app.home-active { justify-content: center; }
 }
 
 /* ── Landscape (横長) ── */

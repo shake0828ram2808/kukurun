@@ -268,7 +268,6 @@ function setKukurunSmile(isSmiling) { _setSmile('home', isSmiling); }
 ════════════════════════════════ */
 const SCREEN_MESSAGES = {
   name: [
-    'こんにちは　ぼくは　くくるん！',
     'きみの　なまえを　おしえて！',
   ],
   suffix: [

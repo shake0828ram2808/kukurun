@@ -334,6 +334,7 @@ function restoreSession() {
   // イントロ表示中もバックグラウンドでホーム状態を準備
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-home').classList.add('active');
+  document.getElementById('app').classList.add('home-active');
   const greetingText = '　' + fullName() + '、おかえり♪';
   const balloonText = document.getElementById('balloon-text');
   if (balloonText) balloonText.textContent = greetingText;

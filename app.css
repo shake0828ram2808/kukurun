@@ -1285,7 +1285,10 @@ body {
 
   /* だんカード: 余白を詰めてボタン領域を最大化 */
   #screen-home > .card { padding: 8px 12px; flex: 1; display: flex; flex-direction: column; gap: 6px; }
+}
 
+/* ── Landscape + 低い画面（スマホ横）のみ: だんボタン 5列2段 ── */
+@media (orientation: landscape) and (max-height: 500px) {
   /* だんボタン: 縦画面と同じ高さで横長・5列2段 */
   .dan-grid          { gap: 6px; grid-template-columns: repeat(5, 1fr); flex: 1; align-content: stretch; }
   .dan-btn           { padding: 14px 4px; }

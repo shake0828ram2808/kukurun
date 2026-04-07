@@ -386,6 +386,7 @@ async function kukurunNameIntro() {
   playKukurunTapAnim(svg);
   // タップで次のメッセージへ（タイマーもリセット）
   _nextBalloonMsg('name');
+  _resetBalloonTimer('name');
   for (let m of ['O', 'I', 'A', 'I', 'U', 'O']) { setKukurunMouthSmall(m); await new Promise(r => setTimeout(r, 120)); }
   setKukurunSmileSmall(true);
   setKukurunMouthSmall('munyu');
@@ -436,9 +437,14 @@ function closeIntroModal(e) {
     document.body.style.background = '';
     const bb = document.getElementById('bottom-bar');
     if (bb) bb.style.zIndex = '';
-    // 名前登録済みならホーム、未登録なら音声選択→名前入力へ
+    // 名前登録済みならホーム（たまご選択済み）、未選択なら卵選択、未登録なら音声選択→名前入力へ
     if (typeof S !== 'undefined' && S.name) {
-      showScreen('screen-home');
+      if (!S.selectedEgg) {
+        if (typeof buildEggSelectGrid === 'function') buildEggSelectGrid();
+        showScreen('screen-egg-select');
+      } else {
+        showScreen('screen-home');
+      }
     } else {
       showScreen('screen-speech-select');
     }

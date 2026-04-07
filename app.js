@@ -838,7 +838,7 @@ function buildDanGrid() {
     b.innerHTML = `${badge}<div class="dan-main"><span class="dn">${KD.fw(d)}</span><span class="dl">のだん</span></div>`;
     b.classList.toggle('has-medals', !!badge);
     const m = getMedals(d);
-    b.classList.toggle('full-medals', !!(m.oboeru && m.renshu && m.test === 'gold'));
+    b.classList.toggle('full-medals', getMedals(d).test === 'gold');
     b.id = `dan-btn-${d}`;
     b.onclick = () => { Snd.tap(); selDan(d); };
     g.appendChild(b);
@@ -862,7 +862,7 @@ function refreshDanBadge(dan) {
   }
   b.classList.toggle('has-medals', !!badgeHtml);
   const m2 = getMedals(dan);
-  b.classList.toggle('full-medals', !!(m2.oboeru && m2.renshu && m2.test === 'gold'));
+  b.classList.toggle('full-medals', getMedals(dan).test === 'gold');
 }
 function selDan(dan) {
   S.dan = dan;

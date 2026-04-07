@@ -812,6 +812,7 @@ body {
   border-radius: var(--r); padding: 8px;
   cursor: pointer;
   width: 80px; /* 画像ロード前にレイアウトを確定させる */
+  display: flex; align-items: center; justify-content: center;
   transition: border-color .14s, transform .12s cubic-bezier(.34,1.56,.64,1);
   position: relative;
   touch-action: manipulation;
@@ -1246,16 +1247,6 @@ body {
   #screen-growth,
   #screen-settings { height: calc(100dvh - 116px); }
   #screen-cert      { height: calc(100dvh - 116px); }
-}
-
-/* ── たまご選択画面を縦中央に（全サイズ共通） ── */
-#app.egg-select-active #screen-egg-select {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: calc(100% - 32px);
-  animation: fadeUpCentered .28s cubic-bezier(.22,1,.36,1);
 }
 
 /* ── Tablet/Desktop: ホーム画面を縦中央に（スマホ横画面=高さ500px以下は除外） ── */

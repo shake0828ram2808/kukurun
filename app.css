@@ -805,6 +805,7 @@ body {
 .egg-select-grid {
   display: flex; gap: 16px; justify-content: center;
   flex-wrap: wrap; margin-bottom: 8px;
+  padding-top: 12px; /* チェックマーク(top:-8px)のはみ出し分を確保 */
 }
 .egg-sel-btn {
   background: none; border: 3px solid var(--border);
@@ -818,13 +819,15 @@ body {
 .egg-sel-btn:hover  { border-color: var(--theme); }
 .egg-sel-btn:active { transform: scale(.93); }
 .egg-sel-btn.selected { border-color: var(--theme); background: var(--theme-lt); }
-.egg-sel-btn.selected::after {
+.egg-sel-btn::after {
   content: '✓'; position: absolute; top: -8px; right: -8px;
   background: var(--theme); color: #fff;
   border-radius: 50%; width: 22px; height: 22px;
   font-size: 13px; display: flex; align-items: center; justify-content: center;
   line-height: 22px;
+  opacity: 0;
 }
+.egg-sel-btn.selected::after { opacity: 1; }
 
 /* ══════════════════
    EGG + CRACK OVERLAY

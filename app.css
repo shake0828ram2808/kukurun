@@ -1245,6 +1245,10 @@ body {
 }
 
 /* ── Tablet/Desktop: ホーム画面を縦中央に（スマホ横画面=高さ500px以下は除外） ── */
+@keyframes fadeUpCentered {
+  from { opacity:0; transform: translate(-50%, calc(-50% + 16px)) scale(.98); }
+  to   { opacity:1; transform: translate(-50%, -50%); }
+}
 @media (min-width: 768px) and (min-height: 600px) {
   #app.home-active #screen-home {
     position: absolute;
@@ -1253,6 +1257,7 @@ body {
     transform: translate(-50%, -50%);
     width: calc(100% - 80px);
     gap: 28px;
+    animation: fadeUpCentered .28s cubic-bezier(.22,1,.36,1);
   }
 }
 

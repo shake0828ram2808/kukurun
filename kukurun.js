@@ -263,29 +263,10 @@ function setKukurunMouth(state)     { _setMouth('home', state); }
 function setKukurunSmile(isSmiling) { _setSmile('home', isSmiling); }
 
 /* ════════════════════════════════
-   各画面のメッセージ定義
-   5秒おき＆タップで順番に切り替わる
+   各画面のメッセージ定義（最低限のフォールバック）
+   実データは messages.json で上書きされる
 ════════════════════════════════ */
-const SCREEN_MESSAGES = {
-  name: [
-    'きみの　なまえを　おしえて！',
-  ],
-  suffix: [
-    'よびかたを　おしえて！',
-    'いっしょに　がんばろうね！',
-  ],
-  egg: [
-    'どれを　そだてたい？',
-    'くくを　おぼえて　そだてよう！',
-  ],
-  home: [
-    'どれを　やる？　{name}',
-    '{name}　きてくれて　ありがとう！',
-    'いっしょに　おぼえようね',
-    'メダルゲットで　たまごが　そだつよ',
-    'あつめたメダルの　しょうじょうを　もらおう',
-  ],
-};
+const SCREEN_MESSAGES = { name: [], suffix: [], egg: [], home: [] };
 
 // 各画面の現在インデックス
 const _msgIdx = { name: 0, suffix: 0, egg: 0, home: 0 };

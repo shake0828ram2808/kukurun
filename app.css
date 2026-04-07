@@ -1205,8 +1205,6 @@ body {
   .dan-btn       { padding: 22px 4px; }
   .dan-grid      { gap: 14px; }
 
-  #screen-home .kukurun-wrap { margin-bottom: 24px; }
-
   .sel-main      { font-size: 19px; }
   .sel-sub       { font-size: 14px; }
   .sel-row       { padding: 18px 20px; }
@@ -1244,6 +1242,11 @@ body {
   #screen-growth,
   #screen-settings { height: calc(100dvh - 116px); }
   #screen-cert      { height: calc(100dvh - 116px); }
+}
+
+/* ── Tablet/Desktop 縦画面: ホーム画面を縦中央に ── */
+@media (min-width: 768px) and (orientation: portrait) {
+  #screen-home { margin-top: auto; margin-bottom: auto; }
 }
 
 /* ── Landscape (横長) ── */

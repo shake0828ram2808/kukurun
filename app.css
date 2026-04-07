@@ -1244,9 +1244,15 @@ body {
   #screen-cert      { height: calc(100dvh - 116px); }
 }
 
-/* ── Tablet/Desktop 縦画面: ホーム画面を縦中央に ── */
-@media (min-width: 768px) and (orientation: portrait) {
-  #app.home-active { justify-content: center; }
+/* ── Tablet/Desktop: ホーム画面を縦中央に（スマホ横画面=高さ500px以下は除外） ── */
+@media (min-width: 768px) and (min-height: 600px) {
+  #app.home-active #screen-home {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: calc(100% - 80px);
+  }
 }
 
 /* ── Landscape (横長) ── */

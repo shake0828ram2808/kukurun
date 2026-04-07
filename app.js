@@ -2253,6 +2253,13 @@ Promise.all([
   // 吹き出しメッセージをJSONで上書き
   if (typeof SCREEN_MESSAGES !== 'undefined') {
     Object.assign(SCREEN_MESSAGES, msg.screenMessages);
+    // JSON上書き後、現在アクティブな画面のタイマーを再起動して正しいメッセージを反映
+    const active = document.querySelector('.screen.active');
+    if (active && typeof startBalloonTimer === 'function') {
+      const screenMap = { 'screen-name': 'name', 'screen-suffix': 'suffix', 'screen-egg-select': 'egg', 'screen-home': 'home' };
+      const screenKey = screenMap[active.id];
+      if (screenKey) startBalloonTimer(screenKey);
+    }
   }
   buildKanaGrid();
 }).catch(err => {

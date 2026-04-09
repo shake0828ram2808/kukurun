@@ -6,8 +6,10 @@ workflows:
       groups:
         - app_store_connect
       ios_signing:
-        distribution_type: app_store
-        bundle_identifier: com.shakeram389.kukurun
+        provisioning_profiles:
+          - kukurun_app_store
+        certificates:
+          - kukurun_distribution
       vars:
         XCODE_WORKSPACE: ios/App/App.xcworkspace
         XCODE_SCHEME: App
@@ -32,10 +34,37 @@ workflows:
         script: xcodebuild -workspace "$XCODE_WORKSPACE" -list
       - name: Build iOS IPA
         script: |
-          xcode-project build-ipa \
-            --workspace "$XCODE_WORKSPACE" \
-            --scheme "$XCODE_SCHEME" \
-            --xcodebuild-args "-sdk iphoneos ONLY_ACTIVE_ARCH=NO"
+          echo "$APP_STORE_CONNECT_PRIVATE_KEY" > /tmp/AuthKey.p8
+          xcodebuild \
+            -workspace "$XCODE_WORKSPACE" \
+            -scheme "$XCODE_SCHEME" \
+            -configuration Release \
+            -sdk iphoneos \
+            -archivePath build/ios/App.xcarchive \
+            archive \
+            DEVELOPMENT_TEAM=B6KV2PAQ6D \
+            CODE_SIGN_STYLE=Automatic \
+            ONLY_ACTIVE_ARCH=NO \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath /tmp/AuthKey.p8 \
+            -authenticationKeyID "$APP_STORE_CONNECT_KEY_IDENTIFIER" \
+            -authenticationKeyIssuerID "$APP_STORE_CONNECT_ISSUER_ID" 2>&1
+          xcodebuild \
+            -exportArchive \
+            -archivePath build/ios/App.xcarchive \
+            -exportPath build/ios/ipa \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath /tmp/AuthKey.p8 \
+            -authenticationKeyID "$APP_STORE_CONNECT_KEY_IDENTIFIER" \
+            -authenticationKeyIssuerID "$APP_STORE_CONNECT_ISSUER_ID" \
+            -exportOptionsPlist /dev/stdin <<'PLIST'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0"><dict>
+            <key>method</key><string>app-store</string>
+            <key>teamID</key><string>B6KV2PAQ6D</string>
+          </dict></plist>
+          PLIST
     artifacts:
       - build/ios/ipa/*.ipa
       - build/ios/App.xcarchive

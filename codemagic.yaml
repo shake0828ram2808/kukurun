@@ -6,8 +6,10 @@ workflows:
       groups:
         - app_store_connect
       ios_signing:
-        distribution_type: app_store
-        bundle_identifier: com.shakeram389.kukurun
+        provisioning_profiles:
+          - kukurun_app_store
+        certificates:
+          - kukurun_distribution
       vars:
         XCODE_WORKSPACE: ios/App/App.xcworkspace
         XCODE_SCHEME: App

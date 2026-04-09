@@ -45,8 +45,7 @@ workflows:
             DEVELOPMENT_TEAM=B6KV2PAQ6D \
             CODE_SIGN_IDENTITY="iPhone Distribution" \
             PROVISIONING_PROFILE_SPECIFIER="kukurun_app_store" \
-            ONLY_ACTIVE_ARCH=NO \
-            | xcpretty --color && exit ${PIPESTATUS[0]}
+            ONLY_ACTIVE_ARCH=NO 2>&1
           xcodebuild \
             -exportArchive \
             -archivePath build/ios/App.xcarchive \

@@ -5,11 +5,6 @@ workflows:
     environment:
       groups:
         - app_store_connect
-      ios_signing:
-        provisioning_profiles:
-          - kukurun_app_store
-        certificates:
-          - kukurun_distribution
       vars:
         XCODE_WORKSPACE: ios/App/App.xcworkspace
         XCODE_SCHEME: App
@@ -28,8 +23,6 @@ workflows:
           fi
       - name: Capacitor sync
         script: npx cap sync ios
-      - name: Set up code signing
-        script: xcode-project use-profiles
       - name: List Xcode schemes
         script: xcodebuild -workspace "$XCODE_WORKSPACE" -list
       - name: Build iOS IPA

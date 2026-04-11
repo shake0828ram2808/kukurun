@@ -4,3 +4,9 @@
 !.dev.vars.example
 .env*
 !.env.example
+
+# Node.js
+node_modules/
+
+# Capacitor web assets (自動生成)
+www/

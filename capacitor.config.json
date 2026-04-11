@@ -1,0 +1,8 @@
+{
+  "appId": "com.shakeram389.kukurun",
+  "appName": "くくるん",
+  "webDir": "www",
+  "ios": {
+    "contentInset": "always"
+  }
+}

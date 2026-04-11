@@ -349,6 +349,22 @@ body {
   font-size: 18px; line-height: 1;
 }
 
+@keyframes gold-shimmer {
+  0%   { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
+.dan-btn.full-medals {
+  background: linear-gradient(105deg,
+    #7a5200 0%, #c49a00 20%, #ffd700 38%, #fff0a0 50%, #ffd700 62%, #c49a00 80%, #7a5200 100%
+  );
+  background-size: 280% 100%;
+  animation: gold-shimmer 6s ease-in-out infinite;
+  box-shadow: 0 5px 0 #7a5200, 0 0 14px rgba(255,215,0,.4), var(--sh);
+  border-color: rgba(255,230,60,.7);
+}
+.dan-btn.full-medals .dn { color: #2a1800; text-shadow: 0 1px 1px rgba(255,255,255,.5); }
+.dan-btn.full-medals .dl { color: rgba(42,24,0,.75); }
+
 .d1 { background: #8B8EF8; }
 .d2 { background: #7B7EEF; }
 .d3 { background: #6B6EE6; }
@@ -415,6 +431,29 @@ body {
   box-shadow: 0 4px 0 var(--theme-dk), 0 2px 10px rgba(92,95,232,.28);
 }
 .btn-primary:hover { background: var(--theme-dk); border-color: var(--theme-dk); }
+
+.cert-notice-wrap { margin-bottom: 12px; }
+.cert-notice-text {
+  font-size: 15px; color: #c49a00; font-weight: bold;
+  line-height: 1.8; margin-bottom: 10px;
+}
+.btn-cert {
+  background: linear-gradient(105deg, #7a5200 0%, #c49a00 20%, #ffd700 38%, #fff0a0 50%, #ffd700 62%, #c49a00 80%, #7a5200 100%);
+  background-size: 280% 100%;
+  animation: gold-shimmer 6s ease-in-out infinite;
+  color: #2a1800; border-color: #c49a00; font-weight: bold;
+}
+.btn-cert:hover { transform: translateY(-2px) scale(1.03); }
+
+.result-pill {
+  background: var(--theme); color: #fff;
+  border-radius: var(--r-pill); padding: 4px 18px; font-size: 13px;
+  display: inline-block;
+}
+.result-growth-msg {
+  font-size: 15px; color: var(--theme); font-weight: bold;
+  white-space: pre-line; line-height: 1.7; margin-bottom: 16px; min-height: 1em;
+}
 
 .btn-outline {
   background: var(--surface); color: var(--theme);
@@ -766,11 +805,14 @@ body {
 .egg-select-grid {
   display: flex; gap: 16px; justify-content: center;
   flex-wrap: wrap; margin-bottom: 8px;
+  padding-top: 12px; /* チェックマーク(top:-8px)のはみ出し分を確保 */
 }
 .egg-sel-btn {
   background: none; border: 3px solid var(--border);
   border-radius: var(--r); padding: 8px;
   cursor: pointer;
+  width: 80px; /* 画像ロード前にレイアウトを確定させる */
+  display: flex; align-items: center; justify-content: center;
   transition: border-color .14s, transform .12s cubic-bezier(.34,1.56,.64,1);
   position: relative;
   touch-action: manipulation;
@@ -779,13 +821,15 @@ body {
 .egg-sel-btn:hover  { border-color: var(--theme); }
 .egg-sel-btn:active { transform: scale(.93); }
 .egg-sel-btn.selected { border-color: var(--theme); background: var(--theme-lt); }
-.egg-sel-btn.selected::after {
+.egg-sel-btn::after {
   content: '✓'; position: absolute; top: -8px; right: -8px;
   background: var(--theme); color: #fff;
   border-radius: 50%; width: 22px; height: 22px;
   font-size: 13px; display: flex; align-items: center; justify-content: center;
   line-height: 22px;
+  opacity: 0;
 }
+.egg-sel-btn.selected::after { opacity: 1; }
 
 /* ══════════════════
    EGG + CRACK OVERLAY
@@ -1017,16 +1061,25 @@ body {
 }
 .cert-icon-btn { font-size: 22px; padding: 6px 2px; line-height: 1; }
 #cert-tooltip { transition: opacity .5s; }
+.cert-frame {
+  flex: 1; min-height: 0;
+  margin: 0 4px 4px;
+  padding: 5px;
+  border-radius: 8px;
+  background: linear-gradient(105deg, #7a5200 0%, #c49a00 20%, #ffd700 38%, #fff0a0 50%, #ffd700 62%, #c49a00 80%, #7a5200 100%);
+  background-size: 280% 100%;
+  animation: gold-shimmer 6s ease-in-out infinite;
+  box-shadow: 0 8px 24px rgba(0,0,0,.2);
+  overflow: hidden;
+  display: flex; flex-direction: column;
+}
 .cert-paper {
   flex: 1;
   overflow-y: auto;
   background: #fffef5;
-  border: 5px solid #C9A227;
-  box-shadow:
-    0 0 0 2px #fef9d0,
-    0 0 0 4px #C9A227,
-    0 8px 24px rgba(0,0,0,.2);
-  border-radius: 4px;
+  border: none;
+  box-shadow: none;
+  border-radius: 3px;
   padding: 24px 20px 20px;
   position: relative;
   font-family: 'Shippori Mincho', 'Noto Serif JP', 'Yu Mincho', serif;
@@ -1126,6 +1179,18 @@ body {
 
   #bottom-bar    { gap: 32px; }
   .bottom-btn    { padding: 6px 28px; }
+
+  /* しょうじょうボタン: 右縦並び（ボトムバーと重ならないよう） */
+  #cert-btn-row {
+    flex-direction: column;
+    left: auto;
+    right: 8px;
+    bottom: auto;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 64px;
+    padding: 6px 4px;
+  }
 }
 
 /* ── Desktop: 1024px+ ── */
@@ -1182,6 +1247,77 @@ body {
   #screen-growth,
   #screen-settings { height: calc(100dvh - 116px); }
   #screen-cert      { height: calc(100dvh - 116px); }
+}
+
+/* ── Tablet/Desktop: ホーム画面を縦中央に（スマホ横画面=高さ500px以下は除外） ── */
+@keyframes fadeUpCentered {
+  from { opacity:0; transform: translate(-50%, calc(-50% + 16px)) scale(.98); }
+  to   { opacity:1; transform: translate(-50%, -50%); }
+}
+@media (min-width: 768px) and (min-height: 600px) {
+  #app.home-active #screen-home {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: calc(100% - 80px);
+    gap: 28px;
+    animation: fadeUpCentered .28s cubic-bezier(.22,1,.36,1);
+  }
+}
+
+/* ── Landscape (横長) ── */
+@media (orientation: landscape) {
+
+  /* ホーム画面: 縦積み（くくるん上・だんカード下） */
+  #screen-home {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+  }
+
+  /* くくるん + 吹き出しを横並びに */
+  .kukurun-wrap {
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    padding: 0 4px;
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+
+  /* SVGを左・吹き出しを右 */
+  .kukurun-svg-wrap { order: 1; }
+  .kukurun-balloon  { order: 2; align-self: center; }
+
+  /* 吹き出しの尻尾: 下向き → 左向き */
+  .balloon-tail {
+    left: 0;
+    top: 50%;
+    right: auto;
+    transform: translate(-100%, -50%);
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+    border-right: 10px solid white;
+    border-left: 0;
+  }
+
+  /* 「どれをやる？」ラベルを非表示 */
+  #screen-home .sec-lbl { display: none; }
+
+  /* だんカード: 余白を詰めてボタン領域を最大化 */
+  #screen-home > .card { padding: 8px 12px; flex: 1; display: flex; flex-direction: column; gap: 6px; }
+}
+
+/* ── Landscape + 低い画面（スマホ横）のみ: だんボタン 5列2段 ── */
+@media (orientation: landscape) and (max-height: 500px) {
+  /* だんボタン: 縦画面と同じ高さで横長・5列2段 */
+  .dan-grid          { gap: 6px; grid-template-columns: repeat(5, 1fr); flex: 1; align-content: stretch; }
+  .dan-btn           { padding: 14px 4px; }
+  .dan-btn .dn       { font-size: 20px; }
+  .dan-btn .dl       { font-size: 9px; }
+  .dan-btn .dan-main { margin-top: 0; }
+  .d-rnd             { padding: 10px 4px; }
 }
 
 /* ── PWA standalone: safe-area-aware height ── */

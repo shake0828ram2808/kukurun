@@ -1,0 +1,19 @@
+{
+  "name": "kukurun",
+  "version": "1.0.0",
+  "description": "くくるん — 九九学習アプリ",
+  "private": true,
+  "scripts": {
+    "sync-www": "node sync-www.js",
+    "cap:sync": "node sync-www.js && npx cap sync",
+    "cap:open": "npx cap open ios",
+    "cap:build": "node sync-www.js && npx cap build ios"
+  },
+  "dependencies": {
+    "@capacitor/core": "^7.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.0.0",
+    "@capacitor/ios": "^7.0.0"
+  }
+}

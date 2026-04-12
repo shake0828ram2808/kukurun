@@ -1,0 +1,60 @@
+workflows:
+  ios-workflow:
+    name: iOS Build (App Store)
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+
+    environment:
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.shakeram.kukurun
+      node: v18
+      xcode: latest
+      cocoapods: default
+      vars:
+        BUNDLE_ID: com.shakeram.kukurun
+        XCODE_WORKSPACE: ios/App/App.xcworkspace
+        XCODE_SCHEME: App
+
+    cache:
+      cache_paths:
+        - $CM_BUILD_DIR/node_modules
+        - $HOME/.pub-cache
+        - ios/App/Pods
+
+    scripts:
+      - name: Node.js 依存関係のインストール
+        script: npm install
+
+      - name: Web アセットを www/ にコピー
+        script: node sync-www.js
+
+      - name: Capacitor sync (iOS)
+        script: npx cap sync ios
+
+      - name: CocoaPods インストール
+        script: |
+          cd ios/App
+          pod install
+
+      - name: コード署名プロファイルを適用
+        script: xcode-project use-profiles
+
+      - name: Xcode アーカイブ & IPA エクスポート
+        script: |
+          xcode-project build-ipa \
+            --workspace "$XCODE_WORKSPACE" \
+            --config-name Release
+
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.dSYM
+
+    publishing:
+      email:
+        recipients:
+          - $CM_SUBMITTER_EMAIL
+        notify:
+          success: true
+          failure: true

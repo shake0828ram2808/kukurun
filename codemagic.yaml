@@ -9,7 +9,7 @@ workflows:
         distribution_type: app_store
         bundle_identifier: com.shakeram.kukurun
       integrations:
-        app_store_connect: Apple API Key   # Codemagic に登録したAPIキーの名前
+        app_store_connect: Codemagic
       node: v18
       xcode: latest
       cocoapods: default

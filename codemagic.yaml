@@ -10,12 +10,12 @@ workflows:
     environment:
       ios_signing:
         distribution_type: app_store
-        bundle_identifier: com.shakeram.kukurun
+        bundle_identifier: com.shakeram389.kukurun
       node: v18
       xcode: latest
       cocoapods: default
       vars:
-        BUNDLE_ID: com.shakeram.kukurun
+        BUNDLE_ID: com.shakeram389.kukurun
         XCODE_WORKSPACE: ios/App/App.xcworkspace
         XCODE_SCHEME: App
 

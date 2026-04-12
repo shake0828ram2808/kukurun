@@ -8,9 +8,6 @@ workflows:
       app_store_connect: Codemagic
 
     environment:
-      ios_signing:
-        distribution_type: app_store
-        bundle_identifier: com.shakeram389.kukurun
       node: v18
       xcode: latest
       cocoapods: default

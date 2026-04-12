@@ -40,8 +40,16 @@ workflows:
           cd ios/App
           pod install
 
-      - name: コード署名プロファイルを適用
-        script: xcode-project use-profiles
+      - name: コード署名ファイルを Apple から自動取得
+        script: |
+          app-store-connect fetch-signing-files \
+            --bundle-id-identifier "$BUNDLE_ID" \
+            --type IOS_APP_STORE \
+            --certificate-types DISTRIBUTION \
+            --create
+          keychain initialize
+          keychain add-certificates
+          xcode-project use-profiles
 
       - name: Xcode アーカイブ & IPA エクスポート
         script: |

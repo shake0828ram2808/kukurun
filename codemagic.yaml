@@ -37,25 +37,38 @@ workflows:
           cd ios/App
           pod install
 
-      - name: コード署名ファイルを Apple から自動取得
-        script: |
-          app-store-connect fetch-signing-files \
-            --bundle-id-identifier "$BUNDLE_ID" \
-            --type IOS_APP_STORE \
-            --certificate-types DISTRIBUTION \
-            --create
-          keychain initialize
-          keychain add-certificates
-          xcode-project use-profiles
-
       - name: Xcode アーカイブ & IPA エクスポート
         script: |
-          xcode-project build-ipa \
-            --workspace "$XCODE_WORKSPACE" \
-            --scheme "$XCODE_SCHEME"
+          # ASC API キーをファイルに書き出す
+          mkdir -p ~/.private_keys
+          echo "$APP_STORE_CONNECT_PRIVATE_KEY" > ~/.private_keys/AuthKey_${APP_STORE_CONNECT_KEY_IDENTIFIER}.p8
+
+          # アーカイブ
+          xcodebuild archive \
+            -workspace "$XCODE_WORKSPACE" \
+            -scheme "$XCODE_SCHEME" \
+            -configuration Release \
+            -archivePath "$CM_BUILD_DIR/App.xcarchive" \
+            -allowProvisioningUpdates \
+            -authenticationKeyID "$APP_STORE_CONNECT_KEY_IDENTIFIER" \
+            -authenticationKeyIssuerID "$APP_STORE_CONNECT_ISSUER_ID" \
+            -authenticationKeyPath ~/.private_keys/AuthKey_${APP_STORE_CONNECT_KEY_IDENTIFIER}.p8 \
+            CODE_SIGN_STYLE=Automatic \
+            DEVELOPMENT_TEAM=B6KV2PAQ6D
+
+          # IPA エクスポート
+          xcodebuild -exportArchive \
+            -archivePath "$CM_BUILD_DIR/App.xcarchive" \
+            -exportPath "$CM_BUILD_DIR/ipa" \
+            -exportOptionsPlist ios/ExportOptions.plist \
+            -allowProvisioningUpdates \
+            -authenticationKeyID "$APP_STORE_CONNECT_KEY_IDENTIFIER" \
+            -authenticationKeyIssuerID "$APP_STORE_CONNECT_ISSUER_ID" \
+            -authenticationKeyPath ~/.private_keys/AuthKey_${APP_STORE_CONNECT_KEY_IDENTIFIER}.p8
 
     artifacts:
-      - build/ios/ipa/*.ipa
+      - $CM_BUILD_DIR/ipa/*.ipa
+      - $CM_BUILD_DIR/App.xcarchive
       - /tmp/xcodebuild_logs/*.log
       - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.dSYM
 

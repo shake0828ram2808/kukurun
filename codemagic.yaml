@@ -39,9 +39,9 @@ workflows:
 
       - name: Xcode アーカイブ & IPA エクスポート
         script: |
-          # ASC API キーをファイルに書き出す
+          # ASC API キーをファイルに書き出す（改行を正しく保持）
           mkdir -p ~/.private_keys
-          echo "$APP_STORE_CONNECT_PRIVATE_KEY" > ~/.private_keys/AuthKey_${APP_STORE_CONNECT_KEY_IDENTIFIER}.p8
+          printf '%s' "$APP_STORE_CONNECT_PRIVATE_KEY" > ~/.private_keys/AuthKey_${APP_STORE_CONNECT_KEY_IDENTIFIER}.p8
 
           # アーカイブ
           xcodebuild archive \

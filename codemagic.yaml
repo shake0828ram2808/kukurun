@@ -42,9 +42,8 @@ workflows:
           keychain initialize
 
           app-store-connect fetch-signing-files \
-            --bundle-id-identifier "$BUNDLE_ID" \
+            "$BUNDLE_ID" \
             --type IOS_APP_STORE \
-            --certificate-types DISTRIBUTION \
             --create
 
           keychain add-certificates

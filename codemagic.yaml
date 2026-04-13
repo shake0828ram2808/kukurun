@@ -37,34 +37,22 @@ workflows:
           cd ios/App
           pod install
 
-      - name: Xcode アーカイブ & IPA エクスポート
+      - name: コード署名（自動）& IPA エクスポート
         script: |
-          # ASC API キーをファイルに書き出す（改行を正しく保持）
-          mkdir -p ~/.private_keys
-          printf '%s' "$APP_STORE_CONNECT_PRIVATE_KEY" > ~/.private_keys/AuthKey_${APP_STORE_CONNECT_KEY_IDENTIFIER}.p8
+          keychain initialize
 
-          # アーカイブ
-          xcodebuild archive \
-            -workspace "$XCODE_WORKSPACE" \
-            -scheme "$XCODE_SCHEME" \
-            -configuration Release \
-            -archivePath "$CM_BUILD_DIR/App.xcarchive" \
-            -allowProvisioningUpdates \
-            -authenticationKeyID "$APP_STORE_CONNECT_KEY_IDENTIFIER" \
-            -authenticationKeyIssuerID "$APP_STORE_CONNECT_ISSUER_ID" \
-            -authenticationKeyPath ~/.private_keys/AuthKey_${APP_STORE_CONNECT_KEY_IDENTIFIER}.p8 \
-            CODE_SIGN_STYLE=Automatic \
-            DEVELOPMENT_TEAM=B6KV2PAQ6D
+          app-store-connect fetch-signing-files \
+            --bundle-id-identifier "$BUNDLE_ID" \
+            --type IOS_APP_STORE \
+            --certificate-types DISTRIBUTION \
+            --create
 
-          # IPA エクスポート
-          xcodebuild -exportArchive \
-            -archivePath "$CM_BUILD_DIR/App.xcarchive" \
-            -exportPath "$CM_BUILD_DIR/ipa" \
-            -exportOptionsPlist ios/ExportOptions.plist \
-            -allowProvisioningUpdates \
-            -authenticationKeyID "$APP_STORE_CONNECT_KEY_IDENTIFIER" \
-            -authenticationKeyIssuerID "$APP_STORE_CONNECT_ISSUER_ID" \
-            -authenticationKeyPath ~/.private_keys/AuthKey_${APP_STORE_CONNECT_KEY_IDENTIFIER}.p8
+          keychain add-certificates
+          xcode-project use-profiles
+
+          xcode-project build-ipa \
+            --workspace "$XCODE_WORKSPACE" \
+            --scheme "$XCODE_SCHEME"
 
     artifacts:
       - $CM_BUILD_DIR/ipa/*.ipa

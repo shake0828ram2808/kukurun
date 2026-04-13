@@ -8,6 +8,9 @@ workflows:
       app_store_connect: Codemagic
 
     environment:
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.shakeram389.kukurun
       node: v20
       xcode: latest
       cocoapods: default
@@ -19,7 +22,6 @@ workflows:
     cache:
       cache_paths:
         - $CM_BUILD_DIR/node_modules
-        - $HOME/.pub-cache
         - ios/App/Pods
 
     scripts:
@@ -37,18 +39,11 @@ workflows:
           cd ios/App
           pod install
 
-      - name: コード署名（自動）& IPA エクスポート
+      - name: コード署名プロファイルを適用
+        script: xcode-project use-profiles
+
+      - name: Xcode アーカイブ & IPA エクスポート
         script: |
-          keychain initialize
-          keychain add-certificates
-
-          app-store-connect fetch-signing-files \
-            "$BUNDLE_ID" \
-            --type IOS_APP_STORE \
-            --create
-
-          xcode-project use-profiles
-
           xcode-project build-ipa \
             --workspace "$XCODE_WORKSPACE" \
             --scheme "$XCODE_SCHEME"
@@ -58,4 +53,3 @@ workflows:
       - $CM_BUILD_DIR/App.xcarchive
       - /tmp/xcodebuild_logs/*.log
       - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.dSYM
-

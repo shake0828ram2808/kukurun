@@ -263,27 +263,10 @@ function setKukurunMouth(state)     { _setMouth('home', state); }
 function setKukurunSmile(isSmiling) { _setSmile('home', isSmiling); }
 
 /* ════════════════════════════════
-   各画面のメッセージ定義
-   5秒おき＆タップで順番に切り替わる
+   各画面のメッセージ定義（最低限のフォールバック）
+   実データは messages.json で上書きされる
 ════════════════════════════════ */
-const SCREEN_MESSAGES = {
-  name: [
-    'こんにちは　ぼくは　くくるん！',
-    'きみの　なまえを　おしえて！',
-  ],
-  suffix: [
-    'よびかたを　おしえて！',
-    'いっしょに　がんばろうね！',
-  ],
-  egg: [
-    'どれを　そだてたい？',
-    'くくを　おぼえて　そだてよう！',
-  ],
-  home: [
-    // インデックス0はdynamic（ユーザー名入り）、JS側で生成
-    'きてくれて　ありがとう！',
-  ],
-};
+const SCREEN_MESSAGES = { name: [], suffix: [], egg: [], home: [] };
 
 // 各画面の現在インデックス
 const _msgIdx = { name: 0, suffix: 0, egg: 0, home: 0 };
@@ -386,6 +369,7 @@ async function kukurunNameIntro() {
   playKukurunTapAnim(svg);
   // タップで次のメッセージへ（タイマーもリセット）
   _nextBalloonMsg('name');
+  _resetBalloonTimer('name');
   for (let m of ['O', 'I', 'A', 'I', 'U', 'O']) { setKukurunMouthSmall(m); await new Promise(r => setTimeout(r, 120)); }
   setKukurunSmileSmall(true);
   setKukurunMouthSmall('munyu');
@@ -436,9 +420,14 @@ function closeIntroModal(e) {
     document.body.style.background = '';
     const bb = document.getElementById('bottom-bar');
     if (bb) bb.style.zIndex = '';
-    // 名前登録済みならホーム、未登録なら音声選択→名前入力へ
+    // 名前登録済みならホーム（たまご選択済み）、未選択なら卵選択、未登録なら音声選択→名前入力へ
     if (typeof S !== 'undefined' && S.name) {
-      showScreen('screen-home');
+      if (!S.selectedEgg) {
+        if (typeof buildEggSelectGrid === 'function') buildEggSelectGrid();
+        showScreen('screen-egg-select');
+      } else {
+        showScreen('screen-home');
+      }
     } else {
       showScreen('screen-speech-select');
     }

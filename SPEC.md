@@ -125,11 +125,16 @@
 
 ---
 
-### 設定
+### 設定・ビルド
 
 | ファイル | 管理内容 |
 |---|---|
 | `.claude/settings.json` | Claude Code のフック設定。ファイル編集時に `index.html` のバージョンバッジを自動更新 |
+| `package.json` | npm依存関係。Capacitor（iOSネイティブアプリ変換）の定義 |
+| `capacitor.config.json` | Capacitor設定。Bundle ID（`com.shakeram389.kukurun`）・webDir（`www/`）を定義 |
+| `codemagic.yaml` | Codemagic CI/CDビルド定義。App Store向けiOSビルドワークフロー |
+| `www/` | Capacitorのwebアセット同期先（gitignore対象・`npm run build`で自動生成） |
+| `ios/` | CapacitorのiOS Xcodeプロジェクト（Codemagicビルド時に初回生成） |
 
 ---
 

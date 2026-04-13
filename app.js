@@ -334,6 +334,7 @@ function restoreSession() {
   // イントロ表示中もバックグラウンドでホーム状態を準備
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-home').classList.add('active');
+  document.getElementById('app').classList.add('home-active');
   const greetingText = '　' + fullName() + '、おかえり♪';
   const balloonText = document.getElementById('balloon-text');
   if (balloonText) balloonText.textContent = greetingText;
@@ -373,6 +374,7 @@ function showScreen(id) {
   if (cur && cur.id !== id) _prevScreenId = cur.id;
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
+  document.getElementById('app').classList.toggle('home-active', id === 'screen-home');
   const bb = document.getElementById('bottom-bar');
   const noChrome = ['screen-name', 'screen-suffix', 'screen-egg-select', 'screen-speech-select'].includes(id);
   if (bb) bb.style.display = noChrome ? 'none' : 'flex';
@@ -570,6 +572,7 @@ function showSpeechSelect() {
 function goHomeFromEgg() {
   try { Snd.tap(); } catch(e) {}
   S.isFirstAccess = false;
+  S.renshuClears = getGrowthClears();  // 新しいたまごの成長度を正しく反映
   try { saveState(); } catch(e) {}
   try { updateCreature(); } catch(e) {}
   try { eggWobble.start(); } catch(e) {}
@@ -610,6 +613,12 @@ function growthLevel() {
   }
   return score; // 0-30（9段+ばらばら各: oboeru1+renshu1+test1）
 }
+// クリア画面の成長メッセージ（3パターン）
+function growthMsg(isNew, grew) {
+  if (isNew && grew) return 'メダルを　もらえたから\nせいちょうしたよ！\nせいちょうした　すがたを　みてね♪';
+  if (isNew) return 'つぎの　メダルで　せいちょうするよ！';
+  return 'メダルは　もう　もってるね！';
+}
 function getGrowthClears() {
   // たまご: 1点/ステージ（0=intact, 1=crack1, 2=crack2, 3=hatch）
   // キャラ: 2点/ステージ（4-5=newborn, 6-7=baby, 8-9=child, 10-11=adult）
@@ -635,7 +644,7 @@ function checkCertificates() {
     const earned = ct.isKukuMaster
       ? dans.every(d => { const m = S.medals[d]; return m && m.oboeru && m.renshu && m.test === 'gold'; })
       : dans.every(d => ct.check(S.medals[d]));
-    if (earned) { S.certificates[ct.id] = dateStr; buildCertBtns(); }
+    if (earned) { S.certificates[ct.id] = dateStr; buildCertBtns(); _pendingNewCerts.push(ct.id); }
   });
 }
 function buildCertBtns() {
@@ -666,6 +675,7 @@ function buildCertBtns() {
 }
 let _certTooltipTimer = null;
 let _certTooltipAnchor = null;
+let _pendingNewCerts = [];  // このアクションで新たに解放されたしょうじょう
 function hideCertTooltip() {
   const tip = document.getElementById('cert-tooltip');
   if (tip) tip.style.opacity = '0';
@@ -690,7 +700,7 @@ function showCertTooltip(anchorEl, msg) {
   clearTimeout(_certTooltipTimer);
   _certTooltipTimer = setTimeout(() => { hideCertTooltip(); }, 2800);
 }
-function showCertificate(id) {
+function showCertificate(id, returnScreen) {
   const ct = CERT_TYPES.find(c => c.id === id);
   if (!ct) return;
   const dateStr = S.certificates[id] || '';
@@ -710,8 +720,30 @@ function showCertificate(id) {
     <div class="cert-issuer">くくるん</div>
     <div class="cert-deco bot">── ✦ ── ✦ ── ✦ ──</div>
   `;
+  const backLabel = document.getElementById('cert-back-label');
+  const backBtn = document.getElementById('cert-back-btn');
+  if (returnScreen) {
+    if (backLabel) backLabel.textContent = 'もどる';
+    if (backBtn) backBtn.onclick = () => { tapSnd(); showScreen(returnScreen); };
+  } else {
+    if (backLabel) backLabel.textContent = 'ホームに　もどる';
+    if (backBtn) backBtn.onclick = () => { tapSnd(); showScreen('screen-home'); };
+  }
   showScreen('screen-cert');
   certSparkle(ct.isKukuMaster);
+}
+function showCertFromClear(screenId, certId) {
+  showCertificate(certId, screenId);
+}
+function _applyCertNotice(wrapId) {
+  const wrap = document.getElementById(wrapId);
+  if (!wrap) return;
+  const certId = _pendingNewCerts[0] || null;
+  wrap.style.display = certId ? '' : 'none';
+  if (certId) {
+    const btn = wrap.querySelector('[data-cert-id]');
+    if (btn) btn.dataset.certId = certId;
+  }
 }
 function certSparkle(isKukuMaster) {
   const glyphs = ['⭐︎','✦','✸','✺'];
@@ -751,6 +783,7 @@ function checkGraduation() {
   updateCreature();
   setTimeout(() => {
     S._pendingGraduation = false;
+    S.renshuClears = 0;  // 新しいたまご用にリセット
     S.selectedEgg = null;
     saveState();
     buildEggSelectGrid();
@@ -804,6 +837,8 @@ function buildDanGrid() {
     const badge = medalBadge(d);
     b.innerHTML = `${badge}<div class="dan-main"><span class="dn">${KD.fw(d)}</span><span class="dl">のだん</span></div>`;
     b.classList.toggle('has-medals', !!badge);
+    const m = getMedals(d);
+    b.classList.toggle('full-medals', getMedals(d).test === 'gold');
     b.id = `dan-btn-${d}`;
     b.onclick = () => { Snd.tap(); selDan(d); };
     g.appendChild(b);
@@ -826,6 +861,8 @@ function refreshDanBadge(dan) {
     b.insertBefore(temp.firstChild, b.firstChild);
   }
   b.classList.toggle('has-medals', !!badgeHtml);
+  const m2 = getMedals(dan);
+  b.classList.toggle('full-medals', getMedals(dan).test === 'gold');
 }
 function selDan(dan) {
   S.dan = dan;
@@ -879,16 +916,17 @@ function showOboeruClear() {
     return;
   }
   const alreadyHad = getMedals(S.dan).oboeru;
+  const growthBefore = getGrowthClears();
+  _pendingNewCerts = [];
   awardOboeruMedal();
-  const danLabel = S.dan === 'random' ? 'ばらばらのだん' : KD.fw(S.dan) + 'のだん';
-  const obMedalEl = document.getElementById('oboeru-clear-medal');
-  obMedalEl.innerHTML = ctIcon('oboeru');
-  document.getElementById('oboeru-clear-title').textContent = danLabel + '　おぼえたね！';
-  document.getElementById('oboeru-clear-msg').textContent =
-    alreadyHad ? 'メダルは　もう　もってるよ！' : 'メダルを　もらえたよ！';
+  const grew = getGrowthClears() > growthBefore;
+  document.getElementById('oboeru-clear-medal').innerHTML = ctIcon('oboeru');
+  document.getElementById('oboeru-clear-title').textContent = 'おぼえるメダル　ゲット！';
+  document.getElementById('oboeru-clear-msg').textContent = growthMsg(!alreadyHad, grew);
   showScreen('screen-oboeru-clear');
+  _applyCertNotice('oboeru-cert-wrap');
   confetti();
-  speak(alreadyHad ? 'メダルは　もう　もってるよ！' : 'やったー！メダルを　もらえたよ！');
+  speak(grew ? 'せいちょうしたよ！メダルゲット！' : alreadyHad ? 'メダルは　もう　もってるよ！' : 'やったー！メダルを　もらえたよ！');
 }
 function startOboeru() {
   S._oboeruClearShown = false;
@@ -927,6 +965,12 @@ function startOboeru() {
       if ((S._oboeruMode || 'auto') === 'manual') {
         toggleSelectRow(i, p);
       } else {
+        // autoモード中に別の問題をタップ→manualに切り替えて読み上げ停止
+        if (window.speechSynthesis) speechSynthesis.cancel();
+        S._oboeruMode = 'manual';
+        S._oboeruSelected = [];
+        _updateOboeruSwitch();
+        _updateOboeruReadSelectedBtn();
         hlRow(i, p);
       }
     };
@@ -953,7 +997,10 @@ function hlRow(i, p) {
     ? Array.from(document.querySelectorAll('.kuku-check')).filter(el => el.textContent === '✓').length
     : 0;
   if (total > 0 && checked === total) {
-    setTimeout(() => showOboeruClear(), (S._oboeruMode || 'auto') === 'auto' ? 800 : 300);
+    // 最後の問題を読み上げてからクリア画面へ
+    speakThen(kukuTts(p.reading), 0.86, () => {
+      setTimeout(() => showOboeruClear(), (S._oboeruMode || 'auto') === 'auto' ? 800 : 300);
+    });
     return;
   }
   // autoモードのみ自動進行; manualモードは読み上げのみ
@@ -1045,6 +1092,7 @@ function _updateOboeruSwitch() {
    RENSHU
 ════════════════════════════════ */
 let rT = null;
+let renshuAutoTimer = null;
 
 function startRenshu() {
   let probs;
@@ -1171,7 +1219,7 @@ function inputDigit(d) {
     setTimeout(() => { Snd.pingpong(); showHanamaru(); }, 180);
     showAnsEl(p);
     speakThen(kukuTts(p.reading), 0.86, () => {
-      setTimeout(() => { nextRenshu(); S.ansInput = ''; }, 1000);
+      renshuAutoTimer = setTimeout(() => { nextRenshu(); S.ansInput = ''; }, 1000);
     });
   } else if (p.answer < 10 || S.ansInput.length >= 2) {
     // ミス：一桁問題で違う、または二桁入力完了で不正解
@@ -1242,7 +1290,7 @@ function checkAns(n, btn) {
     showAnsEl(p);
     // 読み上げ終了後1秒で自動次問
     speakThen(kukuTts(p.reading), 0.86, () => {
-      setTimeout(() => nextRenshu(), 1000);
+      renshuAutoTimer = setTimeout(() => nextRenshu(), 1000);
     });
   } else {
     btn.classList.add('wrong');
@@ -1376,9 +1424,10 @@ function showGrowthScreen() {
     img.src = '';
   }
 
+  const TEST_MEDAL_WEIGHT = { bronze: 1, silver: 2, gold: 3 };
   const medalCount = Object.values(S.medals).reduce((sum, m) => {
     if (!m || typeof m !== 'object') return sum;
-    return sum + (m.oboeru ? 1 : 0) + (m.renshu ? 1 : 0) + (m.test ? 1 : 0);
+    return sum + (m.oboeru ? 1 : 0) + (m.renshu ? 1 : 0) + (TEST_MEDAL_WEIGHT[m.test] || 0);
   }, 0);
   const el = document.getElementById('growth-medal-count');
   if (el) el.textContent = medalCount;
@@ -1722,6 +1771,7 @@ function stopGrowthAnim() {
 }
 
 function nextRenshu() {
+  if (renshuAutoTimer) { clearTimeout(renshuAutoTimer); renshuAutoTimer = null; }
   S.idx++;
   if (S.idx >= S.probs.length) doneDan();
   else showProb();
@@ -1735,6 +1785,7 @@ function doneDan() {
   const total = S.probs.length;
   const correct = S.hanamaruCount - (S._hanamaruAtStart || 0);
   const passedRenshu = correct / total >= 0.6;
+  _pendingNewCerts = [];
   const alreadyHadRenshu = getMedals(S.dan).renshu;
   if (passedRenshu) {
     getMedals(S.dan).renshu = true;
@@ -1748,40 +1799,30 @@ function doneDan() {
   if (S._pendingGraduation) return;
 
   const grew = getGrowthClears() > growthBefore;
-  updateClearScreen(grew);
-  document.getElementById('clear-title').textContent = grew
-    ? 'せいちょう　したよ！'
-    : (S.dan === 'random' ? 'ばらばらのだんが　できたね！' : KD.fw(S.dan) + 'のだんが　できたね！');
-  const medalMsgEl = document.getElementById('clear-medal-msg');
-  if (medalMsgEl) {
-    medalMsgEl.textContent = passedRenshu
-      ? (alreadyHadRenshu ? 'メダルは　もう　もってるよ！' : 'メダルを　もらえたよ！')
-      : '';
-  }
+  updateClearScreen();
+  document.getElementById('clear-stage-label').textContent =
+    passedRenshu ? 'れんしゅうメダル　ゲット！' : 'もういちど　やってみよう！';
+  document.getElementById('clear-score').textContent =
+    KD.fw(total) + 'もん中　' + KD.fw(correct) + 'もん　せいかい！';
+  document.getElementById('clear-growth-msg').textContent =
+    passedRenshu ? growthMsg(!alreadyHadRenshu, grew) : '';
   showScreen('screen-clear');
+  _applyCertNotice('clear-cert-wrap');
   confetti();
   speak(grew ? 'せいちょうしたよ！やったね！' : 'やったー！ぜんもんできたよ！すごい！');
 }
 
-function updateClearScreen(grew = false) {
-  if (!S.selectedEgg) return;
+function updateClearScreen() {
+  const kind = S.selectedEgg || (S.adultCharacters.length > 0 ? S.adultCharacters[S.adultCharacters.length - 1] : 'green');
   const n = S.renshuClears;
-  const kind = S.selectedEgg;
   const charStage = getCharStage(n);
   const clearEgg = document.getElementById('clear-egg-img');
-  const clearLabel = document.getElementById('clear-stage-label');
   const crackSvg = document.getElementById('clear-crack-svg');
   if (crackSvg) crackSvg.style.display = 'none';
-
   if (charStage) {
     if (clearEgg) { clearEgg.src = getCharSprite(kind, charStageIdx(n)); clearEgg.style.height = '90px'; }
   } else {
     if (clearEgg) { clearEgg.src = getEggSprite(kind, n); clearEgg.style.height = '90px'; }
-  }
-  if (clearLabel) {
-    clearLabel.textContent = grew
-      ? (charStage ? 'せいちょう　したよ！🎉' : 'たまごが　かわったよ！🎉')
-      : 'つぎのメダルで　せいちょうするよ';
   }
 }
 
@@ -1983,6 +2024,7 @@ function doneTest() {
   const cleared = pct >= 0.75;  // 75%以上でクリア
   const growthBefore = getGrowthClears();
   const preAwardMedal = getMedals(dan).test;  // 付与前のメダル状態を保存
+  _pendingNewCerts = [];
 
   if (cleared) {
     const m = getMedals(dan);
@@ -2001,27 +2043,14 @@ function doneTest() {
   const medal = getMedals(dan).test;
   document.getElementById('test-result-medal').innerHTML = cleared ? (medal ? ctIcon(medal) : '⭐') : '😢';
   document.getElementById('test-result-label').textContent =
-    cleared ? (medal ? MEDAL_NAMES[medal] + (preAwardMedal === 'gold' ? 'メダル' : 'メダル　ゲット！') : 'クリア！') : 'もう　いちど！';
-  const titleText = dan === 'random'
-    ? (cleared ? 'ばらばらのだん　クリア！' : 'ばらばらのだん　もう　すこし！')
-    : (cleared ? KD.fw(dan) + 'のだん　クリア！' : KD.fw(dan) + 'のだん　もう　すこし！');
-  document.getElementById('test-result-title').textContent = titleText;
+    cleared ? (medal ? MEDAL_NAMES[medal] + 'メダル　ゲット！' : 'クリア！') : 'もういちど　やってみよう！';
   document.getElementById('test-result-score').textContent =
     KD.fw(total) + 'もん中　' + KD.fw(correct) + 'もん　せいかい！';
-  const growthEl = document.getElementById('test-result-growth');
-  if (growthEl) {
-    growthEl.textContent = cleared
-      ? (grew ? 'せいちょう　したよ！🎉' : 'つぎのメダルで　せいちょうするよ')
-      : '';
-  }
-  const testMedalMsgEl = document.getElementById('test-medal-msg');
-  if (testMedalMsgEl) {
-    testMedalMsgEl.textContent = cleared
-      ? (preAwardMedal === 'gold' ? 'メダルは　もう　もってるよ！' : 'メダルを　もらえたよ！')
-      : '';
-  }
+  document.getElementById('test-result-growth').textContent =
+    cleared ? growthMsg(preAwardMedal !== 'gold', grew) : '';
 
   showScreen('screen-test-result');
+  _applyCertNotice('test-result-cert-wrap');
   if (cleared) { confetti(); speak(grew ? 'せいちょうしたよ！メダルゲット！' : 'やったー！メダルゲット！'); }
   else { speak('もう　いちど　ちゃれんじして　ね！'); }
 }
@@ -2226,6 +2255,8 @@ Promise.all([
     Object.assign(SCREEN_MESSAGES, msg.screenMessages);
   }
   buildKanaGrid();
+  playIntroAnimation();
+  restoreSession();
 }).catch(err => {
   console.warn('JSON load failed, using fallback:', err);
   KANA_ROWS = [
@@ -2247,14 +2278,13 @@ Promise.all([
     {text:'天才だよ！',     sequence:['E','I','A','I','O']},
   ];
   buildKanaGrid();
+  playIntroAnimation();
 });
 
 loadState();
 initDinos();
-
 initKukurun();
-
-restoreSession();
+// playIntroAnimation() / restoreSession() は Promise.all 内（JSON読み込み完了後）に移動
 
 // ══ ボトムバー safe-area 補正 ══
 // env(safe-area-inset-bottom) が 0 を返す環境でも
@@ -2320,8 +2350,6 @@ restoreSession();
     alert(msg);
   });
 })();
-
-playIntroAnimation();
 
 // iOS: 初回タッチでAudioContextをアンロック（サイレント再生）
 document.addEventListener('touchstart', () => Snd.unlock(), { once: true, passive: true });

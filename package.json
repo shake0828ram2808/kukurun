@@ -1,16 +1,19 @@
 {
   "name": "kukurun",
   "version": "1.0.0",
-  "description": "九九を楽しく覚えるアプリ",
+  "description": "くくるん — 九九学習アプリ",
+  "private": true,
   "scripts": {
-    "build": "rm -rf www && mkdir -p www && cp index.html app.js app.css kukurun.js questions.js sprites.js medals.js kana.json kana_hoka.json messages.json manifest.json sw.js privacy.html www/ && cp -r icons sprites www/",
-    "cap:sync": "npm run build && npx cap sync"
+    "sync-www": "node sync-www.js",
+    "cap:sync": "node sync-www.js && npx cap sync",
+    "cap:open": "npx cap open ios",
+    "cap:build": "node sync-www.js && npx cap build ios"
   },
   "dependencies": {
-    "@capacitor/core": "^6.0.0",
-    "@capacitor/ios": "^6.0.0"
+    "@capacitor/core": "^7.0.0"
   },
   "devDependencies": {
-    "@capacitor/cli": "^6.0.0"
+    "@capacitor/cli": "^7.0.0",
+    "@capacitor/ios": "^7.0.0"
   }
 }

@@ -23,6 +23,11 @@ workflows:
           fi
       - name: Capacitor sync
         script: npx cap sync ios
+      - name: Generate iOS app icons
+        script: |
+          mkdir -p assets
+          cp appIcon.png assets/icon-only.png
+          npx capacitor-assets generate --ios
       - name: List Xcode schemes
         script: xcodebuild -workspace "$XCODE_WORKSPACE" -list
       - name: Build iOS IPA

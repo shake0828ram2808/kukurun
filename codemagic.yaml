@@ -59,6 +59,11 @@ workflows:
             <key>method</key><string>app-store-connect</string>
             <key>teamID</key><string>B6KV2PAQ6D</string>
             <key>signingStyle</key><string>manual</string>
+            <key>signingCertificate</key><string>Apple Distribution</string>
+            <key>provisioningProfiles</key>
+            <dict>
+              <key>com.shakeram389.kukurun</key><string>Codemagic</string>
+            </dict>
           </dict></plist>
           PLIST
     artifacts:

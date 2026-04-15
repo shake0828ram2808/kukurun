@@ -1255,6 +1255,9 @@ body {
   to   { opacity:1; transform: translate(-50%, -50%); }
 }
 @media (min-width: 768px) and (min-height: 600px) {
+  #app:not(.home-active) {
+    justify-content: center;
+  }
   #app.home-active #screen-home {
     position: absolute;
     top: 50%;

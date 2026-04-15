@@ -35,6 +35,8 @@ workflows:
           npx capacitor-assets generate --ios
       - name: Set up code signing
         script: xcode-project use-profiles
+      - name: Set build number
+        script: /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUMBER" ios/App/App/Info.plist
       - name: List Xcode schemes
         script: xcodebuild -workspace "$XCODE_WORKSPACE" -list
       - name: Build iOS IPA

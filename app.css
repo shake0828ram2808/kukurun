@@ -106,7 +106,7 @@ body {
   align-items: center;
   cursor: pointer;
   margin-top: 8px;
-  margin-bottom: 4px;
+  margin-bottom: 16px;
   gap: 8px;
   padding: 0 16px;
 }
@@ -1257,6 +1257,12 @@ body {
 @media (min-width: 768px) and (min-height: 600px) {
   #app:not(.home-active) {
     justify-content: center;
+  }
+  /* 成長・設定・しょうじょう画面は高さが大きいので上詰めを維持 */
+  #screen-growth.active,
+  #screen-settings.active,
+  #screen-cert.active {
+    margin-bottom: auto;
   }
   #app.home-active #screen-home {
     position: absolute;

@@ -2,7 +2,12 @@ workflows:
   ios-app-store:
     name: iOS App Store Build
     max_build_duration: 120
+    integrations:
+      app_store_connect: App Store Connect
     environment:
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.shakeram389.kukurun
       groups:
         - app_store_connect
       vars:
@@ -32,7 +37,6 @@ workflows:
         script: xcodebuild -workspace "$XCODE_WORKSPACE" -list
       - name: Build iOS IPA
         script: |
-          echo "$APP_STORE_CONNECT_PRIVATE_KEY" > /tmp/AuthKey.p8
           xcodebuild \
             -workspace "$XCODE_WORKSPACE" \
             -scheme "$XCODE_SCHEME" \
@@ -42,24 +46,16 @@ workflows:
             archive \
             DEVELOPMENT_TEAM=B6KV2PAQ6D \
             CODE_SIGN_STYLE=Automatic \
-            ONLY_ACTIVE_ARCH=NO \
-            -allowProvisioningUpdates \
-            -authenticationKeyPath /tmp/AuthKey.p8 \
-            -authenticationKeyID "$APP_STORE_CONNECT_KEY_IDENTIFIER" \
-            -authenticationKeyIssuerID "$APP_STORE_CONNECT_ISSUER_ID" 2>&1
+            ONLY_ACTIVE_ARCH=NO 2>&1
           xcodebuild \
             -exportArchive \
             -archivePath build/ios/App.xcarchive \
             -exportPath build/ios/ipa \
-            -allowProvisioningUpdates \
-            -authenticationKeyPath /tmp/AuthKey.p8 \
-            -authenticationKeyID "$APP_STORE_CONNECT_KEY_IDENTIFIER" \
-            -authenticationKeyIssuerID "$APP_STORE_CONNECT_ISSUER_ID" \
             -exportOptionsPlist /dev/stdin <<'PLIST'
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
           <plist version="1.0"><dict>
-            <key>method</key><string>app-store</string>
+            <key>method</key><string>app-store-connect</string>
             <key>teamID</key><string>B6KV2PAQ6D</string>
           </dict></plist>
           PLIST

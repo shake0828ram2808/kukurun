@@ -1,7 +1,7 @@
 workflows:
-  ios-workflow:
-    name: iOS Build (App Store)
-    max_build_duration: 60
+  ios-app-store:
+    name: iOS App Store Build
+    max_build_duration: 120
     instance_type: mac_mini_m2
 
     integrations:
@@ -11,13 +11,15 @@ workflows:
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.shakeram389.kukurun
-      node: v20
-      xcode: latest
-      cocoapods: default
+      groups:
+        - app_store_connect
       vars:
         BUNDLE_ID: com.shakeram389.kukurun
         XCODE_WORKSPACE: ios/App/App.xcworkspace
         XCODE_SCHEME: App
+      node: latest
+      xcode: 26
+      cocoapods: default
 
     cache:
       cache_paths:
@@ -29,24 +31,55 @@ workflows:
         script: npm install
 
       - name: Web アセットを www/ にコピー
-        script: node sync-www.js
+        script: npm run build
 
       - name: Capacitor sync (iOS)
         script: npx cap sync ios
 
-      - name: CocoaPods インストール
+      - name: Generate iOS app icons
         script: |
-          cd ios/App
-          pod install
+          mkdir -p assets
+          cp appIcon.png assets/icon-only.png
+          npx capacitor-assets generate --ios
 
-      - name: コード署名プロファイルを適用
+      - name: Set up code signing
         script: xcode-project use-profiles
 
-      - name: Xcode アーカイブ & IPA エクスポート
+      - name: Set build number
+        script: /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUMBER" ios/App/App/Info.plist
+
+      - name: List Xcode schemes
+        script: xcodebuild -workspace "$XCODE_WORKSPACE" -list
+
+      - name: Build iOS IPA
         script: |
-          xcode-project build-ipa \
-            --workspace "$XCODE_WORKSPACE" \
-            --scheme "$XCODE_SCHEME"
+          xcodebuild \
+            -workspace "$XCODE_WORKSPACE" \
+            -scheme "$XCODE_SCHEME" \
+            -configuration Release \
+            -sdk iphoneos \
+            -archivePath build/ios/App.xcarchive \
+            archive \
+            DEVELOPMENT_TEAM=B6KV2PAQ6D \
+            ONLY_ACTIVE_ARCH=NO 2>&1
+          xcodebuild \
+            -exportArchive \
+            -archivePath build/ios/App.xcarchive \
+            -exportPath build/ios/ipa \
+            -exportOptionsPlist /dev/stdin <<'PLIST'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0"><dict>
+            <key>method</key><string>app-store-connect</string>
+            <key>teamID</key><string>B6KV2PAQ6D</string>
+            <key>signingStyle</key><string>manual</string>
+            <key>signingCertificate</key><string>Apple Distribution</string>
+            <key>provisioningProfiles</key>
+            <dict>
+              <key>com.shakeram389.kukurun</key><string>Codemagic</string>
+            </dict>
+          </dict></plist>
+          PLIST
 
     artifacts:
       - build/ios/ipa/*.ipa

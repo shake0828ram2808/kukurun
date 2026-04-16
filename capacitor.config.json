@@ -2,7 +2,13 @@
   "appId": "com.shakeram389.kukurun",
   "appName": "くくるん",
   "webDir": "www",
+  "server": {
+    "iosScheme": "https"
+  },
   "ios": {
-    "contentInset": "always"
+    "contentInset": "always",
+    "allowsLinkPreview": false,
+    "scrollEnabled": false,
+    "webContentsDebuggingEnabled": true
   }
 }

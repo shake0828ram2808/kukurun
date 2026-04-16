@@ -2,8 +2,11 @@ workflows:
   ios-app-store:
     name: iOS App Store Build
     max_build_duration: 120
+    instance_type: mac_mini_m2
+
     integrations:
       app_store_connect: Codemagic
+
     environment:
       ios_signing:
         distribution_type: app_store
@@ -11,34 +14,43 @@ workflows:
       groups:
         - app_store_connect
       vars:
+        BUNDLE_ID: com.shakeram389.kukurun
         XCODE_WORKSPACE: ios/App/App.xcworkspace
         XCODE_SCHEME: App
       node: latest
       xcode: 26
       cocoapods: default
+
+    cache:
+      cache_paths:
+        - $CM_BUILD_DIR/node_modules
+        - ios/App/Pods
+
     scripts:
-      - name: Install npm dependencies
+      - name: Node.js 依存関係のインストール
         script: npm install
-      - name: Build web assets
+
+      - name: Web アセットを www/ にコピー
         script: npm run build
-      - name: Add iOS platform (初回のみ)
-        script: |
-          if [ ! -d "ios" ]; then
-            npx cap add ios
-          fi
-      - name: Capacitor sync
+
+      - name: Capacitor sync (iOS)
         script: npx cap sync ios
+
       - name: Generate iOS app icons
         script: |
           mkdir -p assets
           cp appIcon.png assets/icon-only.png
           npx capacitor-assets generate --ios
+
       - name: Set up code signing
         script: xcode-project use-profiles
+
       - name: Set build number
         script: /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUMBER" ios/App/App/Info.plist
+
       - name: List Xcode schemes
         script: xcodebuild -workspace "$XCODE_WORKSPACE" -list
+
       - name: Build iOS IPA
         script: |
           xcodebuild \
@@ -68,13 +80,15 @@ workflows:
             </dict>
           </dict></plist>
           PLIST
+
     artifacts:
       - build/ios/ipa/*.ipa
-      - build/ios/App.xcarchive
+      - build/ios/xcarchive/*.xcarchive
       - /tmp/xcodebuild_logs/*.log
+      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.dSYM
+
     publishing:
       app_store_connect:
-        api_key: $APP_STORE_CONNECT_PRIVATE_KEY
-        key_id: $APP_STORE_CONNECT_KEY_IDENTIFIER
-        issuer_id: $APP_STORE_CONNECT_ISSUER_ID
-        submit_to_testflight: true
+        auth: integration
+        submit_to_testflight: false
+        submit_to_app_store: false

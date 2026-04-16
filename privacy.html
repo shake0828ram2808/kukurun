@@ -18,6 +18,7 @@
       --border:   #BDD4EA;
       --r:        20px;
       --r-sm:     12px;
+      --r-pill:   999px;
       --sh:       4px 4px 12px rgba(180,210,235,.6), -2px -2px 8px rgba(255,255,255,.8);
       --sh-inner: inset 2px 2px 6px rgba(180,210,235,.5), inset -2px -2px 6px rgba(255,255,255,.7);
     }
@@ -201,6 +202,21 @@
       color: var(--text2);
     }
 
+    /* ── もどるボタン ── */
+    .back-btn {
+      display: flex; align-items: center; gap: 6px;
+      align-self: flex-start;
+      background: var(--surface); border: 2px solid var(--border);
+      border-radius: var(--r-pill); padding: 7px 15px;
+      height: 36px; box-sizing: border-box;
+      font-family: var(--font); font-size: 13px; color: var(--text2);
+      cursor: pointer; box-shadow: 0 4px 0 var(--border), var(--sh);
+      transition: border-color .12s, color .12s, transform .1s, box-shadow .08s;
+      margin-bottom: 8px;
+    }
+    .back-btn:hover  { border-color: var(--theme); color: var(--theme); }
+    .back-btn:active { transform: translateY(4px); box-shadow: 0 0 0 var(--border); }
+
     /* ── レスポンシブ ── */
     @media (max-width: 480px) {
       .card { padding: 20px 18px; }
@@ -211,13 +227,10 @@
 <body>
 
   <!-- 戻るボタン -->
-  <div style="margin-bottom:8px;">
-    <button onclick="history.back()"
-            style="display:inline-flex;align-items:center;gap:6px;background:none;border:none;color:var(--theme);font-family:var(--font);font-size:15px;cursor:pointer;padding:8px 4px;">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-      もどる
-    </button>
-  </div>
+  <button class="back-btn" onclick="history.back()">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    もどる
+  </button>
 
   <main class="container">
 

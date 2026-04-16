@@ -385,9 +385,7 @@
           お問い合わせは保護者の方がお手続きください。<br>
           以下の問題を解いて「かくにん」を押すと、フォームへのリンクが表示されます。
         </div>
-        <p style="text-align:center; font-size:1.15rem; font-weight:bold; margin-bottom:14px; letter-spacing:.06em;">
-          15 &times; 15 = ?
-        </p>
+        <p id="gate-problem" style="text-align:center; font-size:1.15rem; font-weight:bold; margin-bottom:14px; letter-spacing:.06em;"></p>
         <div style="display:flex; gap:8px; justify-content:center; margin-bottom:8px;">
           <input type="number" id="gate-input" placeholder="答え"
                  style="border:2px solid var(--border); border-radius:10px; padding:10px 14px;
@@ -442,10 +440,18 @@
   </footer>
 
 <script>
+  var gateAnswer = 0;
+  (function initGate() {
+    var a = Math.floor(Math.random() * 13) + 3;      // 3〜15
+    var b = a + Math.floor(Math.random() * 18) + 8;  // a+8〜a+25（必ず b > a）
+    gateAnswer = a - b;                               // 必ず負の整数
+    document.getElementById('gate-problem').textContent = a + ' \u2212 ' + b + ' = ?';
+  })();
+
   function checkParentalGate() {
     var val = parseInt(document.getElementById('gate-input').value, 10);
     var err = document.getElementById('gate-error');
-    if (val === 225) { // 15 × 15
+    if (val === gateAnswer) {
       document.getElementById('parental-gate-wrap').style.display = 'none';
       document.getElementById('contact-link-wrap').style.display = 'block';
       err.textContent = '';

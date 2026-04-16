@@ -376,14 +376,42 @@
         <h2>お問い合わせ</h2>
       </div>
       <p style="text-align:center; margin-bottom:16px;">
-        ご不明な点やご意見は、下記フォームよりお気軽にお問い合わせください。
+        ご不明な点やご意見は、下記フォームよりお問い合わせください。
       </p>
-      <div class="contact-note">保護者の方へ：お子さまに代わって保護者の方がご送信ください。</div>
-      <br>
-      <a href="https://forms.gle/ePPSGCLCgrckHoxP9" class="contact-btn" target="_blank" rel="noopener noreferrer">
-        <span>📩</span>
-        <span>お問い合わせフォームへ</span>
-      </a>
+      <!-- ペアレンタルゲート（保護者確認） -->
+      <div id="parental-gate-wrap">
+        <div class="highlight-box" style="text-align:center; margin-bottom:18px;">
+          <strong>保護者の方へ</strong><br>
+          お問い合わせは保護者の方がお手続きください。<br>
+          以下の問題を解いて「かくにん」を押すと、フォームへのリンクが表示されます。
+        </div>
+        <p style="text-align:center; font-size:1.15rem; font-weight:bold; margin-bottom:14px; letter-spacing:.06em;">
+          15 &times; 15 = ?
+        </p>
+        <div style="display:flex; gap:8px; justify-content:center; margin-bottom:8px;">
+          <input type="number" id="gate-input" placeholder="答え"
+                 style="border:2px solid var(--border); border-radius:10px; padding:10px 14px;
+                        font-size:1rem; font-family:var(--font); width:110px; text-align:center;
+                        background:var(--surface); color:var(--text);"
+                 onkeydown="if(event.key==='Enter')checkParentalGate()">
+          <button onclick="checkParentalGate()"
+                  style="background:var(--theme); color:#fff; border:none; border-radius:10px;
+                         padding:10px 20px; font-size:1rem; font-family:var(--font); cursor:pointer;">
+            かくにん
+          </button>
+        </div>
+        <p id="gate-error" style="color:#E03030; text-align:center; font-size:0.85rem; min-height:1.3em;"></p>
+      </div>
+      <!-- 認証後に表示されるリンク -->
+      <div id="contact-link-wrap" style="display:none; text-align:center;">
+        <a href="https://forms.gle/ePPSGCLCgrckHoxP9" class="contact-btn" target="_blank" rel="noopener noreferrer">
+          <span>📩</span>
+          <span>お問い合わせフォームへ</span>
+        </a>
+        <p style="font-size:0.78rem; color:var(--text2); margin-top:12px;">
+          ※ 外部サービス（Google フォーム）に移動します。
+        </p>
+      </div>
     </section>
 
     <!-- ポリシーの変更 -->
@@ -413,5 +441,18 @@
     <p>&copy; 2026 kukurun（くくるん）</p>
   </footer>
 
+<script>
+  function checkParentalGate() {
+    var val = parseInt(document.getElementById('gate-input').value, 10);
+    var err = document.getElementById('gate-error');
+    if (val === 225) { // 15 × 15
+      document.getElementById('parental-gate-wrap').style.display = 'none';
+      document.getElementById('contact-link-wrap').style.display = 'block';
+      err.textContent = '';
+    } else {
+      err.textContent = '答えがちがいます。もういちど入力してください。';
+    }
+  }
+</script>
 </body>
 </html>

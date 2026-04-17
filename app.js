@@ -1611,6 +1611,8 @@ function _startGrowthAnim(charStage) {
   }));
 
   const startTime = Date.now();
+  let _shootingStar = null;
+  let _lastShootingStarMs = 3000; // 最初は3秒後に発射
 
   function frame() {
     const W = area.clientWidth, H = area.clientHeight;
@@ -1636,6 +1638,50 @@ function _startGrowthAnim(charStage) {
       sCtx.fillStyle = `rgba(255,255,255,${alpha.toFixed(2)})`;
       sCtx.fill();
     });
+    // 流れ星（15秒ごと）
+    if (!_shootingStar && t - _lastShootingStarMs >= 15000) {
+      _lastShootingStarMs = t;
+      const angle = Math.PI / 5 + Math.random() * Math.PI / 7;
+      _shootingStar = {
+        x0: Math.random() * W * 0.65,
+        y0: H * 0.02 + Math.random() * H * 0.28,
+        angle,
+        speed: (W * 0.55 + Math.random() * W * 0.25) / 1000,
+        tail: W * 0.10 + Math.random() * W * 0.07,
+        born: t,
+        dur: 650 + Math.random() * 400,
+      };
+    }
+    if (_shootingStar) {
+      const age = t - _shootingStar.born;
+      if (age < _shootingStar.dur) {
+        const progress = age / _shootingStar.dur;
+        const alpha = Math.sin(progress * Math.PI);
+        const dist = _shootingStar.speed * age;
+        const sx = _shootingStar.x0 + Math.cos(_shootingStar.angle) * dist;
+        const sy = _shootingStar.y0 + Math.sin(_shootingStar.angle) * dist;
+        const tx = sx - Math.cos(_shootingStar.angle) * _shootingStar.tail;
+        const ty = sy - Math.sin(_shootingStar.angle) * _shootingStar.tail;
+        const grad = sCtx.createLinearGradient(tx, ty, sx, sy);
+        grad.addColorStop(0, 'rgba(255,255,255,0)');
+        grad.addColorStop(0.6, `rgba(255,245,210,${(alpha * 0.55).toFixed(2)})`);
+        grad.addColorStop(1, `rgba(255,255,255,${alpha.toFixed(2)})`);
+        sCtx.beginPath();
+        sCtx.moveTo(tx, ty);
+        sCtx.lineTo(sx, sy);
+        sCtx.strokeStyle = grad;
+        sCtx.lineWidth = 1.8;
+        sCtx.lineCap = 'round';
+        sCtx.stroke();
+        sCtx.beginPath();
+        sCtx.arc(sx, sy, 1.5 + alpha * 1.5, 0, Math.PI * 2);
+        sCtx.fillStyle = `rgba(255,255,255,${alpha.toFixed(2)})`;
+        sCtx.fill();
+      } else {
+        _shootingStar = null;
+      }
+    }
+
     // 草地の煌めき
     grassSparkles.forEach(s => {
       const alpha = 0.15 + 0.65 * (0.5 + 0.5 * Math.sin(t * s.spd + s.phase));

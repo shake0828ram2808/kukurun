@@ -359,7 +359,8 @@ function updateBottomBar(which) {
 }
 
 function showScreen(id) {
-  // 画面が切り替わるたびに読み上げを止める
+  // 画面が切り替わるたびに読み上げを止め、oboeruチェーンを無効化
+  _oboeruGen++;
   if (window.speechSynthesis) speechSynthesis.cancel();
   if (id === 'screen-home') {
     const label = document.getElementById('debug-clears-label');
@@ -928,7 +929,9 @@ function showOboeruClear() {
   confetti();
   speak(grew ? 'せいちょうしたよ！メダルゲット！' : alreadyHad ? 'メダルは　もう　もってるよ！' : 'やったー！メダルを　もらえたよ！');
 }
+let _oboeruGen = 0;  // autoモードの読み上げチェーンを無効化するためのジェネレーション番号
 function startOboeru() {
+  _oboeruGen++;  // 前のチェーンのコールバックをすべて無効化
   S._oboeruClearShown = false;
   let problems;
   if (S.dan === 'random') {
@@ -937,7 +940,7 @@ function startOboeru() {
     problems = KD.problems(S.dan);
   }
   S._oboeruProblems = problems;
-  S._oboeruMode = S._oboeruMode || 'auto';  // 初期値: じどうで　ぜんぶ
+  S._oboeruMode = 'auto';  // 毎回autoにリセット
   S._oboeruSelected = [];  // manualモードの選択状態リセット
   // スイッチ表示を現在のモードに合わせる
   _updateOboeruSwitch();
@@ -985,6 +988,7 @@ function startOboeru() {
   }
 }
 function hlRow(i, p) {
+  const myGen = _oboeruGen;  // このチェーンのジェネレーションを記録
   document.querySelectorAll('.kuku-row').forEach(r => r.classList.remove('current'));
   const row = document.getElementById(`kr-${i}`);
   if (!row) return;
@@ -997,19 +1001,20 @@ function hlRow(i, p) {
     ? Array.from(document.querySelectorAll('.kuku-check')).filter(el => el.textContent === '✓').length
     : 0;
   if (total > 0 && checked === total) {
-    // 最後の問題を読み上げてからクリア画面へ
     speakThen(kukuTts(p.reading), 0.86, () => {
+      if (_oboeruGen !== myGen) return;
       setTimeout(() => showOboeruClear(), (S._oboeruMode || 'auto') === 'auto' ? 800 : 300);
     });
     return;
   }
   // autoモードのみ自動進行; manualモードは読み上げのみ
   speakThen(kukuTts(p.reading), 0.86, () => {
+    if (_oboeruGen !== myGen) return;  // 画面離脱・再起動で無効化
     if ((S._oboeruMode || 'auto') === 'auto') {
       const waitMs = Math.max(1200, p.reading.length * 130);
       const probs = S._oboeruProblems;
       if (i + 1 < probs.length) {
-        setTimeout(() => hlRow(i + 1, probs[i + 1]), waitMs);
+        setTimeout(() => { if (_oboeruGen === myGen) hlRow(i + 1, probs[i + 1]); }, waitMs);
       }
     }
   });
@@ -2420,3 +2425,11 @@ document.addEventListener('touchstart', () => Snd.unlock(), { once: true, passiv
     if (Date.now() - _lastTouch > 400) addEffect(e.clientX, e.clientY);
   });
 })();
+
+// 別アプリ切り替え・画面オフ時に読み上げを止める
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    _oboeruGen++;
+    if (window.speechSynthesis) speechSynthesis.cancel();
+  }
+});

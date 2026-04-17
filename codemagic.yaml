@@ -48,6 +48,10 @@ workflows:
       - name: Set build number
         script: /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUMBER" ios/App/App/Info.plist
 
+      - name: Set marketing version
+        script: |
+          sed -i '' "s/MARKETING_VERSION = [0-9][0-9.]*/MARKETING_VERSION = 1.0.$BUILD_NUMBER/" ios/App/App.xcodeproj/project.pbxproj
+
       - name: List Xcode schemes
         script: xcodebuild -workspace "$XCODE_WORKSPACE" -list
 

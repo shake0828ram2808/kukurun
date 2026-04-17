@@ -278,6 +278,11 @@ function _nextBalloonMsg(screen) {
   const msgs = _buildMsgs(screen);
   _msgIdx[screen] = (_msgIdx[screen] + 1) % msgs.length;
   _setBalloon(screen, msgs[_msgIdx[screen]], false);
+  // ふきだしが変わるタイミング（タップ or 5秒）でアニメーション
+  if (screen === 'home') {
+    const svg = document.getElementById('home-kukurun-svg');
+    playKukurunTapAnim(svg);
+  }
 }
 
 /** ユーザー名込みのメッセージリストを返す */
@@ -327,9 +332,7 @@ function _resetBalloonTimer(screen) {
 async function homeKukurunTalk() {
   if (kukurunState.isJumping) return;
   kukurunState.isJumping = true;
-  const svg = document.getElementById('home-kukurun-svg');
-  playKukurunTapAnim(svg);
-  // タップで次のメッセージへ、かつ5秒タイマーをリセット
+  // アニメーションは _nextBalloonMsg 内で実行される
   _nextBalloonMsg('home');
   _resetBalloonTimer('home');
   Snd.tap();

@@ -20,8 +20,9 @@
 
 ## バージョン管理
 
-- **git pre-commitフック** (`.git/hooks/pre-commit`) により、コミット時に自動で `index.html` の `#version-badge` をインクリメントしてステージングする。
+- **git pre-commitフック** (`hooks/pre-commit`) により、コミット時に自動で `index.html` の `#version-badge` をインクリメントしてステージングする。
   フォーマット: `ver.YYYY.MMDD.NNNN`（NNNNは連番）
+- フックスクリプトはリポジトリの `hooks/pre-commit` で管理。`npm install` 実行時に `git config core.hooksPath hooks` が自動で走り有効になる。
 - `.claude/settings.json` のPostToolUseフックは廃止済み。ファイル編集時にはバージョンは変わらない。
 
 ## ファイル構成の概要

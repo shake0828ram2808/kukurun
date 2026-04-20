@@ -1,0 +1,28 @@
+#!/bin/bash
+set -e
+
+INDEX="$(git rev-parse --show-toplevel)/index.html"
+
+current=$(grep -oE 'ver\.[0-9]{4}\.[0-9]{4}\.[0-9]{4}' "$INDEX" | head -1)
+[ -z "$current" ] && exit 0
+
+today_year=$(date +%Y)
+today_mmdd=$(date +%m%d)
+
+cur_year=$(echo "$current" | cut -d'.' -f2)
+cur_mmdd=$(echo "$current" | cut -d'.' -f3)
+cur_seq=$(echo "$current"  | cut -d'.' -f4)
+
+if [ "$cur_year" = "$today_year" ] && [ "$cur_mmdd" = "$today_mmdd" ]; then
+  new_seq=$(printf '%04d' $((10#$cur_seq + 1)))
+else
+  new_seq="0001"
+fi
+
+new_ver="ver.${today_year}.${today_mmdd}.${new_seq}"
+
+escaped=$(echo "$current" | sed 's/\./\\./g')
+sed -i "s/${escaped}/${new_ver}/g" "$INDEX"
+
+git add "$INDEX"
+echo "version: $current → $new_ver"

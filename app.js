@@ -1612,7 +1612,7 @@ function _startGrowthAnim(charStage) {
 
   const startTime = Date.now();
   let _shootingStar = null;
-  let _lastShootingStarMs = 3000; // 最初は3秒後に発射
+  let _lastShootingStarMs = Math.random() * 3000 - 15000; // 画面を開いて0〜3秒以内に初回発射
 
   function frame() {
     const W = area.clientWidth, H = area.clientHeight;

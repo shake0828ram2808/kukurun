@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>こえ判定 デモ — くくるん</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&display=swap">
+<style>
+:root {
+  --font:     'Kosugi Maru', sans-serif;
+  --theme:    #5C5FE8;
+  --theme-lt: #EEEEFF;
+  --theme-dk: #4044C0;
+  --bg:       #D6EEFA;
+  --surface:  #FFFFFF;
+  --surface2: #EAF5FF;
+  --red:      #E03030;
+  --red-lt:   #FFECEC;
+  --text:     #1B2640;
+  --text2:    #566480;
+  --border:   #BDD4EA;
+  --green:    #2BAB6F;
+  --green-lt: #E8F8F0;
+  --r:        16px;
+  --r-sm:     10px;
+  --r-pill:   999px;
+  --sh:       0 2px 10px rgba(27,38,64,.07);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  min-height: 100dvh;
+  padding: 20px 16px 48px;
+  color: var(--text);
+}
+.wrap { max-width: 420px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+
+/* ── ヘッダー ── */
+.demo-title { text-align: center; font-size: 13px; color: var(--text2); }
+.demo-title strong { display: block; font-size: 20px; color: var(--text); margin-bottom: 4px; }
+
+/* ── モード切り替えタブ ── */
+.mode-tab {
+  display: flex;
+  background: var(--surface);
+  border-radius: var(--r-pill);
+  padding: 4px;
+  box-shadow: var(--sh);
+}
+.tab-btn {
+  flex: 1; border: none; background: transparent;
+  font-family: var(--font); font-size: 14px; color: var(--text2);
+  padding: 9px 8px; border-radius: var(--r-pill); cursor: pointer;
+  transition: background .15s, color .15s;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  -webkit-tap-highlight-color: transparent;
+}
+.tab-btn.active { background: var(--theme); color: #fff; box-shadow: 0 2px 8px rgba(92,95,232,.3); }
+.tab-btn.active.voice-tab { background: var(--green); box-shadow: 0 2px 8px rgba(43,171,111,.3); }
+
+/* ── カード ── */
+.card {
+  background: var(--surface);
+  border-radius: var(--r);
+  box-shadow: var(--sh);
+  padding: 20px 18px;
+  display: flex; flex-direction: column; gap: 14px;
+}
+
+/* ── 問題カード ── */
+.mode-label {
+  display: flex; align-items: center; gap: 7px;
+}
+.mode-dot { width: 8px; height: 8px; border-radius: 50%; }
+.mode-dot.tap   { background: var(--theme); }
+.mode-dot.voice { background: var(--green); }
+.mode-text { font-size: 12px; }
+.mode-text.tap   { color: var(--theme); }
+.mode-text.voice { color: var(--green); }
+
+.prob-card {
+  background: var(--surface2); border: 2px solid var(--border);
+  border-radius: var(--r); padding: 20px 20px 24px; text-align: center;
+}
+.prob-reading-top {
+  font-size: 15px; color: var(--text2);
+  min-height: 22px; margin-bottom: 6px; letter-spacing: .05em;
+}
+.prob-eq { font-size: 52px; color: var(--text); line-height: 1.1; white-space: nowrap; }
+.q-mark  { color: var(--border); }
+
+/* ── 問題ナビ ── */
+.prob-nav {
+  display: flex; align-items: center; justify-content: space-between;
+}
+.nav-btn {
+  background: var(--surface2); border: 1.5px solid var(--border);
+  border-radius: var(--r-pill); font-family: var(--font);
+  font-size: 13px; color: var(--text2); padding: 7px 16px; cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.nav-btn:active { opacity: .7; }
+.prob-counter { font-size: 13px; color: var(--text2); }
+
+/* ── タップモード: 選択肢グリッド ── */
+.ans-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+}
+.ans-btn {
+  background: var(--surface); border: 2px solid var(--border);
+  border-radius: var(--r-pill);
+  font-family: var(--font); font-size: 20px; color: var(--text);
+  padding: 13px 6px; cursor: pointer;
+  box-shadow: 0 4px 0 #BDD4EA;
+  transition: border-color .1s, background .1s, transform .08s, box-shadow .08s;
+  -webkit-tap-highlight-color: transparent;
+}
+.ans-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #BDD4EA; }
+.ans-btn.correct {
+  background: var(--theme); border-color: var(--theme); color: #fff;
+  transform: scale(1.06); box-shadow: 0 4px 0 #4044C0;
+  animation: popIn .25s cubic-bezier(.34,1.56,.64,1);
+}
+.ans-btn.wrong {
+  background: var(--red-lt); border-color: #F4AAAA; color: var(--red);
+  animation: shake .3s;
+}
+@keyframes popIn {
+  from { transform: scale(.85); opacity: .6; }
+  to   { transform: scale(1.06); }
+}
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  20%     { transform: translateX(-6px); }
+  40%     { transform: translateX(6px); }
+  60%     { transform: translateX(-4px); }
+  80%     { transform: translateX(4px); }
+}
+
+/* ── こえモード ── */
+.voice-area {
+  display: flex; flex-direction: column; align-items: center; gap: 16px;
+  padding: 8px 0 4px;
+}
+.mic-btn {
+  width: 100px; height: 100px; border-radius: 50%;
+  background: var(--green); border: none; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  box-shadow: 0 6px 0 #1F8A57, 0 3px 16px rgba(43,171,111,.35);
+  transition: transform .1s, box-shadow .1s;
+  -webkit-tap-highlight-color: transparent;
+  position: relative;
+}
+.mic-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #1F8A57, 0 1px 8px rgba(43,171,111,.2); }
+.mic-btn.listening {
+  background: var(--red);
+  box-shadow: 0 6px 0 #A82020, 0 3px 16px rgba(224,48,48,.35);
+  animation: micPulse 1.2s ease-in-out infinite;
+}
+@keyframes micPulse {
+  0%,100% { box-shadow: 0 6px 0 #A82020, 0 0 0 0 rgba(224,48,48,.4); }
+  50%     { box-shadow: 0 6px 0 #A82020, 0 0 0 14px rgba(224,48,48,0); }
+}
+.mic-icon { font-size: 36px; line-height: 1; }
+.mic-label { font-size: 11px; color: #fff; opacity: .9; }
+
+.voice-status {
+  font-size: 15px; color: var(--text2);
+  min-height: 24px; text-align: center; letter-spacing: .03em;
+}
+.voice-status.listening { color: var(--red); }
+.voice-status.ok  { color: var(--green); }
+.voice-status.err { color: var(--red); }
+
+.voice-result-box {
+  background: var(--surface2); border: 1.5px solid var(--border);
+  border-radius: var(--r-sm); padding: 10px 18px;
+  min-height: 46px; width: 100%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; letter-spacing: .05em; color: var(--text);
+  min-width: 0;
+}
+.voice-result-box.empty { color: var(--border); font-size: 14px; }
+.voice-result-box.ok  { border-color: var(--green); background: var(--green-lt); color: var(--green); }
+.voice-result-box.err { border-color: #F4AAAA; background: var(--red-lt); color: var(--red); animation: shake .3s; }
+
+.voice-hint {
+  font-size: 12px; color: var(--text2); text-align: center; min-height: 20px;
+}
+
+/* ── 花丸オーバーレイ ── */
+#hanamaru {
+  position: fixed; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  pointer-events: none; z-index: 999;
+  opacity: 0;
+}
+#hanamaru.show { animation: hmIn .15s ease forwards; }
+#hanamaru.hide { animation: hmOut .4s ease forwards; }
+@keyframes hmIn  { to { opacity: 1; } }
+@keyframes hmOut { from { opacity: 1; } to { opacity: 0; } }
+#hanamaru svg circle {
+  fill: none; stroke: var(--red);
+  stroke-dasharray: 880; stroke-dashoffset: 880;
+}
+#hanamaru.show svg circle { animation: drawRing .45s cubic-bezier(.4,0,.2,1) .05s forwards; }
+@keyframes drawRing { to { stroke-dashoffset: 0; } }
+
+/* ── つぎへボタン ── */
+.next-btn {
+  width: 100%; padding: 13px; border: none; border-radius: var(--r-pill);
+  background: var(--theme); color: #fff; font-family: var(--font); font-size: 15px;
+  cursor: pointer; box-shadow: 0 4px 0 var(--theme-dk);
+  display: none; align-items: center; justify-content: center; gap: 8px;
+  -webkit-tap-highlight-color: transparent;
+}
+.next-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--theme-dk); }
+.next-btn.show { display: flex; animation: popIn .3s cubic-bezier(.34,1.56,.64,1); }
+
+/* ── 注記 ── */
+.note { font-size: 11px; color: var(--text2); text-align: center; line-height: 1.7; }
+.note .badge {
+  display: inline-block; background: var(--green-lt); color: var(--green);
+  border-radius: var(--r-pill); padding: 1px 10px; font-size: 11px;
+}
+</style>
+</head>
+<body>
+
+<!-- 花丸 -->
+<div id="hanamaru">
+  <svg width="280" height="280" viewBox="0 0 300 300">
+    <circle cx="150" cy="150" r="118" stroke-width="20"/>
+  </svg>
+</div>
+
+<div class="wrap">
+
+  <div class="demo-title">
+    <strong>こえ判定 デモ</strong>
+    くくるん — タップ／こえモード切り替え
+  </div>
+
+  <!-- モード切り替え -->
+  <div class="mode-tab">
+    <button class="tab-btn active" id="tab-tap" onclick="setMode('tap')">
+      👆 タップ
+    </button>
+    <button class="tab-btn voice-tab" id="tab-voice" onclick="setMode('voice')">
+      🎤 こえ
+    </button>
+  </div>
+
+  <!-- 問題カード -->
+  <div class="card">
+    <div class="mode-label">
+      <div class="mode-dot tap" id="mode-dot"></div>
+      <span class="mode-text tap" id="mode-text">タップで　こたえよう</span>
+    </div>
+
+    <!-- 問題表示 -->
+    <div class="prob-card">
+      <div class="prob-reading-top" id="prob-reading"></div>
+      <div class="prob-eq" id="prob-eq"></div>
+    </div>
+
+    <!-- ── タップモード ── -->
+    <div id="tap-area">
+      <div class="ans-grid" id="ans-grid"></div>
+    </div>
+
+    <!-- ── こえモード ── -->
+    <div id="voice-area" class="voice-area" style="display:none;">
+      <div class="voice-status" id="voice-status">マイクを　おして　こたえてね</div>
+      <button class="mic-btn" id="mic-btn" onclick="toggleMic()">
+        <span class="mic-icon">🎤</span>
+        <span class="mic-label" id="mic-label">おす</span>
+      </button>
+      <div class="voice-result-box empty" id="voice-result">きこえたことばが　でるよ</div>
+      <div class="voice-hint" id="voice-hint"></div>
+    </div>
+
+    <!-- つぎへ -->
+    <button class="next-btn" id="next-btn" onclick="nextProblem()">
+      つぎの　もんだいへ
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </button>
+
+    <!-- ナビ -->
+    <div class="prob-nav">
+      <button class="nav-btn" onclick="moveProblem(-1)">◀ まえ</button>
+      <span class="prob-counter" id="prob-counter"></span>
+      <button class="nav-btn" onclick="moveProblem(1)">つぎ ▶</button>
+    </div>
+  </div>
+
+  <p class="note">
+    <span class="badge">こえモード</span> は Web Speech API を使用します。<br>
+    Chrome / Edge での動作を推奨。<br>
+    マイクのアクセス許可が必要です。
+  </p>
+
+</div>
+
+<script>
+/* ── 問題データ ── */
+const PROBLEMS = [
+  { dan:2, m:3,  ans:6,  reading:'にさんが',    eq:'２ × ３ ＝' },
+  { dan:4, m:5,  ans:20, reading:'しごが',       eq:'４ × ５ ＝' },
+  { dan:7, m:8,  ans:56, reading:'しちはが',     eq:'７ × ８ ＝' },
+  { dan:6, m:7,  ans:42, reading:'ろくしちが',   eq:'６ × ７ ＝' },
+  { dan:9, m:9,  ans:81, reading:'くくが',       eq:'９ × ９ ＝' },
+  { dan:3, m:6,  ans:18, reading:'さぶろくが',   eq:'３ × ６ ＝' },
+];
+
+/* 答えの読み（複数許容）*/
+const ANS_YOMI = {
+  6:  ['ろく'],
+  8:  ['はち'],
+  9:  ['く','きゅう'],
+  12: ['じゅうに'],
+  14: ['じゅうし','じゅうよん'],
+  15: ['じゅうご'],
+  16: ['じゅうろく'],
+  18: ['じゅうはち'],
+  20: ['にじゅう','はたち'],
+  21: ['にじゅういち'],
+  24: ['にじゅうし','にじゅうよん'],
+  25: ['にじゅうご'],
+  27: ['にじゅうしち','にじゅうなな'],
+  28: ['にじゅうはち'],
+  30: ['さんじゅう'],
+  32: ['さんじゅうに'],
+  35: ['さんじゅうご'],
+  36: ['さんじゅうろく'],
+  40: ['しじゅう','よんじゅう'],
+  42: ['しじゅうに','よんじゅうに'],
+  45: ['しじゅうご','よんじゅうご'],
+  48: ['しじゅうはち','よんじゅうはち'],
+  49: ['しじゅうく','よんじゅうく'],
+  50: ['ごじゅう'],
+  54: ['ごじゅうし','ごじゅうよん'],
+  56: ['ごじゅうろく'],
+  63: ['ろくじゅうさん'],
+  64: ['ろくじゅうし','ろくじゅうよん'],
+  72: ['しちじゅうに','ななじゅうに'],
+  81: ['はちじゅういち'],
+};
+
+/* ── 状態 ── */
+let mode = 'tap';
+let probIdx = 0;
+let answered = false;
+let recognition = null;
+let listening = false;
+
+/* ── 初期化 ── */
+function init() { renderProblem(); }
+
+function renderProblem() {
+  answered = false;
+  stopMic();
+  document.getElementById('next-btn').classList.remove('show');
+
+  const p = PROBLEMS[probIdx];
+  document.getElementById('prob-reading').textContent = p.reading;
+  document.getElementById('prob-eq').innerHTML =
+    p.eq + ' <span class="q-mark">？</span>';
+  document.getElementById('prob-counter').textContent =
+    `${probIdx + 1} / ${PROBLEMS.length}`;
+
+  if (mode === 'tap') renderTapGrid(p);
+  resetVoiceUI();
+}
+
+/* ── タップモード ── */
+function renderTapGrid(p) {
+  const grid = document.getElementById('ans-grid');
+  grid.innerHTML = '';
+  const choices = makeChoices(p.ans);
+  choices.forEach(n => {
+    const btn = document.createElement('button');
+    btn.className = 'ans-btn';
+    btn.textContent = n;
+    btn.onclick = () => tapAnswer(btn, n, p.ans);
+    grid.appendChild(btn);
+  });
+}
+
+function makeChoices(correct) {
+  const all = new Set([correct]);
+  const near = [-9,-8,-7,-6,-5,-4,-3,-2,-1,1,2,3,4,5,6,7,8,9];
+  const shuffled = near.sort(() => Math.random() - .5);
+  for (const d of shuffled) {
+    const c = correct + d;
+    if (c > 0 && c <= 81) all.add(c);
+    if (all.size >= 9) break;
+  }
+  while (all.size < 9) all.add(Math.floor(Math.random() * 81) + 1);
+  return [...all].sort(() => Math.random() - .5).slice(0, 9);
+}
+
+function tapAnswer(btn, chosen, correct) {
+  if (answered) return;
+  if (chosen === correct) {
+    answered = true;
+    btn.classList.add('correct');
+    showHanamaru();
+    document.getElementById('next-btn').classList.add('show');
+  } else {
+    btn.classList.add('wrong');
+    setTimeout(() => btn.classList.remove('wrong'), 500);
+  }
+}
+
+/* ── こえモード ── */
+function resetVoiceUI() {
+  document.getElementById('voice-status').textContent = 'マイクを　おして　こたえてね';
+  document.getElementById('voice-status').className = 'voice-status';
+  document.getElementById('voice-result').textContent = 'きこえたことばが　でるよ';
+  document.getElementById('voice-result').className = 'voice-result-box empty';
+  document.getElementById('voice-hint').textContent = '';
+  setMicState(false);
+}
+
+function setMicState(on) {
+  listening = on;
+  const btn = document.getElementById('mic-btn');
+  const lbl = document.getElementById('mic-label');
+  btn.classList.toggle('listening', on);
+  lbl.textContent = on ? 'きいてる' : 'おす';
+}
+
+function toggleMic() {
+  if (answered) return;
+  if (listening) { stopMic(); return; }
+  startMic();
+}
+
+function startMic() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) {
+    document.getElementById('voice-status').textContent = 'このブラウザは非対応です (Chrome推奨)';
+    document.getElementById('voice-status').className = 'voice-status err';
+    return;
+  }
+
+  recognition = new SR();
+  recognition.lang = 'ja-JP';
+  recognition.continuous = false;
+  recognition.interimResults = true;
+  recognition.maxAlternatives = 5;
+
+  setMicState(true);
+  document.getElementById('voice-status').textContent = 'きいてるよ…';
+  document.getElementById('voice-status').className = 'voice-status listening';
+  document.getElementById('voice-result').textContent = '…';
+  document.getElementById('voice-result').className = 'voice-result-box';
+
+  recognition.onresult = e => {
+    const results = e.results[e.results.length - 1];
+    const interim = results[0].transcript.trim();
+    document.getElementById('voice-result').textContent = interim;
+    document.getElementById('voice-result').className = 'voice-result-box';
+
+    if (results.isFinal) {
+      // 全候補を集めてチェック
+      const candidates = Array.from(results).map(r => r.transcript.replace(/\s/g,'').toLowerCase());
+      checkVoiceAnswer(candidates);
+    }
+  };
+
+  recognition.onerror = e => {
+    setMicState(false);
+    const msg = e.error === 'no-speech'    ? 'きこえなかったよ。もう一度！'
+               : e.error === 'not-allowed' ? 'マイクを許可してね'
+               : 'エラー: ' + e.error;
+    document.getElementById('voice-status').textContent = msg;
+    document.getElementById('voice-status').className = 'voice-status err';
+  };
+
+  recognition.onend = () => { if (listening) setMicState(false); };
+
+  recognition.start();
+}
+
+function stopMic() {
+  if (recognition) { try { recognition.stop(); } catch(e){} recognition = null; }
+  setMicState(false);
+}
+
+function checkVoiceAnswer(candidates) {
+  const p = PROBLEMS[probIdx];
+  const yomis = ANS_YOMI[p.ans] || [String(p.ans)];
+  const numStr = String(p.ans);
+
+  const matched = candidates.some(c =>
+    yomis.some(y => c.includes(y)) || c.includes(numStr)
+  );
+
+  const resultBox = document.getElementById('voice-result');
+  const status    = document.getElementById('voice-status');
+  const hint      = document.getElementById('voice-hint');
+
+  if (matched) {
+    answered = true;
+    resultBox.className = 'voice-result-box ok';
+    status.textContent = 'せいかい！　すばらしい！';
+    status.className = 'voice-status ok';
+    hint.textContent = `こたえは　${p.ans}（${yomis[0]}）`;
+    showHanamaru();
+    document.getElementById('next-btn').classList.add('show');
+  } else {
+    resultBox.className = 'voice-result-box err';
+    status.textContent = 'もう一度　いってみよう！';
+    status.className = 'voice-status err';
+    hint.textContent = `ヒント: ${p.ans}`;
+    setTimeout(() => {
+      if (!answered) {
+        resultBox.className = 'voice-result-box empty';
+        resultBox.textContent = 'きこえたことばが　でるよ';
+        status.textContent = 'マイクを　おして　こたえてね';
+        status.className = 'voice-status';
+        hint.textContent = '';
+        setMicState(false);
+      }
+    }, 2000);
+  }
+}
+
+/* ── 花丸 ── */
+function showHanamaru() {
+  const el = document.getElementById('hanamaru');
+  el.className = 'show';
+  setTimeout(() => { el.className = 'hide'; }, 900);
+  setTimeout(() => { el.className = ''; }, 1300);
+}
+
+/* ── モード切り替え ── */
+function setMode(m) {
+  mode = m;
+  const isTap = m === 'tap';
+
+  document.getElementById('tab-tap').classList.toggle('active', isTap);
+  document.getElementById('tab-voice').classList.toggle('active', !isTap);
+  document.getElementById('tap-area').style.display   = isTap ? '' : 'none';
+  document.getElementById('voice-area').style.display = isTap ? 'none' : 'flex';
+
+  const dot  = document.getElementById('mode-dot');
+  const text = document.getElementById('mode-text');
+  if (isTap) {
+    dot.className  = 'mode-dot tap';
+    text.className = 'mode-text tap';
+    text.textContent = 'タップで　こたえよう';
+  } else {
+    dot.className  = 'mode-dot voice';
+    text.className = 'mode-text voice';
+    text.textContent = 'こえで　こたえよう';
+  }
+
+  renderProblem();
+}
+
+/* ── ナビ ── */
+function moveProblem(dir) {
+  stopMic();
+  probIdx = (probIdx + dir + PROBLEMS.length) % PROBLEMS.length;
+  renderProblem();
+}
+
+function nextProblem() {
+  stopMic();
+  probIdx = (probIdx + 1) % PROBLEMS.length;
+  renderProblem();
+}
+
+init();
+</script>
+</body>
+</html>

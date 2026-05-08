@@ -262,6 +262,10 @@ function _setSmile(prefix, isSmiling) {
 function setKukurunMouth(state)     { _setMouth('home', state); }
 function setKukurunSmile(isSmiling) { _setSmile('home', isSmiling); }
 
+/* ── 任意プレフィックス（別アプリ向け） ── */
+function setKukurunMouthFor(prefix, state)     { _setMouth(prefix, state); }
+function setKukurunSmileFor(prefix, isSmiling) { _setSmile(prefix, isSmiling); }
+
 /* ════════════════════════════════
    各画面のメッセージ定義（最低限のフォールバック）
    実データは messages.json で上書きされる

@@ -1,7 +1,7 @@
 {
   "name": "kukurun",
   "version": "1.0.0",
-  "description": "くくるん — 九九学習アプリ",
+  "description": "ピコとくく — 九九学習アプリ",
   "private": true,
   "scripts": {
     "build": "rm -rf www && mkdir -p www && cp index.html app.js app.css kukurun.js questions.js sprites.js medals.js kana.json kana_hoka.json messages.json manifest.json sw.js privacy.html appIcon.png www/ && cp -r icons sprites www/",

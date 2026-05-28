@@ -718,7 +718,7 @@ function showCertificate(id, returnScreen) {
     <div class="cert-name">${nameOnly}　どの</div>
     <div class="cert-body">${nameOnly}どのは　${ct.mLabel}を　すべて　あつめることが　できました。そのえいよを　たたえるとともに　どりょくを　ここに　しょうします。これからも　くくを　たのしんで　おぼえてください。</div>
     <div class="cert-date">${dateStr}</div>
-    <div class="cert-issuer">くくるん</div>
+    <div class="cert-issuer">ピコとくく</div>
     <div class="cert-deco bot">── ✦ ── ✦ ── ✦ ──</div>
   `;
   const backLabel = document.getElementById('cert-back-label');

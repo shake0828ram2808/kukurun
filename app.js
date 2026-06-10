@@ -388,6 +388,7 @@ function showScreen(id) {
     appEl.scrollTop = 0;
     appEl.style.paddingBottom = ['screen-growth', 'screen-settings'].includes(id) ? '0' : '';
   }
+  if (id === 'screen-home' && typeof _tutorialStep !== 'undefined' && _tutorialStep >= 2) endTutorial();
 }
 
 function goBack() {
@@ -870,11 +871,8 @@ function refreshDanBadge(dan) {
 }
 function selDan(dan) {
   if (_tutorialStep === 1) {
-    if (dan === 1) {
-      _tutorialStep = 2;
-    } else {
-      endTutorial();
-    }
+    if (dan !== 1) return;  // 1のだん以外はブロック
+    _tutorialStep = 2;
     document.getElementById('tutorial-overlay').style.display = 'none';
   }
   S.dan = dan;
@@ -2487,50 +2485,101 @@ document.addEventListener('touchstart', () => Snd.unlock(), { once: true, passiv
 /* ════════════════════════════════
    TUTORIAL（初回オンボーディング）
 ════════════════════════════════ */
-let _tutorialStep = 0;  // 0=なし 1=ホーム 2=モード画面
+// 0=なし 1=ホーム 2=おぼえる 3=れんしゅう 4=テスト
+let _tutorialStep = 0;
+let _tutorialAutoTimer = null;
+
+function _clearTutorialTimer() {
+  if (_tutorialAutoTimer) { clearTimeout(_tutorialAutoTimer); _tutorialAutoTimer = null; }
+}
+
+function _applyTutorialSpotlight(el, mainHtml, subHtml) {
+  const rect = el.getBoundingClientRect();
+  const pad = 6;
+  const box = document.getElementById('tutorial-spotlight-box');
+  box.style.left   = (rect.left   - pad) + 'px';
+  box.style.top    = (rect.top    - pad) + 'px';
+  box.style.width  = (rect.width  + pad * 2) + 'px';
+  box.style.height = (rect.height + pad * 2) + 'px';
+
+  document.getElementById('tutorial-tooltip-text').innerHTML = mainHtml;
+  const subEl = document.getElementById('tutorial-tooltip-sub');
+  if (subEl) { subEl.innerHTML = subHtml || ''; subEl.style.display = subHtml ? 'block' : 'none'; }
+
+  const tip = document.getElementById('tutorial-tooltip');
+  const tipTop = Math.min(rect.bottom + pad + 14, window.innerHeight - 180);
+  tip.style.top = Math.max(tipTop, 60) + 'px';
+}
 
 function startTutorial() {
   _tutorialStep = 1;
-  requestAnimationFrame(() => {
+  // ダブルRAFでレイアウト確定後に位置を取得
+  requestAnimationFrame(() => requestAnimationFrame(() => {
     const btn = document.getElementById('dan-btn-1');
     if (!btn) { endTutorial(); return; }
-
-    // スポットライト用ボックスをボタン位置に合わせる
-    const rect = btn.getBoundingClientRect();
-    const pad = 6;
-    const box = document.getElementById('tutorial-spotlight-box');
-    box.style.left   = (rect.left   - pad) + 'px';
-    box.style.top    = (rect.top    - pad) + 'px';
-    box.style.width  = (rect.width  + pad * 2) + 'px';
-    box.style.height = (rect.height + pad * 2) + 'px';
-
-    // ツールチップをスポットライト下に配置
-    const tip = document.getElementById('tutorial-tooltip');
-    const tipTop = Math.min(rect.bottom + pad + 14, window.innerHeight - 140);
-    tip.style.top = tipTop + 'px';
-
-    document.getElementById('tutorial-overlay').style.display = 'block';
+    _applyTutorialSpotlight(btn, 'まず　１のだん　を<br>さわってみよう！', null);
+    const ov = document.getElementById('tutorial-overlay');
+    ov.style.pointerEvents = 'none';
+    ov.onclick = null;
+    ov.style.display = 'block';
     speak('まず　１のだん　をさわってみよう！');
-  });
+  }));
 }
 
 function showTutorialStep2() {
   if (_tutorialStep !== 2) return;
-  const banner = document.getElementById('tutorial-step2-banner');
-  if (banner) {
-    banner.style.display = 'flex';
-    speak('おぼえる・れんしゅう・テストの　じゅんばんで　やってみよう！');
+  _clearTutorialTimer();
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    const row = document.getElementById('mode-oboeru-row');
+    if (!row) { endTutorial(); return; }
+    _applyTutorialSpotlight(
+      row,
+      'おぼえる　から<br>はじめてみてね',
+      'ぼくが　こえで　よむかは<br>せっていから　かえられるよ'
+    );
+    const ov = document.getElementById('tutorial-overlay');
+    ov.style.pointerEvents = 'auto';
+    ov.onclick = () => _tutorialAdvance();
+    ov.style.display = 'block';
+    speak('おぼえる　から　はじめてみてね');
+    _tutorialAutoTimer = setTimeout(_tutorialAdvance, 5000);
+  }));
+}
+
+function _tutorialAdvance() {
+  _clearTutorialTimer();
+  if (_tutorialStep === 2) {
+    _tutorialStep = 3;
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      const row = document.getElementById('mode-renshu-row');
+      if (!row) { endTutorial(); return; }
+      _applyTutorialSpotlight(row, 'ここから　れんしゅう　できるよ', null);
+      document.getElementById('tutorial-overlay').onclick = () => _tutorialAdvance();
+      speak('ここから　れんしゅう　できるよ');
+      _tutorialAutoTimer = setTimeout(_tutorialAdvance, 4000);
+    }));
+  } else if (_tutorialStep === 3) {
+    _tutorialStep = 4;
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      const row = document.getElementById('mode-test-row');
+      if (!row) { endTutorial(); return; }
+      _applyTutorialSpotlight(row, 'れんしゅうすると<br>テストもできるよ', null);
+      document.getElementById('tutorial-overlay').onclick = () => endTutorial();
+      speak('れんしゅうすると　テストもできるよ');
+      _tutorialAutoTimer = setTimeout(endTutorial, 4000);
+    }));
+  } else {
+    endTutorial();
   }
 }
 
 function endTutorial() {
+  _clearTutorialTimer();
   _tutorialStep = 0;
   S.tutorialDone = true;
   saveState();
   const ov = document.getElementById('tutorial-overlay');
-  if (ov) ov.style.display = 'none';
-  const banner = document.getElementById('tutorial-step2-banner');
-  if (banner) banner.style.display = 'none';
+  if (ov) { ov.style.display = 'none'; ov.style.pointerEvents = ''; ov.onclick = null; }
 }
 
 // 別アプリ切り替え・画面オフ時に読み上げを止める

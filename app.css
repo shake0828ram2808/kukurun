@@ -1045,6 +1045,8 @@ body {
 }
 .voice-toggle-sw.on .voice-toggle-knob { transform: translateX(16px); }
 
+#tut-balloon-text { white-space: pre-line; }
+
 /* ══════════════════
    TUTORIAL
 ══════════════════ */

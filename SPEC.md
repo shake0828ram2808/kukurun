@@ -21,8 +21,8 @@
 | `screen-suffix` | 名前のよびかた選択（さん / くん / ちゃん / なし） |
 | `screen-egg-select` | たまごの色選択（みどり / ピンク / あお） |
 | `screen-home` | ホーム画面。キャラ表示・だん選択・モード選択 |
-| `screen-mode` | 学習モード選択（おぼえる / れんしゅう / テスト） |
-| `screen-oboeru` | おぼえるモード。問題を見て読み上げ |
+| `screen-mode` | 学習モード選択（おぼえる / れんしゅう / テスト）。ピコキャラ常設表示 |
+| `screen-oboeru` | おぼえるモード。問題を見て読み上げ。上部に音声トグルスイッチ |
 | `screen-renshu` | れんしゅうモード。答えをボタンで入力 |
 | `screen-test` | テストモード。メダル判定あり |
 | `screen-test-result` | テスト結果表示 |
@@ -55,7 +55,7 @@
 | 読み上げ | `Spk` / `speak()` / `speakThen()`（Web Speech API） |
 | 名前入力 | `buildKanaGrid()` / `addKana()` / `delKana()` / `clearKana()` |
 | ほかのもじ | `buildHokaModal()` / `openHokaModal()` / `closeHokaModal()` |
-| おぼえるモード | `startOboeru()` / `setOboeruMode()` / `readSelectedRows()` |
+| おぼえるモード | `startOboeru()` / `setOboeruMode()` / `readSelectedRows()` / `toggleOboeruSpeech()` / `updateOboeruVoiceToggle()` |
 | れんしゅうモード | `startRenshu()` / `checkAns()` / `doneDan()` |
 | テストモード | `startTest()` / `doneTest()` / `medalBadge()` |
 | ご褒美演出 | `showHanamaru()` / `confetti()` |
@@ -69,6 +69,7 @@
 | 口パク | `kukurunMouthSequences`（母音ごとのSVGパス） / `setKukurunMouth()` |
 | 笑顔制御 | `setKukurunSmile()` |
 | フキダシ | `SCREEN_MESSAGES` / `startBalloonTimer()` / `stopBalloonTimer()` |
+| チュートリアルピコ | `#tut-pico`（z-index:605, オーバーレイ上に表示）/ `_showTutPico()` / `_hideTutPico()` |
 | 画面監視 | `_initScreenWatcher()`（MutationObserver） |
 | 初期化 | `initKukurun()` |
 
@@ -102,6 +103,8 @@
 | ほかのもじ | `.hoka-modal` / `.hoka-grid` / `.hoka-kana-btn` |
 | 問題表示 | `.prob-card` / `.prob-eq` / `.ans-grid` / `.ans-btn` |
 | ご褒美演出 | `@keyframes hanamaru` / `.confetti-piece` / `@keyframes confettiFall` |
+| おぼえる画面上部 | `.screen-topbar`（もどるボタンと音声トグルを横並び） |
+| 音声トグル | `.voice-toggle-label` / `.voice-toggle-sw` / `.voice-toggle-knob`（おぼえる画面の音声ON/OFFスイッチ） |
 
 ---
 

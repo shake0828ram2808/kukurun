@@ -204,6 +204,8 @@ function initKukurunSVGs() {
     { prefix: 'egg',    size: 80  },
     { prefix: 'speech', size: 80  },
     { prefix: 'intro',  size: 120 },
+    { prefix: 'mode',   size: 80  },
+    { prefix: 'tut',    size: 80  },
   ].forEach(({ prefix, size }) => {
     const wrap = document.getElementById(`${prefix}-kukurun-svg-wrap`);
     if (!wrap) return;
@@ -266,10 +268,10 @@ function setKukurunSmile(isSmiling) { _setSmile('home', isSmiling); }
    各画面のメッセージ定義（最低限のフォールバック）
    実データは messages.json で上書きされる
 ════════════════════════════════ */
-const SCREEN_MESSAGES = { name: [], suffix: [], egg: [], home: [] };
+const SCREEN_MESSAGES = { name: [], suffix: [], egg: [], home: [], mode: ['こんにちは！'] };
 
 // 各画面の現在インデックス
-const _msgIdx = { name: 0, suffix: 0, egg: 0, home: 0 };
+const _msgIdx = { name: 0, suffix: 0, egg: 0, home: 0, mode: 0 };
 // 各画面のタイマー
 const _msgTimers = {};
 
@@ -298,6 +300,7 @@ function _setBalloon(screen, text, doSpeak) {
     suffix: 'suffix-balloon-text',
     egg:    'egg-balloon-text',
     home:   'balloon-text',
+    mode:   'mode-balloon-text',
   };
   const el = document.getElementById(idMap[screen]);
   if (el) el.textContent = text;
@@ -342,6 +345,25 @@ async function homeKukurunTalk() {
   await new Promise(r => setTimeout(r, 800));
   setKukurunSmile(false);
   setKukurunMouth('munyu');
+  kukurunState.isJumping = false;
+}
+
+/* ── モード画面 ── */
+function setModeMouth(state)    { _setMouth('mode', state); }
+function setModeSmile(isSmiling){ _setSmile('mode', isSmiling); }
+
+async function modeKukurunTalk() {
+  if (kukurunState.isJumping) return;
+  kukurunState.isJumping = true;
+  _nextBalloonMsg('mode');
+  _resetBalloonTimer('mode');
+  Snd.tap();
+  for (let m of ['O', 'A', 'I', 'U', 'O']) { setModeMouth(m); await new Promise(r => setTimeout(r, 120)); }
+  setModeSmile(true);
+  setModeMouth('munyu');
+  await new Promise(r => setTimeout(r, 800));
+  setModeSmile(false);
+  setModeMouth('munyu');
   kukurunState.isJumping = false;
 }
 
@@ -462,6 +484,7 @@ function _initScreenWatcher() {
     'screen-suffix': 'suffix',
     'screen-egg-select': 'egg',
     'screen-home':   'home',
+    'screen-mode':   'mode',
   };
   let _currentScreen = null;
 

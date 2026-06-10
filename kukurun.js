@@ -419,10 +419,7 @@ function closeIntroModal(e) {
   modal.style.animation = 'fadeOut 0.3s ease forwards';
   setTimeout(() => {
     modal.style.display = 'none';
-    // body 背景・ボトムバー z-index を元に戻す
     document.body.style.background = '';
-    const bb = document.getElementById('bottom-bar');
-    if (bb) bb.style.zIndex = '';
     // 名前登録済みならホーム（たまご選択済み）、未選択なら卵選択、未登録なら音声選択→名前入力へ
     if (typeof S !== 'undefined' && S.name) {
       if (!S.selectedEgg) {
@@ -442,12 +439,9 @@ function setIntroKukurunMouth(state) { _setMouth('intro', state); }
 function playIntroAnimation() {
   const svg = document.getElementById('intro-kukurun-svg');
   if (!svg) return;
-  // ボトムバーを intro-modal の上に表示（z-index を上げる）し、
-  // body 背景を青にしてホームインジケーター帯の白を消す
   const bb = document.getElementById('bottom-bar');
-  if (bb) { bb.style.display = 'flex'; bb.style.zIndex = '501'; }
+  if (bb) bb.style.display = 'none';
   document.body.style.background = 'var(--bg)';
-  if (typeof updateBottomBar === 'function') updateBottomBar('home');
   playKukurunTapAnim(svg);
   (async () => {
     for (let m of ['O', 'I', 'A', 'U', 'O']) { setIntroKukurunMouth(m); await new Promise(r => setTimeout(r, 120)); }

@@ -1650,8 +1650,8 @@ function _startGrowthAnim(charStage) {
       sCtx.fillStyle = `rgba(255,255,255,${alpha.toFixed(2)})`;
       sCtx.fill();
     });
-    // 流れ星（15秒ごと）
-    if (!_shootingStar && t - _lastShootingStarMs >= 15000) {
+    // 流れ星（5秒ごと）
+    if (!_shootingStar && t - _lastShootingStarMs >= 5000) {
       _lastShootingStarMs = t;
       const angle = Math.PI / 5 + Math.random() * Math.PI / 7;
       _shootingStar = {

@@ -289,6 +289,7 @@ const S = {
   _growthBase: 0,       // 現在のキャラの成長ベース（卒業ごとに加算）
   _pendingGraduation: false,  // 卒業遷移中フラグ
   isFirstAccess: true,  // 初回アクセスか
+  tutorialDone: false, // チュートリアル完了フラグ
   speechEnabled: true,  // 音声読み上げon/off
   renshuAnsTime: 10,    // れんしゅう自動回答まで秒数（0=まつ）
   testAnsTime: 0,       // てすと自動回答まで秒数（0=まつ）
@@ -312,6 +313,7 @@ function saveState() {
       done: S.done,
       hanamaruCount: S.hanamaruCount,
       isFirstAccess: S.isFirstAccess,
+      tutorialDone: S.tutorialDone,
       renshuAnsTime: S.renshuAnsTime,
       testAnsTime: S.testAnsTime,
       certificates: S.certificates,
@@ -325,7 +327,7 @@ function loadState() {
     const d = JSON.parse(raw);
     ['name','suffix','speechEnabled','medals','adultCharacters',
      'selectedEgg','_growthBase','renshuClears','done','hanamaruCount','isFirstAccess',
-     'renshuAnsTime','testAnsTime','certificates']
+     'tutorialDone','renshuAnsTime','testAnsTime','certificates']
       .forEach(k => { if (d[k] !== undefined) S[k] = d[k]; });
   } catch(e) {}
 }
@@ -579,6 +581,7 @@ function goHomeFromEgg() {
   try { eggWobble.start(); } catch(e) {}
   try { buildDanGrid(); } catch(e) {}
   showScreen('screen-home');
+  if (!S.tutorialDone) startTutorial();
 }
 
 /* ════════════════════════════════
@@ -866,6 +869,14 @@ function refreshDanBadge(dan) {
   b.classList.toggle('full-medals', getMedals(dan).test === 'gold');
 }
 function selDan(dan) {
+  if (_tutorialStep === 1) {
+    if (dan === 1) {
+      _tutorialStep = 2;
+    } else {
+      endTutorial();
+    }
+    document.getElementById('tutorial-overlay').style.display = 'none';
+  }
   S.dan = dan;
   if (dan === 'random') {
     // ここで問題を生成・固定し、おぼえる／れんしゅうで同じ問題を使う
@@ -891,6 +902,7 @@ function selDan(dan) {
   showScreen('screen-mode');
   refreshModeMedals();
   speak(lbl + 'をえらんだね！');
+  if (_tutorialStep === 2) requestAnimationFrame(showTutorialStep2);
 }
 
 /* ════════════════════════════════
@@ -2471,6 +2483,55 @@ document.addEventListener('touchstart', () => Snd.unlock(), { once: true, passiv
     if (Date.now() - _lastTouch > 400) addEffect(e.clientX, e.clientY);
   });
 })();
+
+/* ════════════════════════════════
+   TUTORIAL（初回オンボーディング）
+════════════════════════════════ */
+let _tutorialStep = 0;  // 0=なし 1=ホーム 2=モード画面
+
+function startTutorial() {
+  _tutorialStep = 1;
+  requestAnimationFrame(() => {
+    const btn = document.getElementById('dan-btn-1');
+    if (!btn) { endTutorial(); return; }
+
+    // スポットライト用ボックスをボタン位置に合わせる
+    const rect = btn.getBoundingClientRect();
+    const pad = 6;
+    const box = document.getElementById('tutorial-spotlight-box');
+    box.style.left   = (rect.left   - pad) + 'px';
+    box.style.top    = (rect.top    - pad) + 'px';
+    box.style.width  = (rect.width  + pad * 2) + 'px';
+    box.style.height = (rect.height + pad * 2) + 'px';
+
+    // ツールチップをスポットライト下に配置
+    const tip = document.getElementById('tutorial-tooltip');
+    const tipTop = Math.min(rect.bottom + pad + 14, window.innerHeight - 140);
+    tip.style.top = tipTop + 'px';
+
+    document.getElementById('tutorial-overlay').style.display = 'block';
+    speak('まず　１のだん　をさわってみよう！');
+  });
+}
+
+function showTutorialStep2() {
+  if (_tutorialStep !== 2) return;
+  const banner = document.getElementById('tutorial-step2-banner');
+  if (banner) {
+    banner.style.display = 'flex';
+    speak('おぼえる・れんしゅう・テストの　じゅんばんで　やってみよう！');
+  }
+}
+
+function endTutorial() {
+  _tutorialStep = 0;
+  S.tutorialDone = true;
+  saveState();
+  const ov = document.getElementById('tutorial-overlay');
+  if (ov) ov.style.display = 'none';
+  const banner = document.getElementById('tutorial-step2-banner');
+  if (banner) banner.style.display = 'none';
+}
 
 // 別アプリ切り替え・画面オフ時に読み上げを止める
 document.addEventListener('visibilitychange', () => {

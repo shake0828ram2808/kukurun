@@ -597,6 +597,30 @@
   <button class="hoka-close-btn" onclick="closeHokaModal()">とじる</button>
 </div>
 
+<!-- ══ TUTORIAL OVERLAY (Step 1: ホーム・スポットライト) ══ -->
+<div id="tutorial-overlay" style="display:none;">
+  <div id="tutorial-spotlight-box"></div>
+  <div id="tutorial-tooltip">
+    <div id="tutorial-tooltip-text">まず　１のだん　をさわってみよう！</div>
+    <button id="tutorial-skip-btn" onclick="endTutorial()">スキップ</button>
+  </div>
+</div>
+
+<!-- ══ TUTORIAL STEP 2 BANNER (モード画面・順番ガイド) ══ -->
+<div id="tutorial-step2-banner" style="display:none;">
+  <div id="tutorial-step2-card">
+    <div id="tutorial-step2-title">この　じゅんばんで　やってみよう！</div>
+    <div id="tutorial-step2-steps">
+      <span class="tut-step">① おぼえる</span>
+      <span class="tut-arrow">→</span>
+      <span class="tut-step">② れんしゅう</span>
+      <span class="tut-arrow">→</span>
+      <span class="tut-step">③ テスト</span>
+    </div>
+    <button id="tutorial-ok-btn" onclick="endTutorial()">わかった！</button>
+  </div>
+</div>
+
 <!-- ══ MODAL: CONFIRM ══ -->
 <div id="confirm-overlay" style="display:none;">
   <div id="confirm-modal">

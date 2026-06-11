@@ -891,10 +891,6 @@ function selDan(dan) {
   }
   const lbl = dan === 'random' ? 'ばらばらのだん' : KD.fw(dan) + 'のだん';
   document.getElementById('mode-dan-label').textContent = lbl;
-  const modeBalloon = document.getElementById('mode-balloon-text');
-  if (modeBalloon) {
-    modeBalloon.textContent = 'どれをやる？' + lbl;
-  }
   // テストボタン ロック/解除
   const testRow = document.getElementById('mode-test-row');
   const testLocked = document.getElementById('mode-test-locked');

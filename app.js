@@ -2577,14 +2577,14 @@ function _setTutOverlay(onClickFn) {
 
 function startTutorial() {
   _tutorialStep = 1;
-  // ホームピコの吹き出しを隠す（二重表示防止。キャラ本体は残す）
-  const hp = document.querySelector('#screen-home .kukurun-balloon');
-  if (hp) hp.style.visibility = 'hidden';
+  // ホームピコを丸ごと隠す（tut-picoが代わりに同位置に表示）
+  const homeWrap = document.querySelector('#screen-home .kukurun-wrap');
+  if (homeWrap) homeWrap.style.visibility = 'hidden';
   requestAnimationFrame(() => requestAnimationFrame(() => {
     const grid = document.getElementById('dan-grid');
     if (!grid) { endTutorial(); return; }
     _applyTutorialSpotlight(grid);
-    _showTutPico('あそぶ　だんを　えらんでね');
+    _showTutPico('あそぶ　だんを　えらんでね', homeWrap);
     _setTutOverlay(() => _tutorialAdvance());
     speak('あそぶ　だんを　えらんでね');
   }));
@@ -2607,6 +2607,7 @@ function showTutorialModeStep() {
 
 function _tutorialAdvance() {
   const modeWrap = document.getElementById('mode-creature-wrap');
+  const homeWrap = document.querySelector('#screen-home .kukurun-wrap');
   if (_tutorialStep === 1) {
     // だんグリッド → 1のだんをさわって
     _tutorialStep = 2;
@@ -2614,7 +2615,7 @@ function _tutorialAdvance() {
       const btn = document.getElementById('dan-btn-1');
       if (!btn) { endTutorial(); return; }
       _applyTutorialSpotlight(btn);
-      _showTutPico('まず　１のだんを\nさわってみよう');
+      _showTutPico('まず　１のだんを\nさわってみよう', homeWrap);
       _setTutOverlay(() => selDan(1));
       speak('まず　１のだんを　さわってみよう');
     }));
@@ -2693,16 +2694,24 @@ function endTutorial() {
   _tutorialStep = 0;
   S.tutorialDone = true;
   saveState();
-  _hideTutPico();
   const ov = document.getElementById('tutorial-overlay');
-  if (ov) { ov.style.display = 'none'; ov.style.pointerEvents = ''; ov.onclick = null; ov.style.background = ''; }
-  const tip = document.getElementById('tutorial-tooltip');
-  if (tip) tip.style.display = '';
-  // ピコ表示を復元
-  const hp = document.querySelector('#screen-home .kukurun-balloon');
-  if (hp) hp.style.visibility = '';
-  const mp = document.getElementById('mode-creature-wrap');
-  if (mp) mp.style.visibility = '';
+  const pico = document.getElementById('tut-pico');
+  // スタイリッシュにフェードアウト（暗幕・スポットライト・ピコをまとめて溶かす）
+  if (ov) { ov.onclick = null; ov.style.pointerEvents = 'none'; ov.style.background = 'transparent'; ov.style.opacity = '0'; }
+  if (pico) { pico.style.opacity = '0'; pico.style.transform = 'translateY(-12px)'; }
+  setTimeout(() => {
+    _hideTutPico();
+    if (ov) { ov.style.display = 'none'; ov.style.pointerEvents = ''; ov.style.background = ''; ov.style.opacity = ''; }
+    if (pico) { pico.style.opacity = ''; pico.style.transform = ''; }
+    _hideSpotlight();
+    const tip = document.getElementById('tutorial-tooltip');
+    if (tip) tip.style.display = '';
+    // ピコ表示を復元
+    const hp = document.querySelector('#screen-home .kukurun-wrap');
+    if (hp) hp.style.visibility = '';
+    const mp = document.getElementById('mode-creature-wrap');
+    if (mp) mp.style.visibility = '';
+  }, 500);
 }
 
 function replayTutorial() {

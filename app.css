@@ -1053,6 +1053,10 @@ body {
 #tutorial-overlay {
   position: fixed; inset: 0; z-index: 600;
   pointer-events: none;
+  transition: opacity .5s ease, background .4s ease;
+}
+#tut-pico {
+  transition: opacity .5s ease, transform .5s cubic-bezier(.22,1,.36,1);
 }
 #tutorial-spotlight-box {
   position: fixed;

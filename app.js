@@ -2505,8 +2505,8 @@ document.addEventListener('touchstart', () => Snd.unlock(), { once: true, passiv
 ════════════════════════════════ */
 // 0=なし
 // 1=ホーム:だんグリッド  2=ホーム:１のだん
-// 3=モード:おぼえる      4=モード:れんしゅう  5=モード:テスト  6=モード:締め
-// 7=ボトム:ホーム        8=ボトム:せってい    9=ボトム:せいちょう
+// 3=モード:おぼえる      4=モード:れんしゅう  5=モード:テスト
+// 6=ボトム:ホーム        7=ボトム:せってい    8=ボトム:せいちょう  9=締め
 let _tutorialStep = 0;
 
 function _isTapInSpotlight(e) {
@@ -2518,6 +2518,11 @@ function _isTapInSpotlight(e) {
 }
 
 function _showTutPico(text) {
+  // #tut-pico はスクリプトタグより後に配置されているため SVG が自動初期化されない。遅延初期化。
+  const wrap = document.getElementById('tut-kukurun-svg-wrap');
+  if (wrap && !wrap.querySelector('svg') && typeof buildKukurunSVG === 'function') {
+    wrap.insertAdjacentHTML('afterbegin', buildKukurunSVG('tut', 80));
+  }
   document.getElementById('tut-balloon-text').textContent = text;
   document.getElementById('tut-pico').style.display = 'block';
 }
@@ -2552,8 +2557,8 @@ function _setTutOverlay(onClickFn) {
 
 function startTutorial() {
   _tutorialStep = 1;
-  // ホームピコを隠す（tut-picoが表示）
-  const hp = document.querySelector('#screen-home .kukurun-wrap');
+  // ホームピコの吹き出しを隠す（二重表示防止。キャラ本体は残す）
+  const hp = document.querySelector('#screen-home .kukurun-balloon');
   if (hp) hp.style.visibility = 'hidden';
   requestAnimationFrame(() => requestAnimationFrame(() => {
     const grid = document.getElementById('dan-grid');
@@ -2567,8 +2572,8 @@ function startTutorial() {
 
 function showTutorialModeStep() {
   if (_tutorialStep !== 3) return;
-  // モードピコを隠す（tut-picoが表示）
-  const mp = document.getElementById('mode-creature-wrap');
+  // モードピコの吹き出しを隠す（二重表示防止。キャラ本体は残す）
+  const mp = document.getElementById('mode-kukurun-balloon');
   if (mp) mp.style.visibility = 'hidden';
   requestAnimationFrame(() => requestAnimationFrame(() => {
     const row = document.getElementById('mode-oboeru-row');
@@ -2615,17 +2620,8 @@ function _tutorialAdvance() {
       speak('れんしゅうすると　テストもできるよ');
     }));
   } else if (_tutorialStep === 5) {
-    // テスト → 締め
+    // テスト → ボトム:ホーム
     _tutorialStep = 6;
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      _hideSpotlight();
-      _showTutPico('くくマスターを\nめざしてね！');
-      document.getElementById('tutorial-overlay').onclick = () => _tutorialAdvance();
-      speak('くくマスターを　めざしてね！');
-    }));
-  } else if (_tutorialStep === 6) {
-    // 締め → ボトム:ホーム
-    _tutorialStep = 7;
     requestAnimationFrame(() => requestAnimationFrame(() => {
       const btn = document.getElementById('bottom-btn-home');
       if (!btn) { endTutorial(); return; }
@@ -2634,9 +2630,9 @@ function _tutorialAdvance() {
       document.getElementById('tutorial-overlay').onclick = (e) => { if (_isTapInSpotlight(e)) _tutorialAdvance(); };
       speak('ちがうだんも　あそべるよ');
     }));
-  } else if (_tutorialStep === 7) {
+  } else if (_tutorialStep === 6) {
     // ボトム:ホーム → せってい
-    _tutorialStep = 8;
+    _tutorialStep = 7;
     requestAnimationFrame(() => requestAnimationFrame(() => {
       const btn = document.getElementById('bottom-btn-settings');
       if (!btn) { endTutorial(); return; }
@@ -2645,16 +2641,25 @@ function _tutorialAdvance() {
       document.getElementById('tutorial-overlay').onclick = (e) => { if (_isTapInSpotlight(e)) _tutorialAdvance(); };
       speak('なまえは　かえられるよ');
     }));
-  } else if (_tutorialStep === 8) {
+  } else if (_tutorialStep === 7) {
     // ボトム:せってい → せいちょう
-    _tutorialStep = 9;
+    _tutorialStep = 8;
     requestAnimationFrame(() => requestAnimationFrame(() => {
       const btn = document.getElementById('bottom-btn-growth');
       if (!btn) { endTutorial(); return; }
       _applyTutorialSpotlight(btn);
       _showTutPico('たまごの　せいちょうが\nみられるよ');
-      document.getElementById('tutorial-overlay').onclick = (e) => { if (_isTapInSpotlight(e)) endTutorial(); };
+      document.getElementById('tutorial-overlay').onclick = (e) => { if (_isTapInSpotlight(e)) _tutorialAdvance(); };
       speak('たまごの　せいちょうが　みられるよ');
+    }));
+  } else if (_tutorialStep === 8) {
+    // せいちょう → 締め（くくマスター）
+    _tutorialStep = 9;
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      _hideSpotlight();
+      _showTutPico('くくマスターを\nめざしてね！');
+      document.getElementById('tutorial-overlay').onclick = () => endTutorial();
+      speak('くくマスターを　めざしてね！');
     }));
   } else {
     endTutorial();
@@ -2670,10 +2675,10 @@ function endTutorial() {
   if (ov) { ov.style.display = 'none'; ov.style.pointerEvents = ''; ov.onclick = null; }
   const tip = document.getElementById('tutorial-tooltip');
   if (tip) tip.style.display = '';
-  // ピコ表示を復元
-  const hp = document.querySelector('#screen-home .kukurun-wrap');
+  // 吹き出し表示を復元
+  const hp = document.querySelector('#screen-home .kukurun-balloon');
   if (hp) hp.style.visibility = '';
-  const mp = document.getElementById('mode-creature-wrap');
+  const mp = document.getElementById('mode-kukurun-balloon');
   if (mp) mp.style.visibility = '';
 }
 

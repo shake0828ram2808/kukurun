@@ -2572,8 +2572,8 @@ function startTutorial() {
 
 function showTutorialModeStep() {
   if (_tutorialStep !== 3) return;
-  // モードピコの吹き出しを隠す（二重表示防止。キャラ本体は残す）
-  const mp = document.getElementById('mode-kukurun-balloon');
+  // モードピコを丸ごと隠す（tut-picoが代わりに表示）
+  const mp = document.getElementById('mode-creature-wrap');
   if (mp) mp.style.visibility = 'hidden';
   requestAnimationFrame(() => requestAnimationFrame(() => {
     const row = document.getElementById('mode-oboeru-row');
@@ -2675,10 +2675,10 @@ function endTutorial() {
   if (ov) { ov.style.display = 'none'; ov.style.pointerEvents = ''; ov.onclick = null; }
   const tip = document.getElementById('tutorial-tooltip');
   if (tip) tip.style.display = '';
-  // 吹き出し表示を復元
+  // ピコ表示を復元
   const hp = document.querySelector('#screen-home .kukurun-balloon');
   if (hp) hp.style.visibility = '';
-  const mp = document.getElementById('mode-kukurun-balloon');
+  const mp = document.getElementById('mode-creature-wrap');
   if (mp) mp.style.visibility = '';
 }
 

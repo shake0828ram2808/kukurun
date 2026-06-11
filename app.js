@@ -2558,6 +2558,21 @@ function _applyTutorialSpotlight(el) {
   box.style.height = (rect.height + pad * 2) + 'px';
 }
 
+function _applyTutorialSpotlightUnion(el1, el2) {
+  const r1 = el1.getBoundingClientRect();
+  const r2 = el2 ? el2.getBoundingClientRect() : r1;
+  const pad = 6;
+  const top    = Math.min(r1.top,    r2.top)    - pad;
+  const left   = Math.min(r1.left,   r2.left)   - pad;
+  const bottom = Math.max(r1.bottom, r2.bottom) + pad;
+  const right  = Math.max(r1.right,  r2.right)  + pad;
+  const box = document.getElementById('tutorial-spotlight-box');
+  box.style.left   = left + 'px';
+  box.style.top    = top + 'px';
+  box.style.width  = (right - left) + 'px';
+  box.style.height = (bottom - top) + 'px';
+}
+
 function _hideSpotlight() {
   const box = document.getElementById('tutorial-spotlight-box');
   if (box) { box.style.left = '-9999px'; box.style.top = '-9999px'; box.style.width = '0'; box.style.height = '0'; }
@@ -2574,16 +2589,45 @@ function _setTutOverlay(onClickFn) {
 
 function startTutorial() {
   _tutorialStep = 1;
-  // ホームピコを丸ごと隠す（tut-picoが代わりに同位置に表示）
   const homeWrap = document.querySelector('#screen-home .kukurun-wrap');
   if (homeWrap) homeWrap.style.visibility = 'hidden';
   requestAnimationFrame(() => requestAnimationFrame(() => {
+    // ① イントロ：ぴょんっとピコが上から落ちてきて案内
+    _showTutPico('あそびかたを　せつめいするね！', homeWrap);
+    const pico = document.getElementById('tut-pico');
+    // ドロップイン前の状態（上にオフ）
+    pico.style.transition = 'none';
+    pico.style.transform = 'translateY(-100px)';
+    pico.style.opacity = '0';
+    // 薄い暗幕のみ（スポットライトなし）
+    const ov = document.getElementById('tutorial-overlay');
+    ov.style.background = 'rgba(27,38,64,.35)';
+    _hideSpotlight();
+    ov.style.pointerEvents = 'auto';
+    ov.style.display = 'block';
+    ov.onclick = () => { ov.style.background = ''; _startDanGridStep(); };
+    // ぴょんっ（バウンス込みのスプリング）
+    requestAnimationFrame(() => {
+      pico.style.transition = 'opacity .3s ease, transform .65s cubic-bezier(.34,1.56,.64,1)';
+      pico.style.transform = 'translateY(0)';
+      pico.style.opacity = '1';
+    });
+    speak('あそびかたを　せつめいするね！');
+  }));
+}
+
+function _startDanGridStep() {
+  const pico = document.getElementById('tut-pico');
+  pico.style.transition = '';
+  const homeWrap = document.querySelector('#screen-home .kukurun-wrap');
+  requestAnimationFrame(() => requestAnimationFrame(() => {
     const grid = document.getElementById('dan-grid');
+    const rndBtn = document.getElementById('dan-btn-random');
     if (!grid) { endTutorial(); return; }
-    _applyTutorialSpotlight(grid);
-    _showTutPico('あそぶ　だんを　えらんでね', homeWrap);
+    _applyTutorialSpotlightUnion(grid, rndBtn);
+    _showTutPico('ホームがめんでは　だんを　えらんでね', homeWrap);
     _setTutOverlay(() => _tutorialAdvance());
-    speak('あそぶ　だんを　えらんでね');
+    speak('ホームがめんでは　だんを　えらんでね');
   }));
 }
 

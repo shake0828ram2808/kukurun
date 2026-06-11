@@ -1158,8 +1158,8 @@ body {
   border-radius: 3px;
   padding: 24px 20px 20px;
   position: relative;
-  font-family: 'Shippori Mincho', 'Noto Serif JP', 'Yu Mincho', serif;
-  font-weight: bold;
+  font-family: 'BIZ UDMincho', 'Shippori Mincho', 'Yu Mincho', serif;
+  font-weight: 700;
 }
 .cert-paper::before {
   content: '';

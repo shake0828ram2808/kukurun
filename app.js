@@ -2315,11 +2315,12 @@ function executeConfirm() {
   }
 }
 
-// データJSON一括ロード後に初期化
+// データJSON一括ロード後に初期化（version-badgeでキャッシュバスト）
+const _v = encodeURIComponent(document.getElementById('version-badge')?.textContent || '0');
 Promise.all([
-  fetch('kana.json').then(r => r.json()),
-  fetch('messages.json').then(r => r.json()),
-  fetch('kana_hoka.json').then(r => r.json()),
+  fetch('kana.json?v=' + _v).then(r => r.json()),
+  fetch('messages.json?v=' + _v).then(r => r.json()),
+  fetch('kana_hoka.json?v=' + _v).then(r => r.json()),
 ]).then(([kana, msg, hoka]) => {
   KANA_ROWS     = kana.kanaRows;
   SUFFIXES      = kana.suffixes;

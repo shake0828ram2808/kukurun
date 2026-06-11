@@ -278,13 +278,19 @@ const _msgTimers = {};
 /** 指定画面の吹き出しテキストを次のメッセージに切り替え（読み上げなし） */
 function _nextBalloonMsg(screen) {
   const msgs = _buildMsgs(screen);
-  _msgIdx[screen] = (_msgIdx[screen] + 1) % msgs.length;
+  const prev = _msgIdx[screen];
+  if (screen === 'mode' && msgs.length > 1) {
+    // モード画面はランダム（直前と同じものは出さない）
+    let next;
+    do { next = Math.floor(Math.random() * msgs.length); } while (next === prev);
+    _msgIdx[screen] = next;
+  } else {
+    _msgIdx[screen] = (prev + 1) % msgs.length;
+  }
   _setBalloon(screen, msgs[_msgIdx[screen]], false);
   // ふきだしが変わるタイミング（タップ or 5秒）でアニメーション
-  if (screen === 'home') {
-    const svg = document.getElementById('home-kukurun-svg');
-    playKukurunTapAnim(svg);
-  }
+  const svgIdMap = { home: 'home-kukurun-svg', mode: 'mode-kukurun-svg' };
+  if (svgIdMap[screen]) playKukurunTapAnim(document.getElementById(svgIdMap[screen]));
 }
 
 /** ユーザー名込みのメッセージリストを返す */

@@ -1066,6 +1066,7 @@ body {
   transition: all .2s ease;
 }
 #tutorial-tooltip {
+  display: none;
   position: fixed;
   left: 50%; transform: translateX(-50%);
   background: var(--surface);

@@ -2582,9 +2582,18 @@ function _setTutOverlay(onClickFn) {
   const ov = document.getElementById('tutorial-overlay');
   ov.style.pointerEvents = 'auto';
   ov.style.display = 'block';
-  ov.onclick = onClickFn;
+  ov.onclick = _tutOverlayTap(onClickFn);
   const tip = document.getElementById('tutorial-tooltip');
   if (tip) tip.style.display = 'none';
+}
+
+/** タップ時にtut-picoをランダムアニメーションしてからfnを呼ぶラッパー */
+function _tutOverlayTap(fn) {
+  return (e) => {
+    const svg = document.getElementById('tut-kukurun-svg');
+    if (svg && typeof playKukurunTapAnim === 'function') playKukurunTapAnim(svg);
+    fn(e);
+  };
 }
 
 function startTutorial() {
@@ -2605,7 +2614,7 @@ function startTutorial() {
     _hideSpotlight();
     ov.style.pointerEvents = 'auto';
     ov.style.display = 'block';
-    ov.onclick = () => { ov.style.background = ''; _startDanGridStep(); };
+    ov.onclick = _tutOverlayTap(() => { ov.style.background = ''; _startDanGridStep(); });
     // ぴょんっ（バウンス込みのスプリング）
     requestAnimationFrame(() => {
       pico.style.transition = 'opacity .3s ease, transform .65s cubic-bezier(.34,1.56,.64,1)';
@@ -2668,7 +2677,7 @@ function _tutorialAdvance() {
       if (!row) { endTutorial(); return; }
       _applyTutorialSpotlight(row);
       _showTutPico('ここから　れんしゅう　できるよ', modeWrap);
-      document.getElementById('tutorial-overlay').onclick = () => _tutorialAdvance();
+      document.getElementById('tutorial-overlay').onclick = _tutOverlayTap(() => _tutorialAdvance());
       speak('ここから　れんしゅう　できるよ');
     }));
   } else if (_tutorialStep === 4) {
@@ -2679,7 +2688,7 @@ function _tutorialAdvance() {
       if (!row) { endTutorial(); return; }
       _applyTutorialSpotlight(row);
       _showTutPico('れんしゅうすると\nテストもできるよ', modeWrap);
-      document.getElementById('tutorial-overlay').onclick = () => _tutorialAdvance();
+      document.getElementById('tutorial-overlay').onclick = _tutOverlayTap(() => _tutorialAdvance());
       speak('れんしゅうすると　テストもできるよ');
     }));
   } else if (_tutorialStep === 5) {
@@ -2690,7 +2699,7 @@ function _tutorialAdvance() {
       if (!btn) { endTutorial(); return; }
       _applyTutorialSpotlight(btn);
       _showTutPico('ちがうだんも\nあそべるよ', modeWrap);
-      document.getElementById('tutorial-overlay').onclick = () => _tutorialAdvance();
+      document.getElementById('tutorial-overlay').onclick = _tutOverlayTap(() => _tutorialAdvance());
       speak('ちがうだんも　あそべるよ');
     }));
   } else if (_tutorialStep === 6) {
@@ -2701,7 +2710,7 @@ function _tutorialAdvance() {
       if (!btn) { endTutorial(); return; }
       _applyTutorialSpotlight(btn);
       _showTutPico('なまえは　かえられるよ', modeWrap);
-      document.getElementById('tutorial-overlay').onclick = () => _tutorialAdvance();
+      document.getElementById('tutorial-overlay').onclick = _tutOverlayTap(() => _tutorialAdvance());
       speak('なまえは　かえられるよ');
     }));
   } else if (_tutorialStep === 7) {
@@ -2712,7 +2721,7 @@ function _tutorialAdvance() {
       if (!btn) { endTutorial(); return; }
       _applyTutorialSpotlight(btn);
       _showTutPico('たまごの　せいちょうが\nみられるよ', modeWrap);
-      document.getElementById('tutorial-overlay').onclick = () => _tutorialAdvance();
+      document.getElementById('tutorial-overlay').onclick = _tutOverlayTap(() => _tutorialAdvance());
       speak('たまごの　せいちょうが　みられるよ');
     }));
   } else if (_tutorialStep === 8) {
@@ -2723,7 +2732,7 @@ function _tutorialAdvance() {
       // スポットライトがない場合はoverlay自体に背景色をつけて暗幕にする
       document.getElementById('tutorial-overlay').style.background = 'rgba(27,38,64,.72)';
       _showTutPico('くくマスターを\nめざしてね！', modeWrap);
-      document.getElementById('tutorial-overlay').onclick = () => endTutorial();
+      document.getElementById('tutorial-overlay').onclick = _tutOverlayTap(() => endTutorial());
       speak('くくマスターを　めざしてね！');
     }));
   } else {

@@ -289,6 +289,7 @@ const S = {
   _growthBase: 0,       // 現在のキャラの成長ベース（卒業ごとに加算）
   _pendingGraduation: false,  // 卒業遷移中フラグ
   isFirstAccess: true,  // 初回アクセスか
+  tutorialDone: false, // チュートリアル完了フラグ
   speechEnabled: true,  // 音声読み上げon/off
   renshuAnsTime: 10,    // れんしゅう自動回答まで秒数（0=まつ）
   testAnsTime: 0,       // てすと自動回答まで秒数（0=まつ）
@@ -312,6 +313,7 @@ function saveState() {
       done: S.done,
       hanamaruCount: S.hanamaruCount,
       isFirstAccess: S.isFirstAccess,
+      tutorialDone: S.tutorialDone,
       renshuAnsTime: S.renshuAnsTime,
       testAnsTime: S.testAnsTime,
       certificates: S.certificates,
@@ -325,7 +327,7 @@ function loadState() {
     const d = JSON.parse(raw);
     ['name','suffix','speechEnabled','medals','adultCharacters',
      'selectedEgg','_growthBase','renshuClears','done','hanamaruCount','isFirstAccess',
-     'renshuAnsTime','testAnsTime','certificates']
+     'tutorialDone','renshuAnsTime','testAnsTime','certificates']
       .forEach(k => { if (d[k] !== undefined) S[k] = d[k]; });
   } catch(e) {}
 }
@@ -386,6 +388,7 @@ function showScreen(id) {
     appEl.scrollTop = 0;
     appEl.style.paddingBottom = ['screen-growth', 'screen-settings'].includes(id) ? '0' : '';
   }
+  if (id === 'screen-home' && typeof _tutorialStep !== 'undefined' && _tutorialStep >= 3) endTutorial();
 }
 
 function goBack() {
@@ -579,6 +582,7 @@ function goHomeFromEgg() {
   try { eggWobble.start(); } catch(e) {}
   try { buildDanGrid(); } catch(e) {}
   showScreen('screen-home');
+  if (!S.tutorialDone) startTutorial();
 }
 
 /* ════════════════════════════════
@@ -866,6 +870,14 @@ function refreshDanBadge(dan) {
   b.classList.toggle('full-medals', getMedals(dan).test === 'gold');
 }
 function selDan(dan) {
+  if (_tutorialStep === 2) {
+    if (dan !== 1) return;  // 1のだん以外はブロック
+    _tutorialStep = 3;
+    document.getElementById('tutorial-overlay').style.display = 'none';
+    // ホームピコを復元
+    const hp = document.querySelector('#screen-home .kukurun-wrap');
+    if (hp) hp.style.visibility = '';
+  }
   S.dan = dan;
   if (dan === 'random') {
     // ここで問題を生成・固定し、おぼえる／れんしゅうで同じ問題を使う
@@ -891,6 +903,7 @@ function selDan(dan) {
   showScreen('screen-mode');
   refreshModeMedals();
   speak(lbl + 'をえらんだね！');
+  if (_tutorialStep === 3) requestAnimationFrame(showTutorialModeStep);
 }
 
 /* ════════════════════════════════
@@ -931,6 +944,7 @@ function showOboeruClear() {
 }
 let _oboeruGen = 0;  // autoモードの読み上げチェーンを無効化するためのジェネレーション番号
 function startOboeru() {
+  updateOboeruVoiceToggle();
   _oboeruGen++;  // 前のチェーンのコールバックをすべて無効化
   S._oboeruClearShown = false;
   let problems;
@@ -1638,8 +1652,8 @@ function _startGrowthAnim(charStage) {
       sCtx.fillStyle = `rgba(255,255,255,${alpha.toFixed(2)})`;
       sCtx.fill();
     });
-    // 流れ星（15秒ごと）
-    if (!_shootingStar && t - _lastShootingStarMs >= 15000) {
+    // 流れ星（5秒ごと）
+    if (!_shootingStar && t - _lastShootingStarMs >= 5000) {
       _lastShootingStarMs = t;
       const angle = Math.PI / 5 + Math.random() * Math.PI / 7;
       _shootingStar = {
@@ -2223,6 +2237,16 @@ function setSpeech(val) {
 }
 function toggleSpeech() { setSpeech(!S.speechEnabled); }
 
+function toggleOboeruSpeech() {
+  setSpeech(!S.speechEnabled);
+  updateOboeruVoiceToggle();
+}
+
+function updateOboeruVoiceToggle() {
+  const sw = document.getElementById('oboeru-voice-sw');
+  if (sw) sw.classList.toggle('on', S.speechEnabled !== false);
+}
+
 function goChangeName() {
   // 名前入力画面へ（現在の名前をクリア）
   _skipEggSelect = true;
@@ -2291,11 +2315,12 @@ function executeConfirm() {
   }
 }
 
-// データJSON一括ロード後に初期化
+// データJSON一括ロード後に初期化（version-badgeでキャッシュバスト）
+const _v = encodeURIComponent(document.getElementById('version-badge')?.textContent || '0');
 Promise.all([
-  fetch('kana.json').then(r => r.json()),
-  fetch('messages.json').then(r => r.json()),
-  fetch('kana_hoka.json').then(r => r.json()),
+  fetch('kana.json?v=' + _v).then(r => r.json()),
+  fetch('messages.json?v=' + _v).then(r => r.json()),
+  fetch('kana_hoka.json?v=' + _v).then(r => r.json()),
 ]).then(([kana, msg, hoka]) => {
   KANA_ROWS     = kana.kanaRows;
   SUFFIXES      = kana.suffixes;
@@ -2471,6 +2496,279 @@ document.addEventListener('touchstart', () => Snd.unlock(), { once: true, passiv
     if (Date.now() - _lastTouch > 400) addEffect(e.clientX, e.clientY);
   });
 })();
+
+/* ════════════════════════════════
+   TUTORIAL（初回オンボーディング）
+════════════════════════════════ */
+// 0=なし
+// 1=ホーム:だんグリッド  2=ホーム:１のだん
+// 3=モード:おぼえる      4=モード:れんしゅう  5=モード:テスト
+// 6=ボトム:ホーム        7=ボトム:せってい    8=ボトム:せいちょう  9=締め
+let _tutorialStep = 0;
+
+function _isTapInSpotlight(e) {
+  const box = document.getElementById('tutorial-spotlight-box');
+  if (!box) return false;
+  const l = parseFloat(box.style.left), t = parseFloat(box.style.top);
+  const w = parseFloat(box.style.width), h = parseFloat(box.style.height);
+  return e.clientX >= l && e.clientX <= l + w && e.clientY >= t && e.clientY <= t + h;
+}
+
+function _showTutPico(text, anchorEl) {
+  // #tut-pico はスクリプトタグより後に配置されているため SVG が自動初期化されない。遅延初期化。
+  const svgWrap = document.getElementById('tut-kukurun-svg-wrap');
+  if (svgWrap && !svgWrap.querySelector('svg') && typeof buildKukurunSVG === 'function') {
+    svgWrap.insertAdjacentHTML('afterbegin', buildKukurunSVG('tut', 80));
+  }
+  document.getElementById('tut-balloon-text').textContent = text;
+  const pico = document.getElementById('tut-pico');
+  const inner = pico.querySelector('div');
+  if (anchorEl) {
+    // anchorElの位置に合わせてtut-picoを配置
+    const rect = anchorEl.getBoundingClientRect();
+    pico.style.top = rect.top + 'px';
+    pico.style.left = '0';
+    pico.style.right = '0';
+    if (inner) inner.style.paddingTop = '0';
+  } else {
+    pico.style.top = '0';
+    pico.style.left = '0';
+    pico.style.right = '0';
+    if (inner) inner.style.paddingTop = '';
+  }
+  pico.style.display = 'block';
+}
+
+function _hideTutPico() {
+  const pico = document.getElementById('tut-pico');
+  pico.style.display = 'none';
+  // 位置をデフォルトにリセット
+  pico.style.top = '0';
+  const inner = pico.querySelector('div');
+  if (inner) inner.style.paddingTop = '';
+}
+
+function _applyTutorialSpotlight(el) {
+  const rect = el.getBoundingClientRect();
+  const pad = 6;
+  const box = document.getElementById('tutorial-spotlight-box');
+  box.style.left   = (rect.left   - pad) + 'px';
+  box.style.top    = (rect.top    - pad) + 'px';
+  box.style.width  = (rect.width  + pad * 2) + 'px';
+  box.style.height = (rect.height + pad * 2) + 'px';
+}
+
+function _applyTutorialSpotlightUnion(el1, el2) {
+  const r1 = el1.getBoundingClientRect();
+  const r2 = el2 ? el2.getBoundingClientRect() : r1;
+  const pad = 6;
+  const top    = Math.min(r1.top,    r2.top)    - pad;
+  const left   = Math.min(r1.left,   r2.left)   - pad;
+  const bottom = Math.max(r1.bottom, r2.bottom) + pad;
+  const right  = Math.max(r1.right,  r2.right)  + pad;
+  const box = document.getElementById('tutorial-spotlight-box');
+  box.style.left   = left + 'px';
+  box.style.top    = top + 'px';
+  box.style.width  = (right - left) + 'px';
+  box.style.height = (bottom - top) + 'px';
+}
+
+function _hideSpotlight() {
+  const box = document.getElementById('tutorial-spotlight-box');
+  if (box) { box.style.left = '-9999px'; box.style.top = '-9999px'; box.style.width = '0'; box.style.height = '0'; }
+}
+
+function _setTutOverlay(onClickFn) {
+  const ov = document.getElementById('tutorial-overlay');
+  ov.style.pointerEvents = 'auto';
+  ov.style.display = 'block';
+  ov.onclick = _tutOverlayTap(onClickFn);
+  const tip = document.getElementById('tutorial-tooltip');
+  if (tip) tip.style.display = 'none';
+}
+
+/** タップ時にtut-picoをランダムアニメーションしてからfnを呼ぶラッパー */
+function _tutOverlayTap(fn) {
+  return (e) => {
+    const svg = document.getElementById('tut-kukurun-svg');
+    if (svg && typeof playKukurunTapAnim === 'function') playKukurunTapAnim(svg);
+    fn(e);
+  };
+}
+
+function startTutorial() {
+  _tutorialStep = 1;
+  const homeWrap = document.querySelector('#screen-home .kukurun-wrap');
+  if (homeWrap) homeWrap.style.visibility = 'hidden';
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    // ① イントロ：ぴょんっとピコが上から落ちてきて案内
+    _showTutPico('あそびかたを　せつめいするね！', homeWrap);
+    const pico = document.getElementById('tut-pico');
+    // ドロップイン前の状態（上にオフ）
+    pico.style.transition = 'none';
+    pico.style.transform = 'translateY(-100px)';
+    pico.style.opacity = '0';
+    // 薄い暗幕のみ（スポットライトなし）
+    const ov = document.getElementById('tutorial-overlay');
+    ov.style.background = 'rgba(27,38,64,.35)';
+    _hideSpotlight();
+    ov.style.pointerEvents = 'auto';
+    ov.style.display = 'block';
+    ov.onclick = _tutOverlayTap(() => { ov.style.background = ''; _startDanGridStep(); });
+    // ぴょんっ（バウンス込みのスプリング）
+    requestAnimationFrame(() => {
+      pico.style.transition = 'opacity .3s ease, transform .65s cubic-bezier(.34,1.56,.64,1)';
+      pico.style.transform = 'translateY(0)';
+      pico.style.opacity = '1';
+    });
+    speak('あそびかたを　せつめいするね！');
+  }));
+}
+
+function _startDanGridStep() {
+  const pico = document.getElementById('tut-pico');
+  pico.style.transition = '';
+  const homeWrap = document.querySelector('#screen-home .kukurun-wrap');
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    const grid = document.getElementById('dan-grid');
+    const rndBtn = document.getElementById('dan-btn-random');
+    if (!grid) { endTutorial(); return; }
+    _applyTutorialSpotlightUnion(grid, rndBtn);
+    _showTutPico('ホームがめんでは　だんを　えらんでね', homeWrap);
+    _setTutOverlay(() => _tutorialAdvance());
+    speak('ホームがめんでは　だんを　えらんでね');
+  }));
+}
+
+function showTutorialModeStep() {
+  if (_tutorialStep !== 3) return;
+  // モードピコを丸ごと隠す（tut-picoが代わりに同位置に表示）
+  const mp = document.getElementById('mode-creature-wrap');
+  if (mp) mp.style.visibility = 'hidden';
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    const row = document.getElementById('mode-oboeru-row');
+    if (!row) { endTutorial(); return; }
+    _applyTutorialSpotlight(row);
+    _showTutPico('おぼえる　から\nはじめてみてね', mp);
+    _setTutOverlay(() => _tutorialAdvance());
+    speak('おぼえる　から　はじめてみてね');
+  }));
+}
+
+function _tutorialAdvance() {
+  const modeWrap = document.getElementById('mode-creature-wrap');
+  const homeWrap = document.querySelector('#screen-home .kukurun-wrap');
+  if (_tutorialStep === 1) {
+    // だんグリッド → 1のだんをさわって
+    _tutorialStep = 2;
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      const btn = document.getElementById('dan-btn-1');
+      if (!btn) { endTutorial(); return; }
+      _applyTutorialSpotlight(btn);
+      _showTutPico('まず　１のだんを\nさわってみよう', homeWrap);
+      _setTutOverlay(() => selDan(1));
+      speak('まず　１のだんを　さわってみよう');
+    }));
+  } else if (_tutorialStep === 3) {
+    // おぼえる → れんしゅう
+    _tutorialStep = 4;
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      const row = document.getElementById('mode-renshu-row');
+      if (!row) { endTutorial(); return; }
+      _applyTutorialSpotlight(row);
+      _showTutPico('ここから　れんしゅう　できるよ', modeWrap);
+      document.getElementById('tutorial-overlay').onclick = _tutOverlayTap(() => _tutorialAdvance());
+      speak('ここから　れんしゅう　できるよ');
+    }));
+  } else if (_tutorialStep === 4) {
+    // れんしゅう → テスト
+    _tutorialStep = 5;
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      const row = document.getElementById('mode-test-row');
+      if (!row) { endTutorial(); return; }
+      _applyTutorialSpotlight(row);
+      _showTutPico('れんしゅうすると\nテストもできるよ', modeWrap);
+      document.getElementById('tutorial-overlay').onclick = _tutOverlayTap(() => _tutorialAdvance());
+      speak('れんしゅうすると　テストもできるよ');
+    }));
+  } else if (_tutorialStep === 5) {
+    // テスト → ボトム:ホーム
+    _tutorialStep = 6;
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      const btn = document.getElementById('bottom-btn-home');
+      if (!btn) { endTutorial(); return; }
+      _applyTutorialSpotlight(btn);
+      _showTutPico('ちがうだんも\nあそべるよ', modeWrap);
+      document.getElementById('tutorial-overlay').onclick = _tutOverlayTap(() => _tutorialAdvance());
+      speak('ちがうだんも　あそべるよ');
+    }));
+  } else if (_tutorialStep === 6) {
+    // ボトム:ホーム → せってい
+    _tutorialStep = 7;
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      const btn = document.getElementById('bottom-btn-settings');
+      if (!btn) { endTutorial(); return; }
+      _applyTutorialSpotlight(btn);
+      _showTutPico('なまえは　かえられるよ', modeWrap);
+      document.getElementById('tutorial-overlay').onclick = _tutOverlayTap(() => _tutorialAdvance());
+      speak('なまえは　かえられるよ');
+    }));
+  } else if (_tutorialStep === 7) {
+    // ボトム:せってい → せいちょう
+    _tutorialStep = 8;
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      const btn = document.getElementById('bottom-btn-growth');
+      if (!btn) { endTutorial(); return; }
+      _applyTutorialSpotlight(btn);
+      _showTutPico('たまごの　せいちょうが\nみられるよ', modeWrap);
+      document.getElementById('tutorial-overlay').onclick = _tutOverlayTap(() => _tutorialAdvance());
+      speak('たまごの　せいちょうが　みられるよ');
+    }));
+  } else if (_tutorialStep === 8) {
+    // せいちょう → 締め（くくマスター、スポットライトなし全暗幕）
+    _tutorialStep = 9;
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      _hideSpotlight();
+      // スポットライトがない場合はoverlay自体に背景色をつけて暗幕にする
+      document.getElementById('tutorial-overlay').style.background = 'rgba(27,38,64,.72)';
+      _showTutPico('くくマスターを\nめざしてね！', modeWrap);
+      document.getElementById('tutorial-overlay').onclick = _tutOverlayTap(() => endTutorial());
+      speak('くくマスターを　めざしてね！');
+    }));
+  } else {
+    endTutorial();
+  }
+}
+
+function endTutorial() {
+  _tutorialStep = 0;
+  S.tutorialDone = true;
+  saveState();
+  const ov = document.getElementById('tutorial-overlay');
+  const pico = document.getElementById('tut-pico');
+  // スタイリッシュにフェードアウト（暗幕・スポットライト・ピコをまとめて溶かす）
+  if (ov) { ov.onclick = null; ov.style.pointerEvents = 'none'; ov.style.background = 'transparent'; ov.style.opacity = '0'; }
+  if (pico) { pico.style.opacity = '0'; pico.style.transform = 'translateY(-12px)'; }
+  setTimeout(() => {
+    _hideTutPico();
+    if (ov) { ov.style.display = 'none'; ov.style.pointerEvents = ''; ov.style.background = ''; ov.style.opacity = ''; }
+    if (pico) { pico.style.opacity = ''; pico.style.transform = ''; }
+    _hideSpotlight();
+    const tip = document.getElementById('tutorial-tooltip');
+    if (tip) tip.style.display = '';
+    // ピコ表示を復元
+    const hp = document.querySelector('#screen-home .kukurun-wrap');
+    if (hp) hp.style.visibility = '';
+    const mp = document.getElementById('mode-creature-wrap');
+    if (mp) mp.style.visibility = '';
+  }, 500);
+}
+
+function replayTutorial() {
+  tapSnd();
+  showScreen('screen-home');
+  setTimeout(startTutorial, 350);
+}
 
 // 別アプリ切り替え・画面オフ時に読み上げを止める
 document.addEventListener('visibilitychange', () => {

@@ -10,6 +10,9 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="ピコとくく">
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=BIZ+UDMincho:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="app.css?v=20260407">
 
 </head>
@@ -205,10 +208,21 @@
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
     もどる
   </button>
+  <div style="display:flex;flex-direction:column;align-items:center;gap:8px;width:100%;max-width:430px;margin:0 auto;">
+    <div class="kukurun-wrap" id="mode-creature-wrap" onclick="modeKukurunTalk()">
+      <div class="kukurun-balloon" id="mode-kukurun-balloon">
+        <div class="balloon-text" id="mode-balloon-text">こんにちは！</div>
+        <div class="balloon-tail"></div>
+      </div>
+      <div class="kukurun-svg-wrap" id="mode-kukurun-svg-wrap">
+        <div class="floor-shadow" id="mode-floor-shadow"></div>
+      </div>
+    </div>
+  </div>
   <div class="card">
     <div id="mode-dan-label" style="font-size:28px;margin-bottom:4px;"></div>
     <div class="sec-lbl">どれを　やる？</div>
-    <div class="sel-row" onclick="tapSnd();speak('おぼえる');startOboeru()">
+    <div class="sel-row" id="mode-oboeru-row" onclick="tapSnd();speak('おぼえる');startOboeru()">
       <div class="sel-icon">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--theme)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
@@ -219,7 +233,7 @@
       <span id="mode-medal-oboeru" class="mode-medal-badge"></span>
     </div>
     <div style="height:16px;"></div>
-    <div class="sel-row" onclick="tapSnd();speak('れんしゅう');startRenshu()">
+    <div class="sel-row" id="mode-renshu-row" onclick="tapSnd();speak('れんしゅう');startRenshu()">
       <div class="sel-icon">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--theme)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 20h9"/>
@@ -256,10 +270,18 @@
 
 <!-- ══ SCREEN: OBOERU ══ -->
 <div class="screen" id="screen-oboeru">
-  <button class="back-btn" onclick="tapSnd();goBack()">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
-    もどる
-  </button>
+  <div class="screen-topbar">
+    <button class="back-btn" onclick="tapSnd();goBack()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      もどる
+    </button>
+    <label class="voice-toggle-label" onclick="tapSnd();toggleOboeruSpeech()">
+      <span class="voice-toggle-text">こえ</span>
+      <div class="voice-toggle-sw" id="oboeru-voice-sw">
+        <div class="voice-toggle-knob"></div>
+      </div>
+    </label>
+  </div>
   <div class="card">
     <div style="display:flex;align-items:center;gap:7px;margin-bottom:12px;">
       <div style="width:8px;height:8px;border-radius:50%;background:var(--theme);"></div>
@@ -441,10 +463,15 @@
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
       ホームに　もどる
     </button>
-    <div id="version-badge">ver.2026.0409.0010</div>
+    <div id="version-badge">ver.2026.0611.0004</div>
   </div>
   <div class="card">
-    <div class="sec-lbl" style="margin-bottom:8px;">せってい</div>
+    <div class="settings-row">
+      <div class="settings-row-text">
+        <div class="settings-row-label">あそびかたを　みる</div>
+      </div>
+      <button class="btn btn-outline" style="width:auto;padding:8px 16px;font-size:13px;" onclick="replayTutorial()">みる</button>
+    </div>
     <div class="settings-row settings-row-col">
       <div class="settings-row-text">
         <div class="settings-row-label">ことばや　もんだいを　こえで　よむ</div>
@@ -546,7 +573,7 @@
   <div class="intro-content">
     <div id="intro-kukurun-svg-wrap"></div>
     <div class="intro-balloon">
-      <div class="intro-balloon-text">ようこそ！<br>ぼくはピコ！</div>
+      <div class="intro-balloon-text">ようこそ！<br>ぼくはピコ！<br>くくで　あそぼう！</div>
       <div class="balloon-tail"></div>
     </div>
   </div>
@@ -595,6 +622,32 @@
   <div class="hoka-modal-title">ほかの　もじ</div>
   <div class="hoka-modal-body" id="hoka-modal-body"></div>
   <button class="hoka-close-btn" onclick="closeHokaModal()">とじる</button>
+</div>
+
+<!-- ══ TUTORIAL OVERLAY ══ -->
+<div id="tutorial-overlay" style="display:none;">
+  <div id="tutorial-spotlight-box"></div>
+  <div id="tutorial-tooltip">
+    <div id="tutorial-tooltip-text"></div>
+    <div id="tutorial-tooltip-sub"></div>
+  </div>
+</div>
+
+<!-- ══ TUTORIAL PICO（オーバーレイ上に表示する固定ピコ） ══ -->
+<div id="tut-pico" style="display:none;position:fixed;left:0;right:0;top:0;z-index:605;pointer-events:none;">
+  <div style="display:flex;flex-direction:column;align-items:center;gap:8px;
+              padding-top:max(20px,env(safe-area-inset-top,20px));
+              padding-left:16px;padding-right:16px;max-width:430px;margin:0 auto;">
+    <div class="kukurun-wrap" style="pointer-events:none;margin-top:8px;margin-bottom:0;">
+      <div class="kukurun-balloon" id="tut-kukurun-balloon">
+        <div class="balloon-text" id="tut-balloon-text">まず　１のだんを　さわってみよう</div>
+        <div class="balloon-tail"></div>
+      </div>
+      <div class="kukurun-svg-wrap" id="tut-kukurun-svg-wrap">
+        <div class="floor-shadow" id="tut-floor-shadow"></div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- ══ MODAL: CONFIRM ══ -->
